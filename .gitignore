@@ -1,0 +1,15 @@
+project/
+run/
+sim/
+*.bak
+*.o
+*.elf
+*.lst
+*.map
+*.rec
+*.hex
+*.dis
+FPGA*.txt
+test.html
+test.html.imgtec_forum
+.vscode/
