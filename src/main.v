@@ -1,7 +1,12 @@
-
-
-
-
+/*
+ * schoolMIPS - small MIPS CPU for "Young Russian Chip Architects" 
+ *              summer school ( yrca@googlegroups.com )
+ *
+ * originally based on Sarah L. Harris MIPS CPU 
+ * 
+ * Copyright(c) 2017 Stanislav Zhelnio 
+ *                   Alexander Romanov 
+ */ 
 
 module sm_cpu
 (
@@ -112,6 +117,7 @@ module sm_control
     end
 endmodule
 
+
 module sm_alu
 (
     input  [31:0] srcA,
@@ -133,7 +139,6 @@ module sm_alu
 
     assign zero   = (result == 0);
 endmodule
-
 
 module sm_register_file
 (
