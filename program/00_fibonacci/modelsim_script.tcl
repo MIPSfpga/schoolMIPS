@@ -14,6 +14,8 @@ vsim work.sm_testbench
 
 # add wave -radix hex sim:/sm_testbench/*
 add wave -radix hex sim:/sm_testbench/sm_cpu/*
+add wave -radix hex sim:/sm_testbench/sm_cpu/rf/*
+add wave -radix hex sim:/sm_testbench/sm_cpu/rf/rf
 
 run -all
 
