@@ -11,7 +11,9 @@
 module sm_cpu
 (
     input           clk,
-    input           rst_n
+    input           rst_n,
+    input   [ 4:0]  regAddr,
+    output  [31:0]  regData
 );
     //control wires
     wire        pcSrc;
@@ -32,6 +34,10 @@ module sm_cpu
     reg  [31:0] rom [61:0];
     wire [31:0] instr = rom [pc];
 
+    //debug register access
+    wire [31:0] rd0;
+    assign regData = (regAddr != 0) ? rd0 : pc;
+
     //register file
     wire [ 4:0] a3  = regDst ? instr[15:11] : instr[20:16];
     wire [31:0] rd1;
@@ -41,9 +47,11 @@ module sm_cpu
     sm_register_file rf
     (
         .clk        ( clk          ),
+        .a0         ( regAddr      ),
         .a1         ( instr[25:21] ),
         .a2         ( instr[20:16] ),
         .a3         ( a3           ),
+        .rd0        ( rd0          ),
         .rd1        ( rd1          ),
         .rd2        ( rd2          ),
         .wd3        ( wd3          ),
@@ -143,9 +151,11 @@ endmodule
 module sm_register_file
 (
     input         clk,
+    input  [ 4:0] a0,
     input  [ 4:0] a1,
     input  [ 4:0] a2,
     input  [ 4:0] a3,
+    output [31:0] rd0,
     output [31:0] rd1,
     output [31:0] rd2,
     input  [31:0] wd3,
@@ -153,6 +163,7 @@ module sm_register_file
 );
     reg [31:0] rf [31:0];
 
+    assign rd0 = (a0 != 0) ? rf [a0] : 32'b0;
     assign rd1 = (a1 != 0) ? rf [a1] : 32'b0;
     assign rd2 = (a2 != 0) ? rf [a2] : 32'b0;
 

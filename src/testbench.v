@@ -7,15 +7,19 @@ module sm_testbench;
     parameter Tt     = 20;
     parameter Ncycle = 40;
 
-    reg clk;
-    reg rst_n;
+    reg         clk;
+    reg         rst_n;
+    reg  [ 4:0] regAddr;
+    wire [31:0] regData;
 
     // ***** DUT start ************************
 
     sm_cpu sm_cpu
     (
-        .clk    ( clk   ),
-        .rst_n  ( rst_n )
+        .clk     ( clk     ),
+        .rst_n   ( rst_n   ),
+        .regAddr ( regAddr ),
+        .regData ( regData )
     );
 
     // ***** DUT  end  ************************
@@ -51,9 +55,11 @@ module sm_testbench;
     //simulation debug output
     integer cycle; initial cycle = 0;
 
+    initial regAddr = 0; // get PC
+
     always @ (posedge clk)
     begin
-        $display ("%5d v0= %d", cycle, sm_cpu.rf.rf[2]);
+        $display ("%5d  pc = %1d   instr = %h   v0 = %1d ", cycle, regData, sm_cpu.instr, sm_cpu.rf.rf[2]);
 
         cycle = cycle + 1;
 
