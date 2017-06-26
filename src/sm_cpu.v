@@ -28,7 +28,7 @@ module sm_cpu
     wire [31:0] pcBranch;
     wire [31:0] pcNext  = pc + 1;
     wire [31:0] pc_new   = ~pcSrc ? pcNext : pcBranch;
-    sm_pc_register r_pc(clk ,rst_n, pc_new, pc);
+    sm_register r_pc(clk ,rst_n, pc_new, pc);
 
     //program memory
     reg  [31:0] rom [61:0];
@@ -169,19 +169,4 @@ module sm_register_file
 
     always @ (posedge clk)
         if(we3) rf [a3] <= wd3;
-endmodule
-
-
-module sm_pc_register
-(
-    input                 clk,
-    input                 rst,
-    input      [ 31 : 0 ] d,
-    output reg [ 31 : 0 ] q
-);
-    always @ (posedge clk or negedge rst)
-        if(~rst)
-            q <= 32'b0;
-        else
-            q <= d;
 endmodule
