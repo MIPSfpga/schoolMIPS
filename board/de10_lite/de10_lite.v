@@ -68,25 +68,4 @@ module de10_lite(
     sm_hex_display digit_1 ( h7segment [ 7: 4] , HEX1 [6:0] );
     sm_hex_display digit_0 ( h7segment [ 3: 0] , HEX0 [6:0] );
 
-
-    /*
-    //rom init
-    reg [7:0] rom [0 : 255];
-
-    //reg  [31:0] rom2 [61:0];
-
-    integer i;
-
-    initial begin
-        //program memory init
-        $readmemh ("program.hex", rom);
-        for (i = 0; i < 62; i = i + 4) begin
-            //rom2 [i / 4] = 32'b1;
-            
-            sm_cpu.rom [i / 4] = { rom [i + 3], rom [i + 2], 
-                                   rom [i + 1], rom [i + 0] };
-        end
-    end
-    */
-
 endmodule

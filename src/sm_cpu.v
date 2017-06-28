@@ -31,8 +31,8 @@ module sm_cpu
     sm_register r_pc(clk ,rst_n, pc_new, pc);
 
     //program memory
-    reg  [31:0] rom [61:0];
-    wire [31:0] instr = rom [pc];
+    wire [31:0] instr;
+    sm_rom reset_rom(pc, instr);
 
     //debug register access
     wire [31:0] rd0;

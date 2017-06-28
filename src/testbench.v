@@ -36,18 +36,9 @@ module sm_testbench;
         rst_n   = 1;
     end
 
-    //rom & ram init
-    reg [7:0] rom [0 : 255];
+    //register file reset
     integer i;
-
     initial begin
-        //program memory init
-        $readmemh ("program.hex", rom);
-        for (i = 0; i < 256; i = i + 4)
-            sm_cpu.rom [i / 4] = { rom [i + 3], rom [i + 2], 
-                                   rom [i + 1], rom [i + 0] };
-
-        //register file reset
         for (i = 0; i < 32; i = i + 1)
             sm_cpu.rf.rf[i] = 0;
     end
