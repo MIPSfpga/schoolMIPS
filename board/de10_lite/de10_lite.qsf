@@ -273,3 +273,5 @@ set_global_assignment -name SEARCH_PATH ../../../src
 set_global_assignment -name HEX_FILE ../../program/program.hex
 
 set_global_assignment -name SDC_FILE de10_lite.sdc
+
+set_global_assignment -name INTERNAL_FLASH_UPDATE_MODE "SINGLE IMAGE WITH ERAM"
