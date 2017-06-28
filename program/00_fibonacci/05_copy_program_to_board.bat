@@ -1,4 +1,4 @@
 
-del ..\..\board\program\program.hex
+rem del ..\..\board\program\program.hex
 
-copy .\program.hex ..\..\board\program
+rem copy .\program.hex ..\..\board\program

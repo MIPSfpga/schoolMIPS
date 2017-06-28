@@ -1,2 +1,2 @@
 
-mips-mti-elf-objcopy program.elf -O verilog program.hex
+rem mips-mti-elf-objcopy program.elf -O verilog program.hex
