@@ -26,25 +26,27 @@ module de10_lite(
     wire          clk;
     wire          clkIn     =  MAX10_CLK1_50;
     wire          rst_n     =  KEY[0];
-    wire [  4:0 ] devide    =  SW [9:5];
+    wire          clkEnable =  SW [9] | ~KEY[1];
+    wire [  3:0 ] devide    =  SW [8:5];
     wire [  4:0 ] regAddr   =  SW [4:0];
     wire [ 31:0 ] regData;
 
     //cores
     sm_clk_divider sm_clk_divider
     (
-        .clkIn      ( clkIn    ),
-        .rst_n      ( rst_n    ),
-        .devide     ( devide   ),
-        .clkOut     ( clk      )
+        .clkIn      ( clkIn     ),
+        .rst_n      ( rst_n     ),
+        .devide     ( devide    ),
+        .enable     ( clkEnable ),
+        .clkOut     ( clk       )
     );
 
     sm_cpu sm_cpu
     (
-        .clk        ( clk      ),
-        .rst_n      ( rst_n    ),
-        .regAddr    ( regAddr  ),
-        .regData    ( regData  )
+        .clk        ( clk       ),
+        .rst_n      ( rst_n     ),
+        .regAddr    ( regAddr   ),
+        .regData    ( regData   )
     );
 
     //outputs
