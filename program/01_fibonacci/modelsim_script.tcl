@@ -5,10 +5,12 @@ set p0 -vlog01compat
 set p1 +define+SIMULATION
 
 set i0 +incdir+../../../src
+set i1 +incdir+../../../testbench
 
 set s0 ../../../src/*.v
+set s1 ../../../testbench/*.v
 
-vlog $p0 $p1  $i0  $s0
+vlog $p0 $p1  $i0 $i1  $s0 $s1
 
 vsim work.sm_testbench
 
