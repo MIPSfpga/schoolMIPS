@@ -70,6 +70,7 @@ module sm_cpu
         .srcA       ( rd1          ),
         .srcB       ( srcB         ),
         .oper       ( aluControl   ),
+        .shift      ( instr[10:6 ] ),
         .zero       ( aluZero      ),
         .result     ( wd3          ) 
     );
@@ -101,26 +102,37 @@ module sm_control
     output [2:0] aluControl
 );
     wire         branch;
-    assign pcSrc = branch & aluZero;
+    wire         condZero;
+    assign pcSrc = branch & (aluZero == condZero);
 
-    reg    [6:0] conf;
-    assign { branch, regDst, regWrite, aluSrc, aluControl } = conf;
+    reg    [7:0] conf;
+    assign { branch, condZero, regDst, regWrite, aluSrc, aluControl } = conf;
 
     localparam  C_SPEC  = 6'b000000,
                 C_ADDIU = 6'b001001,
-                C_BGEZ  = 6'b000100;
+                C_BGEZ  = 6'b000100,
+                C_LUI   = 6'b001111,
+                C_BNEZ  = 6'b000101;
 
     localparam  F_ADDU  = 6'b100001,
                 F_OR    = 6'b100101,
+                F_SRL   = 6'b000010,
+                F_SLTU  = 6'b101011,
+                F_SUBU  = 6'b100011,
                 F_ANY   = 6'b??????;
 
     always @ (*) begin
         casez( {cmdOper,cmdFunk} )
-            default             : conf = 7'b0;
-            { C_SPEC,  F_ADDU } : conf = 7'b0110000;
-            { C_SPEC,  F_OR   } : conf = 7'b0110001;
-            { C_ADDIU, F_ANY  } : conf = 7'b0011000;
-            { C_BGEZ,  F_ANY  } : conf = 7'b1000000;
+            default             : conf = 8'b00;
+            { C_SPEC,  F_ADDU } : conf = 8'b00110000;
+            { C_SPEC,  F_OR   } : conf = 8'b00110001;
+            { C_ADDIU, F_ANY  } : conf = 8'b00011000;
+            { C_BGEZ,  F_ANY  } : conf = 8'b11000000;
+            { C_LUI,   F_ANY  } : conf = 8'b00011010;
+            { C_SPEC,  F_SRL  } : conf = 8'b00110011;
+            { C_SPEC,  F_SLTU } : conf = 8'b00110100;
+            { C_BNEZ,  F_ANY  } : conf = 8'b10000000;
+            { C_SPEC,  F_SUBU } : conf = 8'b00110101;
         endcase
     end
 endmodule
@@ -131,17 +143,26 @@ module sm_alu
     input  [31:0] srcA,
     input  [31:0] srcB,
     input  [ 2:0] oper,
+    input  [ 4:0] shift,
     output        zero,
-    output reg [31:0] result 
+    output reg [31:0] result
 );
-    localparam ALU_ADD = 3'b000,
-               ALU_OR  = 3'b001;
+    localparam ALU_ADD  = 3'b000,
+               ALU_OR   = 3'b001,
+               ALU_LUI  = 3'b010,
+               ALU_SRL  = 3'b011,
+               ALU_SLTU = 3'b100,
+               ALU_SUBU = 3'b101;
 
     always @ (*) begin
         case (oper)
-            default : result = srcA + srcB;
-            ALU_ADD : result = srcA + srcB;
-            ALU_OR  : result = srcA | srcB;
+            default  : result = srcA + srcB;
+            ALU_ADD  : result = srcA + srcB;
+            ALU_OR   : result = srcA | srcB;
+            ALU_LUI  : result = (srcB << 16);
+            ALU_SRL  : result = srcB >> shift;
+            ALU_SLTU : result = (srcA < srcB) ? 1 : 0;
+            ALU_SUBU : result = srcA - srcB;
         endcase
     end
 

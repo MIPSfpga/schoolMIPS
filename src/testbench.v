@@ -5,7 +5,7 @@ module sm_testbench;
 
     // simulation options
     parameter Tt     = 20;
-    parameter Ncycle = 40;
+    parameter Ncycle = 150;
 
     reg         clk;
     reg         rst_n;
@@ -50,7 +50,8 @@ module sm_testbench;
 
     always @ (posedge clk)
     begin
-        $display ("%5d  pc = %1d   instr = %h   v0 = %1d ", cycle, regData, sm_cpu.instr, sm_cpu.rf.rf[2]);
+        $display ("%5d  pc = %2d  pcaddr= %h  instr = %h   v0 = %1d ", 
+                  cycle, regData, (regData << 2), sm_cpu.instr, sm_cpu.rf.rf[2]);
 
         cycle = cycle + 1;
 
