@@ -50,7 +50,8 @@ module de10_lite(
     );
 
     //outputs
-    assign LEDR[0] = clk;
+    assign LEDR[0]   = clk;
+    assign LEDR[9:1] = regData[8:0];
 
     wire [ 31:0 ] h7segment = regData;
 
