@@ -110,9 +110,9 @@ module sm_control
 
     localparam  C_SPEC  = 6'b000000,
                 C_ADDIU = 6'b001001,
-                C_BGEZ  = 6'b000100,
+                C_BEQ   = 6'b000100,
                 C_LUI   = 6'b001111,
-                C_BNEZ  = 6'b000101;
+                C_BNE   = 6'b000101;
 
     localparam  F_ADDU  = 6'b100001,
                 F_OR    = 6'b100101,
@@ -127,11 +127,11 @@ module sm_control
             { C_SPEC,  F_ADDU } : conf = 8'b00110000;
             { C_SPEC,  F_OR   } : conf = 8'b00110001;
             { C_ADDIU, F_ANY  } : conf = 8'b00011000;
-            { C_BGEZ,  F_ANY  } : conf = 8'b11000000;
+            { C_BEQ,   F_ANY  } : conf = 8'b11000000;
             { C_LUI,   F_ANY  } : conf = 8'b00011010;
             { C_SPEC,  F_SRL  } : conf = 8'b00110011;
             { C_SPEC,  F_SLTU } : conf = 8'b00110100;
-            { C_BNEZ,  F_ANY  } : conf = 8'b10000000;
+            { C_BNE,   F_ANY  } : conf = 8'b10000000;
             { C_SPEC,  F_SUBU } : conf = 8'b00110101;
         endcase
     end
