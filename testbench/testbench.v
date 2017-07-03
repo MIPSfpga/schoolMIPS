@@ -58,7 +58,7 @@ module sm_testbench;
         if (cycle > Ncycle)
         begin
             $display ("Timeout");
-            $finish;
+            $stop;
         end
     end
 
