@@ -5,7 +5,7 @@ program.elf:     file format elf32-tradlittlemips
 Disassembly of section .text:
 
 00000000 <.text>:
-   0:	24040052 	li	a0,82
+   0:	20040052 	addi	a0,zero,82
 
 00000004 <sqrt>:
    4:	3c084000 	lui	t0,0x4000

@@ -17,7 +17,7 @@
 
         .text
 
-init:   li      $a0, 82         ## x = 82
+init:   addi    $a0, $0, 82     ## x = 82
 
 sqrt:   li      $t0, 0x40000000 ## m = 0x40000000
         move    $t1, $0         ## y = 0
