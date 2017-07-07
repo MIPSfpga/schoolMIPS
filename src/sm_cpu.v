@@ -105,28 +105,39 @@ module sm_control
     wire         condZero;
     assign pcSrc = branch & (aluZero == condZero);
 
+    // cmdOper values
+    localparam  C_SPEC  = 6'b000000, // Special instructions (depends on cmdFunk field)
+                C_ADDI  = 6'b001000, // I-type, Integer Add Immediate 
+                                     //         Rt = Rs + Immed
+                C_BEQ   = 6'b000100, // I-type, Branch On Equal
+                                     //         if (Rs == Rt) PC += (int)offset
+                C_LUI   = 6'b001111, // I-type, Load Upper Immediate
+                                     //         Rt = Immed << 16
+                C_BNE   = 6'b000101; // I-type, Branch on Not Equal
+                                     //         if (Rs != Rt) PC += (int)offset
+
+    // cmdFunk values
+    localparam  F_ADD   = 6'b100000, // R-type, Integer Add
+                                     //         Rd = Rs + Rt
+                F_OR    = 6'b100101, // R-type, Logical OR
+                                     //         Rd = Rs | Rt
+                F_SRL   = 6'b000010, // R-type, Shift Right Logical
+                                     //         Rd = (uns)Rt >> sa
+                F_SLTU  = 6'b101011, // R-type, Set on Less Than Unsigned
+                                     //         if (uns)Rs < (uns)Immed Rd = 1 else Rd = 0
+                F_SUBU  = 6'b100011, // R-type, Unsigned Subtract
+                                     //         Rt = (uns)Rs - (uns)Rd
+                F_ANY   = 6'b??????;
+
     reg    [7:0] conf;
     assign { branch, condZero, regDst, regWrite, aluSrc, aluControl } = conf;
-
-    localparam  C_SPEC  = 6'b000000,
-                C_ADDIU = 6'b001001,
-                C_BEQ   = 6'b000100,
-                C_LUI   = 6'b001111,
-                C_BNE   = 6'b000101;
-
-    localparam  F_ADDU  = 6'b100001,
-                F_OR    = 6'b100101,
-                F_SRL   = 6'b000010,
-                F_SLTU  = 6'b101011,
-                F_SUBU  = 6'b100011,
-                F_ANY   = 6'b??????;
 
     always @ (*) begin
         casez( {cmdOper,cmdFunk} )
             default             : conf = 8'b00;
-            { C_SPEC,  F_ADDU } : conf = 8'b00110000;
+            { C_SPEC,  F_ADD  } : conf = 8'b00110000;
             { C_SPEC,  F_OR   } : conf = 8'b00110001;
-            { C_ADDIU, F_ANY  } : conf = 8'b00011000;
+            { C_ADDI , F_ANY  } : conf = 8'b00011000;
             { C_BEQ,   F_ANY  } : conf = 8'b11000000;
             { C_LUI,   F_ANY  } : conf = 8'b00011010;
             { C_SPEC,  F_SRL  } : conf = 8'b00110011;
