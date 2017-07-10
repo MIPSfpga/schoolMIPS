@@ -3,11 +3,11 @@
             .text
 
 start:      move    $t0, $0
-            addi    $t1, $0, 1
+            li      $t1, 1
             move    $v0, $t1
 
-fibonacci:  add     $t0, $t0, $t1
+fibonacci:  addu    $t0, $t0, $t1
             move    $v0, $t0
-            add     $t1, $t0, $t1
+            addu    $t1, $t0, $t1
             move    $v0, $t1
             b       fibonacci
