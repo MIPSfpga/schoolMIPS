@@ -13,21 +13,15 @@ module marsohod_3(
     wire          rst_n     =  KEY0;
     wire          clkEnable =  ~KEY1;
 	 wire [ 31:0 ] regData;
-    
+
     //cores
-    sm_clk_divider sm_clk_divider
+    sm_top sm_top
     (
         .clkIn      ( clkIn     ),
         .rst_n      ( rst_n     ),
-        .devide     ( 4'b1000   ),
-        .enable     ( clkEnable ),
-        .clkOut     ( clk       )
-    );
-
-    sm_cpu sm_cpu
-    (
+        .clkDevide  ( 4'b1000   ),
+        .clkEnable  ( clkEnable ),
         .clk        ( clk       ),
-        .rst_n      ( rst_n     ),
         .regAddr    ( 4'b0010   ),
         .regData    ( regData   )
     );
