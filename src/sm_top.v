@@ -6,6 +6,7 @@ module sm_top
     input           rst_n,
     input   [ 3:0 ] clkDevide,
     input           clkEnable,
+    output          clk,
     input   [ 4:0 ] regAddr,
     output  [31:0 ] regData
 );
