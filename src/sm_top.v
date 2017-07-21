@@ -14,9 +14,9 @@ module sm_top
     wire            enable;
     wire    [ 4:0 ] addr;
 
-    metafilter #(.SIZE(4)) f1(clkIn, clkDevide, devide);
-    metafilter #(.SIZE(1)) f1(clkIn, clkEnable, enable);
-    metafilter #(.SIZE(5)) f1(clkIn, regAddr,   addr  );
+    sm_metafilter #(.SIZE(4)) f0(clkIn, clkDevide, devide);
+    sm_metafilter #(.SIZE(1)) f1(clkIn, clkEnable, enable);
+    sm_metafilter #(.SIZE(5)) f2(clkIn, regAddr,   addr  );
 
     //cores
     sm_clk_divider sm_clk_divider
@@ -39,7 +39,7 @@ module sm_top
 endmodule
 
 //metastability input filter module
-module metafilter
+module sm_metafilter
 #(
     parameter SIZE = 1
 )
