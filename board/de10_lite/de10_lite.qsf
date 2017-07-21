@@ -262,9 +262,9 @@ set_global_assignment -name VERILOG_FILE ../de10_lite.v
 
 set_global_assignment -name VERILOG_FILE ../../../src/sm_cpu.v
 set_global_assignment -name VERILOG_FILE ../../../src/sm_hex_display.v
-set_global_assignment -name VERILOG_FILE ../../../src/sm_clk_divider.v
 set_global_assignment -name VERILOG_FILE ../../../src/sm_register.v
 set_global_assignment -name VERILOG_FILE ../../../src/sm_rom.v
+set_global_assignment -name VERILOG_FILE ../../../src/sm_top.v
 
 set_global_assignment -name SEARCH_PATH ..
 set_global_assignment -name SEARCH_PATH ../../program
