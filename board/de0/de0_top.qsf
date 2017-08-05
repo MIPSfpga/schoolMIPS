@@ -551,7 +551,7 @@ set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS R
 
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
 
-set_global_assignment -name VERILOG_FILE ../de10_lite.v
+set_global_assignment -name VERILOG_FILE ../de0_top.v
 
 set_global_assignment -name VERILOG_FILE ../../../src/sm_cpu.v
 set_global_assignment -name VERILOG_FILE ../../../src/sm_hex_display.v
@@ -564,3 +564,6 @@ set_global_assignment -name SEARCH_PATH ../../program
 set_global_assignment -name SEARCH_PATH ../../../src
 
 set_global_assignment -name HEX_FILE ../../program/program.hex
+
+set_global_assignment -name SDC_FILE de0_top.sdc
+
