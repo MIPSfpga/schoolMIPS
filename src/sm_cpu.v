@@ -8,6 +8,8 @@
  *                   Alexander Romanov 
  */ 
 
+`include "sm_cpu.vh"
+
 module sm_cpu
 (
     input           clk,
@@ -92,58 +94,41 @@ endmodule
 
 module sm_control
 (
-    input  [5:0] cmdOper,
-    input  [5:0] cmdFunk,
-    input        aluZero,
-    output       pcSrc, 
-    output       regDst, 
-    output       regWrite, 
-    output       aluSrc,
-    output [2:0] aluControl
+    input      [5:0] cmdOper,
+    input      [5:0] cmdFunk,
+    input            aluZero,
+    output           pcSrc, 
+    output reg       regDst, 
+    output reg       regWrite, 
+    output reg       aluSrc,
+    output reg [2:0] aluControl
 );
-    wire         branch;
-    wire         condZero;
+    reg          branch;
+    reg          condZero;
     assign pcSrc = branch & (aluZero == condZero);
 
-    // cmdOper values
-    localparam  C_SPEC  = 6'b000000, // Special instructions (depends on cmdFunk field)
-                C_ADDIU = 6'b001001, // I-type, Integer Add Immediate Unsigned
-                                     //         Rd = Rs + Immed
-                C_BEQ   = 6'b000100, // I-type, Branch On Equal
-                                     //         if (Rs == Rt) PC += (int)offset
-                C_LUI   = 6'b001111, // I-type, Load Upper Immediate
-                                     //         Rt = Immed << 16
-                C_BNE   = 6'b000101; // I-type, Branch on Not Equal
-                                     //         if (Rs != Rt) PC += (int)offset
-
-    // cmdFunk values
-    localparam  F_ADDU  = 6'b100001, // R-type, Integer Add Unsigned
-                                     //         Rd = Rs + Rt
-                F_OR    = 6'b100101, // R-type, Logical OR
-                                     //         Rd = Rs | Rt
-                F_SRL   = 6'b000010, // R-type, Shift Right Logical
-                                     //         Rd = Rs∅ >> shift
-                F_SLTU  = 6'b101011, // R-type, Set on Less Than Unsigned
-                                     //         Rd = (Rs∅  < Rt∅) ? 1 : 0
-                F_SUBU  = 6'b100011, // R-type, Unsigned Subtract
-                                     //         Rd = Rs – Rt
-                F_ANY   = 6'b??????;
-
-    reg    [7:0] conf;
-    assign { branch, condZero, regDst, regWrite, aluSrc, aluControl } = conf;
-
     always @ (*) begin
+        branch      = 1'b0;
+        condZero    = 1'b0;
+        regDst      = 1'b0;
+        regWrite    = 1'b0;
+        aluSrc      = 1'b0;
+        aluControl  = `ALU_ADD;
+
         casez( {cmdOper,cmdFunk} )
-            default             : conf = 8'b00;
-            { C_SPEC,  F_ADDU } : conf = 8'b00110000;
-            { C_SPEC,  F_OR   } : conf = 8'b00110001;
-            { C_ADDIU, F_ANY  } : conf = 8'b00011000;
-            { C_BEQ,   F_ANY  } : conf = 8'b11000000;
-            { C_LUI,   F_ANY  } : conf = 8'b00011010;
-            { C_SPEC,  F_SRL  } : conf = 8'b00110011;
-            { C_SPEC,  F_SLTU } : conf = 8'b00110100;
-            { C_BNE,   F_ANY  } : conf = 8'b10000000;
-            { C_SPEC,  F_SUBU } : conf = 8'b00110101;
+            default               : ;
+
+            { `C_SPEC,  `F_ADDU } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_ADD;  end
+            { `C_SPEC,  `F_OR   } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_OR;   end
+            { `C_SPEC,  `F_SRL  } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SRL;  end
+            { `C_SPEC,  `F_SLTU } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SLTU; end
+            { `C_SPEC,  `F_SUBU } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SUBU; end
+
+            { `C_ADDIU, `F_ANY  } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD;  end
+            { `C_LUI,   `F_ANY  } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_LUI;  end
+
+            { `C_BEQ,   `F_ANY  } : begin branch = 1'b1; condZero = 1'b1; end
+            { `C_BNE,   `F_ANY  } : branch = 1'b1;
         endcase
     end
 endmodule
@@ -158,22 +143,15 @@ module sm_alu
     output        zero,
     output reg [31:0] result
 );
-    localparam ALU_ADD  = 3'b000,
-               ALU_OR   = 3'b001,
-               ALU_LUI  = 3'b010,
-               ALU_SRL  = 3'b011,
-               ALU_SLTU = 3'b100,
-               ALU_SUBU = 3'b101;
-
     always @ (*) begin
         case (oper)
-            default  : result = srcA + srcB;
-            ALU_ADD  : result = srcA + srcB;
-            ALU_OR   : result = srcA | srcB;
-            ALU_LUI  : result = (srcB << 16);
-            ALU_SRL  : result = srcB >> shift;
-            ALU_SLTU : result = (srcA < srcB) ? 1 : 0;
-            ALU_SUBU : result = srcA - srcB;
+            default   : result = srcA + srcB;
+            `ALU_ADD  : result = srcA + srcB;
+            `ALU_OR   : result = srcA | srcB;
+            `ALU_LUI  : result = (srcB << 16);
+            `ALU_SRL  : result = srcB >> shift;
+            `ALU_SLTU : result = (srcA < srcB) ? 1 : 0;
+            `ALU_SUBU : result = srcA - srcB;
         endcase
     end
 
