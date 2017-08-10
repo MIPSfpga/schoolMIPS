@@ -24,6 +24,15 @@ module sm_testbench;
 
     // ***** DUT  end  ************************
 
+`ifdef ICARUS
+    //iverilog memory dump init workaround
+    initial $dumpvars;
+    genvar k;
+    for (k = 0; k < 32; k = k + 1) begin
+        initial $dumpvars(0, sm_cpu.rf.rf[k]);
+    end
+`endif
+
     // simulation init
     initial begin
         clk = 0;
