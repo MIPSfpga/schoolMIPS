@@ -127,8 +127,8 @@ module sm_control
             { `C_ADDIU, `F_ANY  } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD;  end
             { `C_LUI,   `F_ANY  } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_LUI;  end
 
-            { `C_BEQ,   `F_ANY  } : begin branch = 1'b1; condZero = 1'b1; end
-            { `C_BNE,   `F_ANY  } : branch = 1'b1;
+            { `C_BEQ,   `F_ANY  } : begin branch = 1'b1; condZero = 1'b1; aluControl = `ALU_SUBU; end
+            { `C_BNE,   `F_ANY  } : begin branch = 1'b1; aluControl = `ALU_SUBU; end
         endcase
     end
 endmodule
