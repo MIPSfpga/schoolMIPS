@@ -16,12 +16,20 @@ module sm_testbench;
 
     // ***** DUT start ************************
 
+    //instruction memory
+    wire    [31:0]  imAddr;
+    wire    [31:0]  imData;
+    sm_rom reset_rom(imAddr, imData);
+
+    //cpu core
     sm_cpu sm_cpu
     (
         .clk     ( clk     ),
         .rst_n   ( rst_n   ),
         .regAddr ( regAddr ),
-        .regData ( regData )
+        .regData ( regData ),
+        .imAddr  ( imAddr  ),
+        .imData  ( imData  )
     );
 
     // ***** DUT  end  ************************

@@ -20,6 +20,7 @@ module sm_top
     sm_metafilter #(.SIZE(5)) f2(clkIn, regAddr,   addr  );
 
     //cores
+    //clock devider
     sm_clk_divider sm_clk_divider
     (
         .clkIn      ( clkIn     ),
@@ -29,12 +30,19 @@ module sm_top
         .clkOut     ( clk       )
     );
 
+    //instruction memory
+    wire    [31:0]  imAddr;
+    wire    [31:0]  imData;
+    sm_rom reset_rom(imAddr, imData);
+
     sm_cpu sm_cpu
     (
         .clk        ( clk       ),
         .rst_n      ( rst_n     ),
         .regAddr    ( addr      ),
-        .regData    ( regData   )
+        .regData    ( regData   ),
+        .imAddr     ( imAddr    ),
+        .imData     ( imData    )
     );
 
 endmodule
