@@ -12,10 +12,12 @@
 
 module sm_cpu
 (
-    input           clk,
-    input           rst_n,
-    input   [ 4:0]  regAddr,
-    output  [31:0]  regData
+    input           clk,        // clock
+    input           rst_n,      // reset
+    input   [ 4:0]  regAddr,    // debug access reg address
+    output  [31:0]  regData,    // debug access reg data
+    output  [31:0]  imAddr,     // instruction memory address
+    input   [31:0]  imData      // instruction memory data
 );
     //control wires
     wire        pcSrc;
@@ -32,9 +34,9 @@ module sm_cpu
     wire [31:0] pc_new   = ~pcSrc ? pcNext : pcBranch;
     sm_register r_pc(clk ,rst_n, pc_new, pc);
 
-    //program memory
-    wire [31:0] instr;
-    sm_rom reset_rom(pc, instr);
+    //program memory access
+    assign imAddr = pc;
+    wire [31:0] instr = imData;
 
     //debug register access
     wire [31:0] rd0;
