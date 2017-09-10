@@ -1,0 +1,3 @@
+
+Use init_linux.sh to replace all the *.bat (build, simulation and etc.) files with their linux analogs (*.sh).
+Batch init_windows.bat provides the reverse action.
