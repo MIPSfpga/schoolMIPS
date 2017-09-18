@@ -34,7 +34,7 @@ module nexys4
     wire          clkCpu;
     wire          clkIn     =  clk;
     wire          rst_n     =  btnCpuReset;
-    wire          clkEnable =  sw [9] | ~btnU;
+    wire          clkEnable =  sw [9] | btnU;
     wire [  3:0 ] clkDevide =  sw [8:5];
     wire [  4:0 ] regAddr   =  sw [4:0];
     wire [ 31:0 ] regData;

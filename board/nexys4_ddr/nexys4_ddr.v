@@ -42,7 +42,7 @@ module nexys4_ddr
     wire          clk;
     wire          clkIn     =  CLK100MHZ;
     wire          rst_n     =  CPU_RESETN;
-    wire          clkEnable =  SW [9] | ~BTNU;
+    wire          clkEnable =  SW [9] | BTNU;
     wire [  3:0 ] clkDevide =  SW [8:5];
     wire [  4:0 ] regAddr   =  SW [4:0];
     wire [ 31:0 ] regData;
