@@ -5,14 +5,14 @@ program.elf:     file format elf32-tradlittlemips
 Disassembly of section .text:
 
 00000000 <.text>:
-   0:	00004025 	move	t0,zero
-   4:	24090001 	li	t1,1
-   8:	01201025 	move	v0,t1
+   0:	00004025 	or	t0,zero,zero
+   4:	24090001 	addiu	t1,zero,1
+   8:	01201025 	or	v0,t1,zero
 
 0000000c <fibonacci>:
    c:	01094021 	addu	t0,t0,t1
-  10:	01001025 	move	v0,t0
+  10:	01001025 	or	v0,t0,zero
   14:	01094821 	addu	t1,t0,t1
-  18:	01201025 	move	v0,t1
-  1c:	1000fffb 	b	c <fibonacci>
-  20:	00000000 	nop
+  18:	01201025 	or	v0,t1,zero
+  1c:	1000fffb 	beqz	zero,c <fibonacci>
+  20:	00000000 	sll	zero,zero,0x0
