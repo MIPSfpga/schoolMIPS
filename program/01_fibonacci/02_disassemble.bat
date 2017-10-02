@@ -1,2 +1,2 @@
 
-mips-mti-elf-objdump -D program.elf > program.dis
+mips-mti-elf-objdump -M no-aliases -D program.elf > program.dis

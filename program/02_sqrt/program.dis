@@ -5,28 +5,28 @@ program.elf:     file format elf32-tradlittlemips
 Disassembly of section .text:
 
 00000000 <.text>:
-   0:	24040052 	li	a0,82
-   4:	24020000 	li	v0,0
+   0:	24040052 	addiu	a0,zero,82
+   4:	24020000 	addiu	v0,zero,0
 
 00000008 <sqrt>:
    8:	3c084000 	lui	t0,0x4000
-   c:	00004825 	move	t1,zero
+   c:	00004825 	or	t1,zero,zero
 
 00000010 <L0>:
   10:	01285025 	or	t2,t1,t0
   14:	00094842 	srl	t1,t1,0x1
   18:	008a582b 	sltu	t3,a0,t2
   1c:	15600003 	bnez	t3,2c <L1>
-  20:	00000000 	nop
+  20:	00000000 	sll	zero,zero,0x0
   24:	008a2023 	subu	a0,a0,t2
   28:	01284825 	or	t1,t1,t0
 
 0000002c <L1>:
   2c:	00084082 	srl	t0,t0,0x2
   30:	1500fff7 	bnez	t0,10 <L0>
-  34:	00000000 	nop
-  38:	01201025 	move	v0,t1
+  34:	00000000 	sll	zero,zero,0x0
+  38:	01201025 	or	v0,t1,zero
 
 0000003c <end>:
-  3c:	1000ffff 	b	3c <end>
-  40:	00000000 	nop
+  3c:	1000ffff 	beqz	zero,3c <end>
+  40:	00000000 	sll	zero,zero,0x0

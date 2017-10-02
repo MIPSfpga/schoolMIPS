@@ -5,9 +5,9 @@ program.elf:     file format elf32-tradlittlemips
 Disassembly of section .text:
 
 00000000 <.text>:
-   0:	00001025 	move	v0,zero
+   0:	00001025 	or	v0,zero,zero
 
 00000004 <counter>:
    4:	24420001 	addiu	v0,v0,1
-   8:	1000fffe 	b	4 <counter>
-   c:	00000000 	nop
+   8:	1000fffe 	beqz	zero,4 <counter>
+   c:	00000000 	sll	zero,zero,0x0
