@@ -12,7 +12,7 @@ module marsohod_3(
     wire          clkIn     =  CLK100MHZ;
     wire          rst_n     =  KEY0;
     wire          clkEnable =  ~KEY1;
-	 wire [ 31:0 ] regData;
+    wire [ 31:0 ] regData;
 
     //cores
     sm_top sm_top
