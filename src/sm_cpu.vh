@@ -30,12 +30,15 @@
 //instruction function field
 `define F_ADDU      6'b100001 // R-type, Integer Add Unsigned
                               //         Rd = Rs + Rt
+`define F_SLT       6'b101010 // R-type, SLT
+                              //         
 `define F_OR        6'b100101 // R-type, Logical OR
                               //         Rd = Rs | Rt
 `define F_SRL       6'b000010 // R-type, Shift Right Logical
-                              //         Rd = Rs∅ >> shift
+                              //         Rd = Rs? >> shift
 `define F_SLTU      6'b101011 // R-type, Set on Less Than Unsigned
-                              //         Rd = (Rs∅ < Rt∅) ? 1 : 0
+                              //         Rd = (Rs? < Rt?) ? 1 : 0
 `define F_SUBU      6'b100011 // R-type, Unsigned Subtract
-                              //         Rd = Rs – Rt
+                              //         Rd = Rs � Rt
 `define F_ANY       6'b??????
+
