@@ -60,7 +60,11 @@ set_location_assignment PIN_85 -to LED[1]
 set_location_assignment PIN_84 -to LED[0]
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name HEX_FILE ../../program/program.hex
+
+set_global_assignment -name SEARCH_PATH ..
+set_global_assignment -name SEARCH_PATH ../../program
+set_global_assignment -name SEARCH_PATH ../../../src
+
 set_global_assignment -name VERILOG_FILE ../../../src/sm_top.v
 set_global_assignment -name VERILOG_FILE ../../../src/sm_rom.v
 set_global_assignment -name VERILOG_FILE ../../../src/sm_register.v
