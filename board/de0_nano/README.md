@@ -8,7 +8,7 @@ pin_r8 | FPGA_CLK1_50 | system clock
 pin_j15 | KEY0 | system reset
 pin_e1 | KEY1 | clock enable
 pin_a15, a13, b13, a11, s1, f3, b1, l3 | LED0-LED7 | system output
-PIN_m1, t8, b9, m15|SW0-SW3|
+pin_m1, t8, b9, m15|SW0-SW3|
 
 ## Board photo
 
@@ -17,3 +17,4 @@ PIN_m1, t8, b9, m15|SW0-SW3|
 ## Board pinout
 
 ![pinout](/board/de0_nano/doc/pins.jpg)
+![pinout](/board/de0_nano/doc/pins_.jpg)
