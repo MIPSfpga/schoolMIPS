@@ -1,4 +1,4 @@
-# Terasic DE0-Nano (Altera Cyclone IV)
+# Terasic DE0-Nano
 
 ## Used pins
 
