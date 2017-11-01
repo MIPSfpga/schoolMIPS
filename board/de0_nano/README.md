@@ -1,4 +1,5 @@
 # Terasic DE0-Nano
+DE0-Nano was migrated from DE10-Nano.
 
 ## Used pins
 
