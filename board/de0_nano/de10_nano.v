@@ -1,7 +1,9 @@
 
-module de0_nano
+module de10_nano
 (
+
     input           FPGA_CLK1_50,
+
     input   [ 1:0]  KEY,
     output  [ 7:0]  LED,
     input   [ 3:0]  SW
