@@ -46,4 +46,4 @@ The program calculates 5 to the power 3. The result shows intermediate calculati
 
 ## Transcript of modeling 
 
-![1](program/03_pow/doc/1.jpg)
+![1](/program/03_pow/doc/1.jpg)
