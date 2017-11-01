@@ -19,8 +19,3 @@ PIN_M1, T8, B9, M15|SW0-SW3| number of the current register
 
 ![pinout](/board/de0_nano/doc/pins.jpg)
 ![pinout](/board/de0_nano/doc/pins_.jpg)
-
-## Transcript of modeling
-The program calculates 5 to the power 3. The result shows intermediate calculations. At first, 5 to the power 1, then to the power 2 and, finally, 3. 
-
-![1](/board/de0_nano/doc/1.jpg)
