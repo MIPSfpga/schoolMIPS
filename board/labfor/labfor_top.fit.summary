@@ -1,0 +1,12 @@
+Fitter Status : Successful - Mon Oct 30 19:46:26 2017
+Quartus II Version : 9.1 Build 222 10/21/2009 SJ Web Edition
+Revision Name : labfor_top
+Top-level Entity Name : labfor_top
+Family : Cyclone
+Device : EP1C3T144C8
+Timing Models : Final
+Total logic elements : 71 / 2,910 ( 2 % )
+Total pins : 33 / 104 ( 32 % )
+Total virtual pins : 0
+Total memory bits : 256 / 59,904 ( < 1 % )
+Total PLLs : 0 / 1 ( 0 % )
