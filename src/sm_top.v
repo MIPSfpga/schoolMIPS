@@ -35,6 +35,21 @@ module sm_top
     wire    [31:0]  imData;
     sm_rom reset_rom(imAddr, imData);
 
+    //data memory
+    wire    [31:0]  dmAddr;
+    wire            dmWe;
+    wire    [31:0]  dmWData;
+    wire    [31:0]  dmRData;
+    sm_ram data_ram
+    (
+        .clk ( clk      ),
+        .a   ( dmAddr   ),
+        .we  ( dmWe     ),
+        .wd  ( dmWData  ),
+        .rd  ( dmRData  )
+    );
+
+    //cpu core
     sm_cpu sm_cpu
     (
         .clk        ( clk       ),
@@ -42,7 +57,11 @@ module sm_top
         .regAddr    ( addr      ),
         .regData    ( regData   ),
         .imAddr     ( imAddr    ),
-        .imData     ( imData    )
+        .imData     ( imData    ),
+        .dmAddr     ( dmAddr    ),
+        .dmWe       ( dmWe      ),
+        .dmWData    ( dmWData   ),
+        .dmRData    ( dmRData   )
     );
 
 endmodule
@@ -69,7 +88,8 @@ endmodule
 //tunable clock devider
 module sm_clk_divider
 #(
-    parameter shift = 16
+    parameter shift  = 16,
+              bypass = 0
 )
 (
     input           clkIn,
@@ -82,5 +102,6 @@ module sm_clk_divider
     wire [31:0] cntrNext = cntr + 1;
     sm_register_we r_cntr(clkIn, rst_n, enable, cntrNext, cntr);
 
-    assign clkOut = cntr[shift + devide];
+    assign clkOut = bypass ? clkIn 
+                           : cntr[shift + devide];
 endmodule
