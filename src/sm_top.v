@@ -1,4 +1,6 @@
 
+`include "sm_config.vh"
+
 //hardware top level module
 module sm_top
 (
@@ -8,7 +10,11 @@ module sm_top
     input           clkEnable,
     output          clk,
     input   [ 4:0 ] regAddr,
-    output  [31:0 ] regData
+    output  [31:0 ] regData,
+
+    input      [`SM_GPIO_WIDTH - 1:0] gpioInput, // GPIO output pins
+    output     [`SM_GPIO_WIDTH - 1:0] gpioOutput // GPIO intput pins
+
 );
     //metastability input filters
     wire    [ 3:0 ] devide;
@@ -35,18 +41,21 @@ module sm_top
     wire    [31:0]  imData;
     sm_rom reset_rom(imAddr, imData);
 
-    //data memory
+    //data bus matrix
     wire    [31:0]  dmAddr;
     wire            dmWe;
     wire    [31:0]  dmWData;
     wire    [31:0]  dmRData;
-    sm_ram data_ram
+    sm_matrix matrix
     (
-        .clk ( clk      ),
-        .a   ( dmAddr   ),
-        .we  ( dmWe     ),
-        .wd  ( dmWData  ),
-        .rd  ( dmRData  )
+        .clk        ( clk        ),
+        .rst_n      ( rst_n      ),
+        .bAddr      ( dmAddr     ),
+        .bWrite     ( dmWe       ),
+        .bWData     ( dmWData    ),
+        .bRData     ( dmRData    ),
+        .gpioInput  ( gpioInput  ),
+        .gpioOutput ( gpioOutput )
     );
 
     //cpu core

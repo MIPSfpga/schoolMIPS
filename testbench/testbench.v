@@ -2,6 +2,7 @@
 `timescale 1 ns / 100 ps
 
 `include "sm_cpu.vh"
+`include "sm_config.vh"
 
 module sm_testbench;
 
@@ -15,6 +16,11 @@ module sm_testbench;
     wire [31:0] regData;
     wire        cpuClk;
 
+    wire [`SM_GPIO_WIDTH - 1:0] gpioInput; // GPIO output pins
+    wire [`SM_GPIO_WIDTH - 1:0] gpioOutput; // GPIO intput pins
+
+    assign gpioInput = 16'h0A;
+
     // ***** DUT start ************************
 
     sm_top sm_top
@@ -25,7 +31,10 @@ module sm_testbench;
         .clkEnable ( 1'b1    ),
         .clk       ( cpuClk  ),
         .regAddr   ( regAddr ),
-        .regData   ( regData )
+        .regData   ( regData ),
+
+        .gpioInput  ( gpioInput  ),
+        .gpioOutput ( gpioOutput )
     );
 
     defparam sm_top.sm_clk_divider.bypass = 1;
