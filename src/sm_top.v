@@ -13,8 +13,8 @@ module sm_top
     output  [31:0 ] regData,
 
     input      [`SM_GPIO_WIDTH - 1:0] gpioInput, // GPIO output pins
-    output     [`SM_GPIO_WIDTH - 1:0] gpioOutput // GPIO intput pins
-
+    output     [`SM_GPIO_WIDTH - 1:0] gpioOutput, // GPIO intput pins
+    output                            pwmOutput   // PWM output pin
 );
     //metastability input filters
     wire    [ 3:0 ] devide;
@@ -55,7 +55,8 @@ module sm_top
         .bWData     ( dmWData    ),
         .bRData     ( dmRData    ),
         .gpioInput  ( gpioInput  ),
-        .gpioOutput ( gpioOutput )
+        .gpioOutput ( gpioOutput ),
+        .pwmOutput  ( pwmOutput  )
     );
 
     //cpu core

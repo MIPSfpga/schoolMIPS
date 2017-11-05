@@ -14,12 +14,14 @@ module sm_matrix
 
     //pin side
     input      [`SM_GPIO_WIDTH - 1:0] gpioInput, // GPIO output pins
-    output     [`SM_GPIO_WIDTH - 1:0] gpioOutput // GPIO intput pins
+    output     [`SM_GPIO_WIDTH - 1:0] gpioOutput, // GPIO intput pins
+    output                            pwmOutput   // PWM output pin
 );
     // bus wires
     wire [ 5:0] bSel;
     wire [31:0] bRData0;
     wire [31:0] bRData1;
+    wire [31:0] bRData2;
 
     // bus selector
     sm_matrix_decoder decoder
@@ -35,7 +37,7 @@ module sm_matrix
         .out    ( bRData  ),
         .in0    ( bRData0 ),
         .in1    ( bRData1 ),
-        .in2    ( 32'b0   ),    //reserved
+        .in2    ( bRData2 ),
         .in3    ( 32'b0   ),    //reserved
         .in4    ( 32'b0   ),    //reserved
         .in5    ( 32'b0   )     //reserved
@@ -67,10 +69,24 @@ module sm_matrix
         .gpioOutput ( gpioOutput )
     );
 
+    // PWM
+    sm_pwm pwm
+    (
+        .clk        ( clk        ),
+        .rst_n      ( rst_n      ),
+        .bSel       ( bSel[2]    ),
+        .bAddr      ( bAddr      ),
+        .bWrite     ( bWrite     ),
+        .bWData     ( bWData     ),
+        .bRData     ( bRData2    ),
+        .pwmOutput  ( pwmOutput  )
+    );
+
 endmodule
 
 `define SM_RAM_ADDR_MATCH   3'b001
 `define SM_GPIO_ADDR_MATCH 12'h7f0
+`define SM_PWM_ADDR_MATCH  12'h7f1
 
 module sm_matrix_decoder
 (
@@ -84,7 +100,9 @@ module sm_matrix_decoder
     // GPIO  0x00007f00 - 0x00007f0f
     assign bSel[1] = ( bAddr [ 15:4  ] == `SM_GPIO_ADDR_MATCH);
 
-    assign bSel[2] = 1'b0;  // reserved
+    // PWM   0x00007f10 - 0x00007f1f
+    assign bSel[2] = ( bAddr [ 15:4  ] == `SM_PWM_ADDR_MATCH);
+
     assign bSel[3] = 1'b0;  // reserved
     assign bSel[4] = 1'b0;  // reserved
     assign bSel[5] = 1'b0;  // reserved
