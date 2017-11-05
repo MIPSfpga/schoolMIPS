@@ -14,7 +14,10 @@ module sm_top
 
     input      [`SM_GPIO_WIDTH - 1:0] gpioInput, // GPIO output pins
     output     [`SM_GPIO_WIDTH - 1:0] gpioOutput, // GPIO intput pins
-    output                            pwmOutput   // PWM output pin
+    output                            pwmOutput,  // PWM output pin
+    output                            alsCS,      // Ligth Sensor chip select
+    output                            alsSCK,     // Light Sensor SPI clock
+    input                             alsSDO      // Light Sensor SPI data
 );
     //metastability input filters
     wire    [ 3:0 ] devide;
@@ -56,7 +59,10 @@ module sm_top
         .bRData     ( dmRData    ),
         .gpioInput  ( gpioInput  ),
         .gpioOutput ( gpioOutput ),
-        .pwmOutput  ( pwmOutput  )
+        .pwmOutput  ( pwmOutput  ),
+        .alsCS      ( alsCS      ),
+        .alsSCK     ( alsSCK     ),
+        .alsSDO     ( alsSDO     )
     );
 
     //cpu core

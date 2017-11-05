@@ -22,6 +22,9 @@ module sm_testbench;
     wire [`SM_GPIO_WIDTH - 1:0] gpioInput; // GPIO output pins
     wire [`SM_GPIO_WIDTH - 1:0] gpioOutput; // GPIO intput pins
     wire                        pwmOutput;  // PWM output pin
+    wire                        alsCS;      // Ligth Sensor chip select
+    wire                        alsSCK;     // Light Sensor SPI clock
+    wire                        alsSDO;     // Light Sensor SPI data
 
     assign gpioInput = 16'h0A;
 
@@ -39,12 +42,18 @@ module sm_testbench;
 
         .gpioInput  ( gpioInput  ),
         .gpioOutput ( gpioOutput ),
-        .pwmOutput  ( pwmOutput  )
+        .pwmOutput  ( pwmOutput  ),
+        .alsCS      ( alsCS      ),
+        .alsSCK     ( alsSCK     ),
+        .alsSDO     ( alsSDO     )
     );
 
     defparam sm_top.sm_clk_divider.bypass = 1;
 
     // ***** DUT  end  ************************
+
+    // Light Sensor stub
+    sm_als_stub sm_als_stub (alsCS, alsSCK, alsSDO);
 
 `ifdef ICARUS
     //iverilog memory dump init workaround
