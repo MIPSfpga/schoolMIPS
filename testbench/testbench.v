@@ -21,6 +21,7 @@ module sm_testbench;
 
     wire [`SM_GPIO_WIDTH - 1:0] gpioInput; // GPIO output pins
     wire [`SM_GPIO_WIDTH - 1:0] gpioOutput; // GPIO intput pins
+    wire                        pwmOutput;  // PWM output pin
 
     assign gpioInput = 16'h0A;
 
@@ -37,7 +38,8 @@ module sm_testbench;
         .regData   ( regData ),
 
         .gpioInput  ( gpioInput  ),
-        .gpioOutput ( gpioOutput )
+        .gpioOutput ( gpioOutput ),
+        .pwmOutput  ( pwmOutput  )
     );
 
     defparam sm_top.sm_clk_divider.bypass = 1;
