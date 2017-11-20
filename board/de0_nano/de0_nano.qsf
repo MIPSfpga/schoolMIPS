@@ -222,3 +222,20 @@ set_location_assignment PIN_M16 -to GPIO_2_IN[2]
 # End of pin assignments by Terasic System Builder
 #============================================================
 
+set_global_assignment -name VERILOG_FILE ../de0_nano.v
+
+set_global_assignment -name VERILOG_FILE ../../../src/sm_cpu.v
+set_global_assignment -name VERILOG_FILE ../../../src/sm_hex_display.v
+set_global_assignment -name VERILOG_FILE ../../../src/sm_register.v
+set_global_assignment -name VERILOG_FILE ../../../src/sm_rom.v
+set_global_assignment -name VERILOG_FILE ../../../src/sm_top.v
+
+set_global_assignment -name SEARCH_PATH ..
+set_global_assignment -name SEARCH_PATH ../../program
+set_global_assignment -name SEARCH_PATH ../../../src
+
+set_global_assignment -name HEX_FILE ../../program/program.hex
+
+set_global_assignment -name SDC_FILE de0_nano.sdc
+
+set_global_assignment -name INTERNAL_FLASH_UPDATE_MODE "SINGLE IMAGE WITH ERAM"
