@@ -1,2 +1,0 @@
-de0_nano_soc_baseline.qar
-de0_nano_soc_baseline.qp_info
