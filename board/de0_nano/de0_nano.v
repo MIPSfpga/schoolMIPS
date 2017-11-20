@@ -58,12 +58,12 @@ module de0_nano(
 //  REG/WIRE declarations
 //=======================================================
 	wire          clk;
-    wire          clkIn     =  CLOCK_50;
-    wire          rst_n     =  KEY[0];
-    wire          clkEnable =  ~KEY[1];
-    wire [  3:0 ] clkDevide =  4'b1000;
-    wire [  4:0 ] regAddr   =  { 1'b0, SW [3:0] };
-    wire [ 31:0 ] regData;
+  wire          clkIn     =  CLOCK_50;
+  wire          rst_n     =  KEY[0];
+  wire          clkEnable =  ~KEY[1];
+  wire [  3:0 ] clkDevide =  4'b1000;
+  wire [  4:0 ] regAddr   =  { 1'b0, SW [3:0] };
+  wire [ 31:0 ] regData;
 
 
 
@@ -81,8 +81,8 @@ sm_top sm_top
         .regData    ( regData   )
     );
 
-	//outputs
-    assign LED[0]   = clk;
-    assign LED[7:1] = regData[6:0];
+//outputs
+assign LED[0]   = clk;
+assign LED[7:1] = regData[6:0];
 
 endmodule
