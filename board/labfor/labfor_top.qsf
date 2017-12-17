@@ -1,0 +1,145 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2009 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II
+# Version 9.1 Build 222 10/21/2009 SJ Web Edition
+# Date created = 00:35:51  October 19, 2017
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		labfor_top_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2010 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II
+# Version 9.1 Build 350 03/24/2010 Service Pack 2 SJ Web Edition
+# Date created = 23:28:52  June 11, 2010
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		demo_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY Cyclone
+set_global_assignment -name DEVICE EP1C3T144C8
+set_global_assignment -name TOP_LEVEL_ENTITY labfor_top
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "9.1 SP2"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "23:28:52  JUNE 11, 2010"
+set_global_assignment -name LAST_QUARTUS_VERSION 9.1
+set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 144
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE ANY
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name GENERATE_RBF_FILE ON
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+set_location_assignment PIN_16 -to CLK
+set_location_assignment PIN_91 -to CLK_enable
+set_global_assignment -name MISC_FILE "D:/Shamrel/_work/LESO2/demo/demo.dpf"
+set_location_assignment PIN_52 -to A1
+set_location_assignment PIN_56 -to A2
+set_location_assignment PIN_51 -to B1
+set_location_assignment PIN_50 -to C1
+set_location_assignment PIN_49 -to D1
+set_location_assignment PIN_55 -to B2
+set_location_assignment PIN_54 -to C2
+set_location_assignment PIN_53 -to D2
+set_location_assignment PIN_37 -to Button
+set_location_assignment PIN_128 -to LED[0]
+set_location_assignment PIN_127 -to LED[1]
+set_location_assignment PIN_126 -to LED[2]
+set_location_assignment PIN_125 -to LED[3]
+set_location_assignment PIN_124 -to LED[4]
+set_location_assignment PIN_123 -to LED[5]
+set_location_assignment PIN_122 -to LED[6]
+set_location_assignment PIN_121 -to LED[7]
+set_global_assignment -name MISC_FILE "D:/Users/Konstantin/Desktop/SoC/leso2_demo/leso2_demo/demo.dpf"
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name MISC_FILE "D:/Desktop/DigitalDevices/schoolMIPS/board/labfor/labfor_top.dpf"
+set_location_assignment PIN_112 -to IND_1A
+set_location_assignment PIN_111 -to IND_1B
+set_location_assignment PIN_108 -to IND_1C
+set_location_assignment PIN_109 -to IND_1D
+set_location_assignment PIN_110 -to IND_1E
+set_location_assignment PIN_114 -to IND_1F
+set_location_assignment PIN_113 -to IND_1G
+set_location_assignment PIN_98 -to IND_2A
+set_location_assignment PIN_97 -to IND_2B
+set_location_assignment PIN_103 -to IND_2C
+set_location_assignment PIN_107 -to IND_1H
+set_location_assignment PIN_105 -to IND_2D
+set_location_assignment PIN_106 -to IND_2E
+set_location_assignment PIN_99 -to IND_2F
+set_location_assignment PIN_104 -to IND_2G
+set_location_assignment PIN_100 -to IND_2H
+set_global_assignment -name HEX_FILE ../program/program.hex
+set_global_assignment -name VERILOG_FILE ../../src/sm_cpu.v
+set_global_assignment -name VERILOG_FILE ../../src/sm_hex_display.v
+set_global_assignment -name VERILOG_FILE ../../src/sm_register.v
+set_global_assignment -name VERILOG_FILE ../../src/sm_rom.v
+set_global_assignment -name VERILOG_FILE ../../src/sm_top.v
+set_global_assignment -name VERILOG_FILE labfor_top.v
+set_global_assignment -name QIP_FILE lpm_counter0.qip
+set_global_assignment -name QIP_FILE lpm_decode0.qip
+set_global_assignment -name QIP_FILE lpm_mux0.qip
+set_global_assignment -name SEARCH_PATH "f:\\spds\\lr_v1\\src"
+set_global_assignment -name SEARCH_PATH "f:\\spds\\lr_v1\\board\\program"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
