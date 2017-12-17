@@ -13,10 +13,10 @@ module de4_230
 
     output  [7:0]   LED,
     input   [3:0]   BUTTON,
-    input           CPU_RESET_n,
+    input           CPU_RESET_n, // CPU Reset Push Button
     inout           EXT_IO,
-    input   [7:0]   SW,
-    input   [3:0]   SLIDE_SW,
+    input   [7:0]   SW,          // DIP Switches
+    input   [3:0]   SLIDE_SW,    // Slide switches
     output  [6:0]   SEG0_D,
     output          SEG0_DP,
     output  [6:0]   SEG1_D,
