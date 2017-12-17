@@ -1,6 +1,1 @@
-DATE = "21:15:44 July 21, 2017"
-QUARTUS_VERSION = "16.0.2"
-
-# Revisions
-
-PROJECT_REVISION = "de10_standard"
+# This file can be empty, all the settings are in .qsf file

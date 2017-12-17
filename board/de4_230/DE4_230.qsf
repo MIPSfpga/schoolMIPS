@@ -1,0 +1,165 @@
+#============================================================
+# Build by Terasic System Builder
+#============================================================
+
+set_global_assignment -name FAMILY "Stratix IV"
+set_global_assignment -name DEVICE EP4SGX230KF40C2
+set_global_assignment -name TOP_LEVEL_ENTITY "de4_230"
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "11.1 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "11.1 SP1"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "14:44:26 DECEMBER 17,2017"
+set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 1517
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 2
+set_global_assignment -name SDC_FILE de4_230.SDC
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
+set_location_assignment PIN_AF25 -to termination_blk0~_rup_pad
+set_location_assignment PIN_AG25 -to termination_blk0~_rdn_pad
+
+#============================================================
+# CLOCK
+#============================================================
+set_location_assignment PIN_AC35 -to OSC_50_BANK2
+set_instance_assignment -name IO_STANDARD "2.5 V" -to OSC_50_BANK2
+set_location_assignment PIN_AV22 -to OSC_50_BANK3
+set_instance_assignment -name IO_STANDARD "1.8 V" -to OSC_50_BANK3
+set_location_assignment PIN_AV19 -to OSC_50_BANK4
+set_instance_assignment -name IO_STANDARD "1.8 V" -to OSC_50_BANK4
+set_location_assignment PIN_AC6 -to OSC_50_BANK5
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to OSC_50_BANK5
+set_location_assignment PIN_AB6 -to OSC_50_BANK6
+set_instance_assignment -name IO_STANDARD "2.5 V" -to OSC_50_BANK6
+set_location_assignment PIN_A19 -to OSC_50_BANK7
+set_instance_assignment -name IO_STANDARD "1.8 V" -to OSC_50_BANK7
+set_location_assignment PIN_AH19 -to GCLKOUT_FPGA
+set_instance_assignment -name IO_STANDARD "1.8 V" -to GCLKOUT_FPGA
+set_location_assignment PIN_A21 -to GCLKIN
+set_instance_assignment -name IO_STANDARD "1.8 V" -to GCLKIN
+set_location_assignment PIN_B22 -to PLL_CLKIN_p
+set_instance_assignment -name IO_STANDARD "LVDS" -to PLL_CLKIN_p
+
+#============================================================
+# LED x 8
+#============================================================
+set_location_assignment PIN_V28 -to LED[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[0]
+set_location_assignment PIN_W28 -to LED[1]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[1]
+set_location_assignment PIN_R29 -to LED[2]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[2]
+set_location_assignment PIN_P29 -to LED[3]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[3]
+set_location_assignment PIN_N29 -to LED[4]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[4]
+set_location_assignment PIN_M29 -to LED[5]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[5]
+set_location_assignment PIN_M30 -to LED[6]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[6]
+set_location_assignment PIN_N30 -to LED[7]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[7]
+
+#============================================================
+# BUTTON x 4, EXT_IO and CPU_RESET_n
+#============================================================
+set_location_assignment PIN_AH5 -to BUTTON[0]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to BUTTON[0]
+set_location_assignment PIN_AG5 -to BUTTON[1]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to BUTTON[1]
+set_location_assignment PIN_AG7 -to BUTTON[2]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to BUTTON[2]
+set_location_assignment PIN_AG8 -to BUTTON[3]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to BUTTON[3]
+set_location_assignment PIN_AC11 -to EXT_IO
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to EXT_IO
+set_location_assignment PIN_V34 -to CPU_RESET_n
+set_instance_assignment -name IO_STANDARD "2.5 V" -to CPU_RESET_n
+
+#============================================================
+# DIP SWITCH x 8
+#============================================================
+set_location_assignment PIN_AB13 -to SW[0]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to SW[0]
+set_location_assignment PIN_AB12 -to SW[1]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to SW[1]
+set_location_assignment PIN_AB11 -to SW[2]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to SW[2]
+set_location_assignment PIN_AB10 -to SW[3]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to SW[3]
+set_location_assignment PIN_AB9 -to SW[4]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to SW[4]
+set_location_assignment PIN_AC8 -to SW[5]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to SW[5]
+set_location_assignment PIN_AH6 -to SW[6]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to SW[6]
+set_location_assignment PIN_AG6 -to SW[7]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to SW[7]
+
+#============================================================
+# SLIDE SWITCH x 4
+#============================================================
+set_location_assignment PIN_J7 -to SLIDE_SW[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SLIDE_SW[0]
+set_location_assignment PIN_K7 -to SLIDE_SW[1]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SLIDE_SW[1]
+set_location_assignment PIN_AK6 -to SLIDE_SW[2]
+set_instance_assignment -name IO_STANDARD "3.0-V PCI-X" -to SLIDE_SW[2]
+set_location_assignment PIN_L7 -to SLIDE_SW[3]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SLIDE_SW[3]
+
+#============================================================
+# SEG7
+#============================================================
+set_location_assignment PIN_L34 -to SEG0_D[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG0_D[0]
+set_location_assignment PIN_M34 -to SEG0_D[1]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG0_D[1]
+set_location_assignment PIN_M33 -to SEG0_D[2]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG0_D[2]
+set_location_assignment PIN_H31 -to SEG0_D[3]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG0_D[3]
+set_location_assignment PIN_J33 -to SEG0_D[4]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG0_D[4]
+set_location_assignment PIN_L35 -to SEG0_D[5]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG0_D[5]
+set_location_assignment PIN_K32 -to SEG0_D[6]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG0_D[6]
+set_location_assignment PIN_AL34 -to SEG0_DP
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG0_DP
+set_location_assignment PIN_E31 -to SEG1_D[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG1_D[0]
+set_location_assignment PIN_F31 -to SEG1_D[1]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG1_D[1]
+set_location_assignment PIN_G31 -to SEG1_D[2]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG1_D[2]
+set_location_assignment PIN_C34 -to SEG1_D[3]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG1_D[3]
+set_location_assignment PIN_C33 -to SEG1_D[4]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG1_D[4]
+set_location_assignment PIN_D33 -to SEG1_D[5]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG1_D[5]
+set_location_assignment PIN_D34 -to SEG1_D[6]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG1_D[6]
+set_location_assignment PIN_AL35 -to SEG1_DP
+set_instance_assignment -name IO_STANDARD "2.5 V" -to SEG1_DP
+
+#============================================================
+# End of pin assignments by Terasic System Builder
+#============================================================
+
+set_global_assignment -name VERILOG_FILE ../de4_230.v
+
+set_global_assignment -name VERILOG_FILE ../../../src/sm_cpu.v
+set_global_assignment -name VERILOG_FILE ../../../src/sm_hex_display.v
+set_global_assignment -name VERILOG_FILE ../../../src/sm_register.v
+set_global_assignment -name VERILOG_FILE ../../../src/sm_rom.v
+set_global_assignment -name VERILOG_FILE ../../../src/sm_top.v
+
+set_global_assignment -name SEARCH_PATH ..
+set_global_assignment -name SEARCH_PATH ../../program
+set_global_assignment -name SEARCH_PATH ../../../src
+
+set_global_assignment -name HEX_FILE ../../program/program.hex
+
+set_global_assignment -name SDC_FILE de4_230.sdc
+
+set_global_assignment -name INTERNAL_FLASH_UPDATE_MODE "SINGLE IMAGE WITH ERAM"
