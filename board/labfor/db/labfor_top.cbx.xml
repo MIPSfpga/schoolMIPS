@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<LOG_ROOT>
+	<PROJECT NAME="labfor_top">
+		<CBX_INST_ENTRY INSTANCE_NAME="|labfor_top|sm_top:sm_top|sm_cpu:sm_cpu|sm_register_file:rf|altsyncram:rf_rtl_0" CBX_FILE_NAME="altsyncram_mgc1.tdf"/>
+	</PROJECT>
+</LOG_ROOT>

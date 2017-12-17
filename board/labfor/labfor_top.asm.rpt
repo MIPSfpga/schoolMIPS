@@ -1,0 +1,141 @@
+Assembler report for labfor_top
+Mon Oct 30 19:46:31 2017
+Quartus II Version 9.1 Build 222 10/21/2009 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Assembler Summary
+  3. Assembler Settings
+  4. Assembler Generated Files
+  5. Assembler Device Options: F:/SPDS/LR_v1/board/labfor/labfor_top.sof
+  6. Assembler Device Options: F:/SPDS/LR_v1/board/labfor/labfor_top.pof
+  7. Assembler Device Options: F:/SPDS/LR_v1/board/labfor/labfor_top.rbf
+  8. Assembler Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2009 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++---------------------------------------------------------------+
+; Assembler Summary                                             ;
++-----------------------+---------------------------------------+
+; Assembler Status      ; Successful - Mon Oct 30 19:46:31 2017 ;
+; Revision Name         ; labfor_top                            ;
+; Top-level Entity Name ; labfor_top                            ;
+; Family                ; Cyclone                               ;
+; Device                ; EP1C3T144C8                           ;
++-----------------------+---------------------------------------+
+
+
++--------------------------------------------------------------------------------------------------------+
+; Assembler Settings                                                                                     ;
++-----------------------------------------------------------------------------+----------+---------------+
+; Option                                                                      ; Setting  ; Default Value ;
++-----------------------------------------------------------------------------+----------+---------------+
+; Generate Raw Binary File (.rbf) For Target Device                           ; On       ; Off           ;
+; Use smart compilation                                                       ; Off      ; Off           ;
+; Enable parallel Assembler and TimeQuest Timing Analyzer during compilation  ; On       ; On            ;
+; Enable compact report table                                                 ; Off      ; Off           ;
+; Generate compressed bitstreams                                              ; On       ; On            ;
+; Compression mode                                                            ; Off      ; Off           ;
+; Clock source for configuration device                                       ; Internal ; Internal      ;
+; Clock frequency of the configuration device                                 ; 10 MHZ   ; 10 MHz        ;
+; Divide clock frequency by                                                   ; 1        ; 1             ;
+; Auto user code                                                              ; Off      ; Off           ;
+; Use configuration device                                                    ; On       ; On            ;
+; Configuration device                                                        ; Auto     ; Auto          ;
+; Configuration device auto user code                                         ; Off      ; Off           ;
+; Auto-increment JTAG user code for multiple configuration devices            ; On       ; On            ;
+; Generate Tabular Text File (.ttf) For Target Device                         ; Off      ; Off           ;
+; Generate Hexadecimal (Intel-Format) Output File (.hexout) for Target Device ; Off      ; Off           ;
+; Hexadecimal Output File start address                                       ; 0        ; 0             ;
+; Hexadecimal Output File count direction                                     ; Up       ; Up            ;
+; Release clears before tri-states                                            ; Off      ; Off           ;
+; Auto-restart configuration after error                                      ; On       ; On            ;
+; Generate Serial Vector Format File (.svf) for Target Device                 ; Off      ; Off           ;
+; Generate a JEDEC STAPL Format File (.jam) for Target Device                 ; Off      ; Off           ;
+; Generate a compressed Jam STAPL Byte Code 2.0 File (.jbc) for Target Device ; Off      ; Off           ;
+; Generate a compressed Jam STAPL Byte Code 2.0 File (.jbc) for Target Device ; On       ; On            ;
++-----------------------------------------------------------------------------+----------+---------------+
+
+
++-------------------------------------------+
+; Assembler Generated Files                 ;
++-------------------------------------------+
+; File Name                                 ;
++-------------------------------------------+
+; F:/SPDS/LR_v1/board/labfor/labfor_top.sof ;
+; F:/SPDS/LR_v1/board/labfor/labfor_top.pof ;
+; F:/SPDS/LR_v1/board/labfor/labfor_top.rbf ;
++-------------------------------------------+
+
+
++---------------------------------------------------------------------+
+; Assembler Device Options: F:/SPDS/LR_v1/board/labfor/labfor_top.sof ;
++----------------+----------------------------------------------------+
+; Option         ; Setting                                            ;
++----------------+----------------------------------------------------+
+; Device         ; EP1C3T144C8                                        ;
+; JTAG usercode  ; 0xFFFFFFFF                                         ;
+; Checksum       ; 0x000558C3                                         ;
++----------------+----------------------------------------------------+
+
+
++---------------------------------------------------------------------+
+; Assembler Device Options: F:/SPDS/LR_v1/board/labfor/labfor_top.pof ;
++--------------------+------------------------------------------------+
+; Option             ; Setting                                        ;
++--------------------+------------------------------------------------+
+; Device             ; EPCS1                                          ;
+; JTAG usercode      ; 0x00000000                                     ;
+; Checksum           ; 0x01A85968                                     ;
+; Compression Ratio  ; 2                                              ;
++--------------------+------------------------------------------------+
+
+
++---------------------------------------------------------------------+
+; Assembler Device Options: F:/SPDS/LR_v1/board/labfor/labfor_top.rbf ;
++---------------------+-----------------------------------------------+
+; Option              ; Setting                                       ;
++---------------------+-----------------------------------------------+
+; Raw Binary File     ;                                               ;
+;  Compression Ratio  ; 2                                             ;
++---------------------+-----------------------------------------------+
+
+
++--------------------+
+; Assembler Messages ;
++--------------------+
+Info: *******************************************************************
+Info: Running Quartus II Assembler
+    Info: Version 9.1 Build 222 10/21/2009 SJ Web Edition
+    Info: Processing started: Mon Oct 30 19:46:30 2017
+Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off labfor_top -c labfor_top
+Info: Assembler is generating device programming files
+Info: Quartus II Assembler was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 184 megabytes
+    Info: Processing ended: Mon Oct 30 19:46:31 2017
+    Info: Elapsed time: 00:00:01
+    Info: Total CPU time (on all processors): 00:00:01
+
+
