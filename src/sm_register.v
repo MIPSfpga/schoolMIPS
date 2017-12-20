@@ -1,31 +1,39 @@
 
 
 module sm_register
+#(
+    parameter WIDTH = 32,
+    parameter RESET = { WIDTH { 1'b0 } }
+)
 (
-    input                 clk,
-    input                 rst,
-    input      [ 31 : 0 ] d,
-    output reg [ 31 : 0 ] q
+    input                        clk,
+    input                        rst,
+    input      [ WIDTH - 1 : 0 ] d,
+    output reg [ WIDTH - 1 : 0 ] q
 );
     always @ (posedge clk or negedge rst)
         if(~rst)
-            q <= 32'b0;
+            q <= RESET;
         else
             q <= d;
 endmodule
 
 
 module sm_register_we
+#(
+    parameter WIDTH = 32,
+    parameter RESET = { WIDTH { 1'b0 } }
+)
 (
-    input                 clk,
-    input                 rst,
-    input                 we,
-    input      [ 31 : 0 ] d,
-    output reg [ 31 : 0 ] q
+    input                        clk,
+    input                        rst,
+    input                        we,
+    input      [ WIDTH - 1 : 0 ] d,
+    output reg [ WIDTH - 1 : 0 ] q
 );
     always @ (posedge clk or negedge rst)
         if(~rst)
-            q <= 32'b0;
+            q <= RESET;
         else
             if(we) q <= d;
 endmodule
