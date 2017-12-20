@@ -4,7 +4,7 @@
  *
  * the pipeline version of Sarah L. Harris MIPS CPU 
  * 
- * Copyright(c) 2017 Stanislav Zhelnio 
+ * Copyright(c) 2017 Stanislav Zhelnio
  */
 
  `include "sm_cpu.vh"
@@ -41,7 +41,7 @@ module sm_cpu
     assign imAddr = pc_F;
     wire [31:0] instr_F = imData;
 
-    //stage border
+    //stage data border
     wire [31:0] pcNext_D
     wire [31:0] instr_D
     sm_register r_pcNext_D(clk ,rst_n, pcNext_F, pcNext_D);
@@ -56,20 +56,22 @@ module sm_cpu
     assign regData = (regAddr != 0) ? regData0_D : pc_F;
 
     //control wires
-    wire cw_regWrite_D;
+    wire cw_regWrite_W;
 
-    //register file
-    wire [ 4:0] writeReg_W;
-
-    wire [31:0] regData1_D;
-    wire [31:0] regData2_D;
-    wire [31:0] writeData_W;
-
+    // instaturction fields
+    wire [ 5:0] instrOp_D  = instr_D[31:26];
+    wire [ 5:0] instrFn_D  = instr_D[ 5:0 ];
     wire [ 4:0] instrRs_D  = instr_D[25:21];
     wire [ 4:0] instrRt_D  = instr_D[20:16];
     wire [ 4:0] instrRd_D  = instr_D[15:11];
     wire [15:0] instrImm_D = instr_D[15:0 ];
     wire [ 4:0] instrSa_D  = instr_D[10:6 ];
+
+    //register file
+    wire [ 4:0] writeReg_W;
+    wire [31:0] regData1_D;
+    wire [31:0] regData2_D;
+    wire [31:0] writeData_W;
 
     sm_register_file rf
     (
@@ -82,13 +84,42 @@ module sm_cpu
         .rd1        ( regData1_D    ),
         .rd2        ( regData2_D    ),
         .wd3        ( writeData_W   ),
-        .we3        ( cw_regWrite_D )
+        .we3        ( cw_regWrite_W )
     );
 
     //sign extension
     wire [31:0] signImm_D = { {16 { instrImm_D[15] }}, instrImm_D };
 
-    //stage border
+    //control unit
+    wire        cw_regDst_D;
+    wire        cw_regWrite_D;
+    wire        cw_aluSrc_D;
+    wire [ 2:0] cw_aluCtrl_D;
+    wire        cw_memWrite_D;
+    wire        cw_memToReg_D;
+    wire        cw_branch_D;
+    wire        cw_condZero_D;
+
+    wire        aluZero;    //TODO! not used now
+    wire        pcSrc;      //TODO! not used now
+
+    sm_control sm_control
+    (
+        .cmdOper    ( instrOp_D       ),
+        .cmdFunk    ( instrFn_D       ),
+        .aluZero    ( aluZero         ), //TODO!
+        .pcSrc      ( pcSrc           ), //TODO!
+        .regDst     ( cw_regDst_D     ),
+        .regWrite   ( cw_regWrite_D   ),
+        .aluSrc     ( cw_aluSrc_D     ),
+        .aluControl ( cw_aluCtrl_D    ),
+        .memWrite   ( cw_memWrite_D   ),
+        .memToReg   ( cw_memToReg_D   ),
+        .branch     ( cw_branch_D     ),
+        .condZero   ( cw_condZero_D   )
+    );
+
+    //stage data border
     wire [31:0] pcNext_E;
     wire [31:0] regData1_E;
     wire [31:0] regData2_E;
@@ -104,14 +135,27 @@ module sm_cpu
     sm_register #(.WIDTH(5)) r_instrRd_E (clk ,rst_n, instrRd_D,  instrRd_E);
     sm_register #(.WIDTH(5)) r_signImm_E (clk ,rst_n, instrSa_D,  instrSa_E);
 
+    //stage control border
+    wire        cw_regWrite_E;
+    wire        cw_regDst_E;
+    wire        cw_aluSrc_E;
+    wire [2:0]  cw_aluCtrl_E;
+    wire        cw_memWrite_E;
+    wire        cw_memToReg_E;
+    wire        cw_branch_E;
+    wire        cw_condZero_E;
+    sm_register #(.WIDTH(1)) r_cw_regWrite_E (clk ,rst_n, cw_regWrite_D, cw_regWrite_E);
+    sm_register #(.WIDTH(1)) r_cw_regDst_E   (clk ,rst_n, cw_regDst_D,   cw_regDst_E);
+    sm_register #(.WIDTH(1)) r_cw_aluSrc_E   (clk ,rst_n, cw_aluSrc_D,   cw_aluSrc_E);
+    sm_register #(.WIDTH(3)) r_cw_aluCtrl_E  (clk ,rst_n, cw_aluCtrl_D,  cw_aluCtrl_E);
+    sm_register #(.WIDTH(1)) r_cw_memWrite_E (clk ,rst_n, cw_memWrite_D, cw_memWrite_E);
+    sm_register #(.WIDTH(1)) r_cw_memToReg_E (clk ,rst_n, cw_memToReg_D, cw_memToReg_E);
+    sm_register #(.WIDTH(1)) r_cw_branch_E   (clk ,rst_n, cw_branch_D,   cw_branch_E);
+    sm_register #(.WIDTH(1)) r_cw_condZero_E (clk ,rst_n, cw_condZero_D, cw_condZero_E);
+
     // **********************************************************
     // E - Execution
     // **********************************************************
-
-    //control wires
-    wire cw_aluSrc_E;
-    wire cw_aluCtrl_E;
-    wire cw_regDst_E;
 
     //alu
     wire        aluZero_E;
@@ -137,7 +181,7 @@ module sm_cpu
     //branch address
     wire [31:0] pcBranch_E = pcNext_E + signImm_E;
 
-    //stage border
+    //stage data border
     wire [31:0] aluResult_M;
     wire [31:0] writeData_M;
     wire [ 4:0] writeReg_M
@@ -149,12 +193,21 @@ module sm_cpu
     sm_register #(.WIDTH(5)) r_writeReg_M (clk ,rst_n, writeReg_E,  writeReg_M);
     sm_register #(.WIDTH(1)) r_aluZero_M  (clk ,rst_n, aluZero_E,  aluZero_M);
 
+    //stage control border
+    wire        cw_regWrite_M;
+    wire        cw_memWrite_M;
+    wire        cw_memToReg_M;
+    wire        cw_branch_M;
+    wire        cw_condZero_M;
+    sm_register #(.WIDTH(1)) r_cw_regWrite_M (clk ,rst_n, cw_regWrite_E, cw_regWrite_M);
+    sm_register #(.WIDTH(1)) r_cw_memWrite_M (clk ,rst_n, cw_memWrite_E, cw_memWrite_M);
+    sm_register #(.WIDTH(1)) r_cw_memToReg_M (clk ,rst_n, cw_memToReg_E, cw_memToReg_M);
+    sm_register #(.WIDTH(1)) r_cw_branch_M   (clk ,rst_n, cw_branch_E,   cw_branch_M);
+    sm_register #(.WIDTH(1)) r_cw_condZero_M (clk ,rst_n, cw_condZero_E, cw_condZero_M);
+
     // **********************************************************
     // M - Memory
     // **********************************************************
-
-    //control wires
-    wire cw_memWrite_M;
 
     // memory
     wire [31:0] readData_M = dmRData;
@@ -162,7 +215,7 @@ module sm_cpu
     assign dmAddr  = aluResult_M;
     assign dmWData = writeData_M;
 
-    //stage border
+    //stage data border
     wire [31:0] aluResult_W;
     wire [31:0] readData_W;
     wire [ 4:0] writeReg_W;
@@ -171,22 +224,20 @@ module sm_cpu
     sm_register r_readData_W  (clk ,rst_n, readData_M, readData_W);
     sm_register #(.WIDTH(5)) r_writeReg_M (clk ,rst_n, writeReg_M,  writeReg_W);
 
+    //stage control border
+    wire        cw_memToReg_W;
+    sm_register #(.WIDTH(1)) r_cw_memToReg_W (clk ,rst_n, cw_memToReg_M, cw_memToReg_W);
+    sm_register #(.WIDTH(1)) r_cw_regWrite_M (clk ,rst_n, cw_regWrite_M, cw_regWrite_W);
+
+    //branch decision (TODO: refactoring)
+    assign cw_pcSrc_F = cw_branch_M & (aluZero_M == cw_condZero_M);
+
     // **********************************************************
     // W - Writeback
     // **********************************************************
 
-    //control wires
-    wire cw_memToReg_W;
-
     //data to write from Mem to RF
     assign writeData_W = cw_memToReg_W ? readData_W : aluResult_W;
-
-    // **********************************************************
-    // Control Unit
-    // **********************************************************
-
-    
-
 
     // **********************************************************
     // Hazard Unit

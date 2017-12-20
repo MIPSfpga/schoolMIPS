@@ -120,10 +120,10 @@ module sm_control
     output reg       aluSrc,
     output reg [2:0] aluControl,
     output reg       memWrite,
-    output reg       memToReg
+    output reg       memToReg,
+    output reg       branch,
+    output reg       condZero
 );
-    reg          branch;
-    reg          condZero;
     assign pcSrc = branch & (aluZero == condZero);
 
     always @ (*) begin
