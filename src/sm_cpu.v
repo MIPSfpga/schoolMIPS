@@ -38,7 +38,7 @@ module sm_cpu
     wire [31:0] pcBranch;
     wire [31:0] pcNext  = pc + 1;
     wire [31:0] pc_new   = ~pcSrc ? pcNext : pcBranch;
-    sm_register r_pc(clk ,rst_n, pc_new, pc);
+    sm_register_c r_pc(clk ,rst_n, pc_new, pc);
 
     //program memory access
     assign imAddr = pc;

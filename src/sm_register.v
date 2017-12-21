@@ -1,6 +1,19 @@
 
-
 module sm_register
+#(
+    parameter WIDTH = 32
+)
+(
+    input                        clk,
+    input      [ WIDTH - 1 : 0 ] d,
+    output reg [ WIDTH - 1 : 0 ] q
+);
+    always @ (posedge clk)
+        q <= d;
+endmodule
+
+
+module sm_register_c
 #(
     parameter WIDTH = 32,
     parameter RESET = { WIDTH { 1'b0 } }
