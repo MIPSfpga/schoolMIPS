@@ -12,7 +12,7 @@ set s1 ../../../testbench/*.v
 
 vlog $p0 $p1  $i0 $i1  $s0 $s1
 
-vsim work.sm_testbench
+vsim -novopt work.sm_testbench
 
 # add wave -radix hex sim:/sm_testbench/*
 add wave -radix hex sim:/sm_testbench/sm_top/sm_cpu/*
