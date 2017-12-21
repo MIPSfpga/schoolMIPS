@@ -15,8 +15,7 @@ endmodule
 
 module sm_register_c
 #(
-    parameter WIDTH = 32,
-    parameter RESET = { WIDTH { 1'b0 } }
+    parameter WIDTH = 32
 )
 (
     input                        clk,
@@ -24,6 +23,8 @@ module sm_register_c
     input      [ WIDTH - 1 : 0 ] d,
     output reg [ WIDTH - 1 : 0 ] q
 );
+    localparam RESET = { WIDTH { 1'b0 } };
+
     always @ (posedge clk or negedge rst)
         if(~rst)
             q <= RESET;
@@ -34,8 +35,7 @@ endmodule
 
 module sm_register_we
 #(
-    parameter WIDTH = 32,
-    parameter RESET = { WIDTH { 1'b0 } }
+    parameter WIDTH = 32
 )
 (
     input                        clk,
@@ -44,6 +44,8 @@ module sm_register_we
     input      [ WIDTH - 1 : 0 ] d,
     output reg [ WIDTH - 1 : 0 ] q
 );
+    localparam RESET = { WIDTH { 1'b0 } };
+    
     always @ (posedge clk or negedge rst)
         if(~rst)
             q <= RESET;
