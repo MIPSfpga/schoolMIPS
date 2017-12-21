@@ -1,4 +1,6 @@
 
+`include "sm_settings.vh"
+
 //hardware top level module
 module sm_top
 (
@@ -50,7 +52,7 @@ module sm_top
     );
 
     //cpu core
-    sm_cpu sm_cpu
+    `SM_CPU sm_cpu
     (
         .clk        ( clk       ),
         .rst_n      ( rst_n     ),
