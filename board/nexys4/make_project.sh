@@ -1,0 +1,11 @@
+#!/bin/bash
+
+SCRIPTPATH=$( cd $(dirname $0) ; pwd -P )
+PROJECTPATH=$SCRIPTPATH/project
+
+rm -rf $PROJECTPATH
+mkdir $PROJECTPATH
+
+cp $SCRIPTPATH/*.qpf $PROJECTPATH
+cp $SCRIPTPATH/*.qsf $PROJECTPATH
+cp $SCRIPTPATH/*.sdc $PROJECTPATH
