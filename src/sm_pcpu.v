@@ -9,7 +9,7 @@
 
  `include "sm_cpu.vh"
 
-module sm_cpu
+module sm_pcpu
 (
     input           clk,        // clock
     input           rst_n,      // reset
@@ -42,8 +42,8 @@ module sm_cpu
     wire [31:0] instr_F = imData;
 
     //stage data border
-    wire [31:0] pcNext_D
-    wire [31:0] instr_D
+    wire [31:0] pcNext_D;
+    wire [31:0] instr_D;
     sm_register r_pcNext_D(clk ,rst_n, pcNext_F, pcNext_D);
     sm_register r_instr_D (clk ,rst_n, instr_F, instr_D);
 
@@ -133,7 +133,7 @@ module sm_cpu
     sm_register r_signImm_E (clk ,rst_n, signImm_D,  signImm_E);
     sm_register #(.WIDTH(5)) r_instrRt_E (clk ,rst_n, instrRt_D,  instrRt_E);
     sm_register #(.WIDTH(5)) r_instrRd_E (clk ,rst_n, instrRd_D,  instrRd_E);
-    sm_register #(.WIDTH(5)) r_signImm_E (clk ,rst_n, instrSa_D,  instrSa_E);
+    sm_register #(.WIDTH(5)) r_instrSa_E (clk ,rst_n, instrSa_D,  instrSa_E);
 
     //stage control border
     wire        cw_regWrite_E;
@@ -184,7 +184,7 @@ module sm_cpu
     //stage data border
     wire [31:0] aluResult_M;
     wire [31:0] writeData_M;
-    wire [ 4:0] writeReg_M
+    wire [ 4:0] writeReg_M;
     wire        aluZero_M;  //TODO!
 
     sm_register r_pcBranch_M  (clk ,rst_n, pcBranch_E, pcBranch_M);
@@ -218,16 +218,15 @@ module sm_cpu
     //stage data border
     wire [31:0] aluResult_W;
     wire [31:0] readData_W;
-    wire [ 4:0] writeReg_W;
 
     sm_register r_aluResult_W (clk ,rst_n, aluResult_M, aluResult_W);
     sm_register r_readData_W  (clk ,rst_n, readData_M, readData_W);
-    sm_register #(.WIDTH(5)) r_writeReg_M (clk ,rst_n, writeReg_M,  writeReg_W);
+    sm_register #(.WIDTH(5)) r_writeReg_W (clk ,rst_n, writeReg_M,  writeReg_W);
 
     //stage control border
     wire        cw_memToReg_W;
     sm_register #(.WIDTH(1)) r_cw_memToReg_W (clk ,rst_n, cw_memToReg_M, cw_memToReg_W);
-    sm_register #(.WIDTH(1)) r_cw_regWrite_M (clk ,rst_n, cw_regWrite_M, cw_regWrite_W);
+    sm_register #(.WIDTH(1)) r_cw_regWrite_W (clk ,rst_n, cw_regWrite_M, cw_regWrite_W);
 
     //branch decision (TODO: refactoring)
     assign cw_pcSrc_F = cw_branch_M & (aluZero_M == cw_condZero_M);
