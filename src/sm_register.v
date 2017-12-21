@@ -1,7 +1,7 @@
 
 module sm_register
 #(
-    parameter WIDTH = 32
+    parameter WIDTH = 1
 )
 (
     input                        clk,
@@ -15,7 +15,7 @@ endmodule
 
 module sm_register_c
 #(
-    parameter WIDTH = 32
+    parameter WIDTH = 1
 )
 (
     input                        clk,
@@ -35,7 +35,7 @@ endmodule
 
 module sm_register_we
 #(
-    parameter WIDTH = 32
+    parameter WIDTH = 1
 )
 (
     input                        clk,
