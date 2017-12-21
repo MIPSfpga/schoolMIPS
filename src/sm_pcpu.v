@@ -8,6 +8,9 @@
  */
 
  `include "sm_cpu.vh"
+ `include "sm_pcpu.vh"
+
+
 
 module sm_pcpu
 (
@@ -124,6 +127,7 @@ module sm_pcpu
     wire [31:0] regData1_E;
     wire [31:0] regData2_E;
     wire [31:0] signImm_E;
+    wire [ 4:0] instrRs_E;
     wire [ 4:0] instrRt_E;
     wire [ 4:0] instrRd_E;
     wire [ 4:0] instrSa_E;
@@ -131,6 +135,7 @@ module sm_pcpu
     sm_register r_regData1_E(clk ,rst_n, regData1_D, regData1_E);
     sm_register r_regData2_E(clk ,rst_n, regData2_D, regData2_E);
     sm_register r_signImm_E (clk ,rst_n, signImm_D,  signImm_E);
+    sm_register #(.WIDTH(5)) r_instrRs_E (clk ,rst_n, instrRs_D,  instrRs_E);
     sm_register #(.WIDTH(5)) r_instrRt_E (clk ,rst_n, instrRt_D,  instrRt_E);
     sm_register #(.WIDTH(5)) r_instrRd_E (clk ,rst_n, instrRd_D,  instrRd_E);
     sm_register #(.WIDTH(5)) r_instrSa_E (clk ,rst_n, instrSa_D,  instrSa_E);
@@ -157,14 +162,26 @@ module sm_pcpu
     // E - Execution
     // **********************************************************
 
+    wire [31:0] aluResult_M;
+
+    //hazard wires
+    wire [ 1:0] hz_forwardA_E;  //forward srcA
+    wire [ 1:0] hz_forwardB_E;  //forward srcB
+
+    wire [31:0] aluSrcA_E = ( hz_forwardA_E == `HZ_FW_WE ) ? writeData_W : (
+                            ( hz_forwardA_E == `HZ_FW_ME ) ? aluResult_M : regData1_E );
+
+    wire [31:0] aluSrcB_E =   cw_aluSrc_E                  ? signImm_E   : (
+                            ( hz_forwardB_E == `HZ_FW_WE ) ? writeData_W : (
+                            ( hz_forwardB_E == `HZ_FW_ME ) ? aluResult_M : regData2_E ));
+
     //alu
     wire        aluZero_E;
     wire [31:0] aluResult_E;
-    wire [31:0] aluSrcB_E = cw_aluSrc_E ? signImm_E : regData2_E;
 
     sm_alu alu
     (
-        .srcA       ( regData1_E   ),
+        .srcA       ( aluSrcA_E    ),
         .srcB       ( aluSrcB_E    ),
         .oper       ( cw_aluCtrl_E ),
         .shift      ( signImm_E    ),
@@ -182,7 +199,6 @@ module sm_pcpu
     wire [31:0] pcBranch_E = pcNext_E + signImm_E;
 
     //stage data border
-    wire [31:0] aluResult_M;
     wire [31:0] writeData_M;
     wire [ 4:0] writeReg_M;
     wire        aluZero_M;  //TODO!
@@ -241,6 +257,41 @@ module sm_pcpu
     // **********************************************************
     // Hazard Unit
     // **********************************************************
+
+    sm_hazard_unit sm_hazard_unit
+    (
+        .instrRs_E      ( instrRs_E     ),
+        .instrRt_E      ( instrRt_E     ),
+        .writeReg_M     ( writeReg_M    ),
+        .writeReg_W     ( writeReg_W    ),
+        .cw_regWrite_M  ( cw_regWrite_M ),
+        .cw_regWrite_W  ( cw_regWrite_W ),
+        .hz_forwardA_E  ( hz_forwardA_E ),
+        .hz_forwardB_E  ( hz_forwardB_E )
+    );
+
+endmodule
+
+
+module sm_hazard_unit
+(
+    input   [ 4:0]  instrRs_E,
+    input   [ 4:0]  instrRt_E,
+    input   [ 4:0]  writeReg_M,
+    input   [ 4:0]  writeReg_W,
+    input           cw_regWrite_M,
+    input           cw_regWrite_W,
+    output  [ 1:0]  hz_forwardA_E,  //forward srcA
+    output  [ 1:0]  hz_forwardB_E   //forward srcB
+);
+    //data forwarding
+    assign hz_forwardA_E =  ( instrRs_E == 5'b0                        ) ? `HZ_FW_NONE : (
+                            ( instrRs_E == writeReg_M && cw_regWrite_M ) ? `HZ_FW_ME   : (
+                            ( instrRs_E == writeReg_W && cw_regWrite_W ) ? `HZ_FW_WE   : `HZ_FW_NONE ));
+
+    assign hz_forwardB_E =  ( instrRt_E == 5'b0                        ) ? `HZ_FW_NONE : (
+                            ( instrRt_E == writeReg_M && cw_regWrite_M ) ? `HZ_FW_ME   : (
+                            ( instrRt_E == writeReg_W && cw_regWrite_W ) ? `HZ_FW_WE   : `HZ_FW_NONE ));
 
 
 
