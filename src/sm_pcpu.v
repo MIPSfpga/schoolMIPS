@@ -31,8 +31,8 @@ module sm_pcpu
     wire cw_pcSrc_F;
 
     //hazard wires
-    wire hz_stall_F;
-    wire hz_stall_D;
+    wire hz_stall_n_F;
+    wire hz_stall_n_D;
 
     //program counter
     wire [31:0] pc_F;
@@ -40,7 +40,7 @@ module sm_pcpu
     wire [31:0] pcNext_F  = pc_F + 1;
     wire [31:0] pcNew_F  = ~cw_pcSrc_F ? pcNext_F : pcBranch_M;
 
-    sm_register_we #(32) r_pc_f (clk ,rst_n, ~hz_stall_F, pcNew_F, pc_F);
+    sm_register_we #(32) r_pc_f (clk ,rst_n, hz_stall_n_F, pcNew_F, pc_F);
 
     //program memory access
     assign imAddr = pc_F;
@@ -49,8 +49,8 @@ module sm_pcpu
     //stage data border
     wire [31:0] pcNext_D;
     wire [31:0] instr_D;
-    sm_register_we #(32) r_pcNext_D (clk ,rst_n, ~hz_stall_D, pcNext_F, pcNext_D);
-    sm_register_we #(32) r_instr_D  (clk ,rst_n, ~hz_stall_D, instr_F, instr_D);
+    sm_register_we #(32) r_pcNext_D (clk ,rst_n, hz_stall_n_D, pcNext_F, pcNext_D);
+    sm_register_we #(32) r_instr_D  (clk ,rst_n, hz_stall_n_D, instr_F, instr_D);
 
     // **********************************************************
     // D - Instruction Decode & Register
@@ -278,8 +278,8 @@ module sm_pcpu
         .instrRt_D      ( instrRt_D     ),
         .writeReg_E     ( writeReg_E    ),
         .cw_memToReg_E  ( cw_memToReg_E ),
-        .hz_stall_F     ( hz_stall_F    ),
-        .hz_stall_D     ( hz_stall_D    ),
+        .hz_stall_n_F     ( hz_stall_n_F    ),
+        .hz_stall_n_D     ( hz_stall_n_D    ),
         .hz_flush_n_E   ( hz_flush_n_E  )
     );
 
@@ -301,8 +301,8 @@ module sm_hazard_unit
     input   [ 4:0]  instrRt_D,
     input   [ 4:0]  writeReg_E,
     input           cw_memToReg_E,
-    output          hz_stall_F,     //stall F stage
-    output          hz_stall_D,     //stall D stage
+    output          hz_stall_n_F,     //stall F stage
+    output          hz_stall_n_D,     //stall D stage
     output          hz_flush_n_E    //flush_n E stage
 );
     //data forwarding
@@ -315,10 +315,10 @@ module sm_hazard_unit
                             ( instrRt_E == writeReg_W && cw_regWrite_W ) ? `HZ_FW_WE   : `HZ_FW_NONE ));
 
     //stalling for memory fetch
-    wire hz_mem_stall = 1'b0; //cw_memToReg_E && ( instrRs_D == writeReg_E || instrRt_D == writeReg_E );
+    wire hz_mem_stall = cw_memToReg_E && ( instrRs_D == writeReg_E || instrRt_D == writeReg_E );
 
-    assign hz_stall_F   =  hz_mem_stall;
-    assign hz_stall_D   =  hz_mem_stall;
+    assign hz_stall_n_F = ~hz_mem_stall;
+    assign hz_stall_n_D = ~hz_mem_stall;
     assign hz_flush_n_E = ~hz_mem_stall;
 
 endmodule
