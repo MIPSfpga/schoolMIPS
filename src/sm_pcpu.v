@@ -174,9 +174,11 @@ module sm_pcpu
     wire [31:0] aluSrcA_E = ( hz_forwardA_E == `HZ_FW_WE ) ? writeData_W : (
                             ( hz_forwardA_E == `HZ_FW_ME ) ? aluResult_M : regData1_E );
 
-    wire [31:0] aluSrcB_E =   cw_aluSrc_E                  ? signImm_E   : (
-                            ( hz_forwardB_E == `HZ_FW_WE ) ? writeData_W : (
-                            ( hz_forwardB_E == `HZ_FW_ME ) ? aluResult_M : regData2_E ));
+    //data to write from RF to Mem
+    wire [31:0] writeData_E = ( hz_forwardB_E == `HZ_FW_WE ) ? writeData_W : (
+                              ( hz_forwardB_E == `HZ_FW_ME ) ? aluResult_M : regData2_E );
+
+    wire [31:0] aluSrcB_E =   cw_aluSrc_E ? signImm_E : writeData_E;
 
     //alu
     wire        aluZero_E;      //not used, branch prediction is on D stage
@@ -191,9 +193,6 @@ module sm_pcpu
         .zero       ( aluZero_E    ),
         .result     ( aluResult_E  ) 
     );
-
-    //data to write from RF to Mem
-    wire [31:0] writeData_E = regData2_E;
 
     //reg to write
     wire [ 4:0] writeReg_E = cw_regDst_E ? instrRd_E : instrRt_E;
