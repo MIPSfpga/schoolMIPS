@@ -25,7 +25,7 @@ module sm_register_c
 );
     localparam RESET = { WIDTH { 1'b0 } };
 
-    always @ (posedge clk or negedge rst)
+    always @ (posedge clk /*or negedge rst*/)
         if(~rst)
             q <= RESET;
         else
@@ -46,7 +46,7 @@ module sm_register_we
 );
     localparam RESET = { WIDTH { 1'b0 } };
     
-    always @ (posedge clk or negedge rst)
+    always @ (posedge clk /*or negedge rst*/)
         if(~rst)
             q <= RESET;
         else
