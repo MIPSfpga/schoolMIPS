@@ -49,8 +49,8 @@ module sm_pcpu
     //stage data border
     wire [31:0] pcNext_D;
     wire [31:0] instr_D;
-    sm_register_we #(32) r_pcNext_D (clk ,rst_n, hz_stall_n_D, pcNext_F, pcNext_D);
-    sm_register_we #(32) r_instr_D  (clk ,rst_n, hz_stall_n_D, instr_F, instr_D);
+    sm_register_wes #(32) r_pcNext_D (clk, rst_n, ~cw_pcSrc_D, hz_stall_n_D, pcNext_F, pcNext_D);
+    sm_register_wes #(32) r_instr_D  (clk, rst_n, ~cw_pcSrc_D, hz_stall_n_D, instr_F, instr_D);
 
     // **********************************************************
     // D - Instruction Decode & Register
@@ -140,14 +140,14 @@ module sm_pcpu
     wire [ 4:0] instrRt_E;
     wire [ 4:0] instrRd_E;
     wire [ 4:0] instrSa_E;
-    sm_register_c #(32) r_pcNext_E  (clk, hz_flush_n_E, pcNext_D,    pcNext_E);
-    sm_register_c #(32) r_regData1_E(clk, hz_flush_n_E, regData1F_D, regData1_E);
-    sm_register_c #(32) r_regData2_E(clk, hz_flush_n_E, regData2F_D, regData2_E);
-    sm_register_c #(32) r_signImm_E (clk, hz_flush_n_E, signImm_D,   signImm_E);
-    sm_register_c #( 5) r_instrRs_E (clk, hz_flush_n_E, instrRs_D,   instrRs_E);
-    sm_register_c #( 5) r_instrRt_E (clk, hz_flush_n_E, instrRt_D,   instrRt_E);
-    sm_register_c #( 5) r_instrRd_E (clk, hz_flush_n_E, instrRd_D,   instrRd_E);
-    sm_register_c #( 5) r_instrSa_E (clk, hz_flush_n_E, instrSa_D,   instrSa_E);
+    sm_register_cs #(32) r_pcNext_E  (clk, rst_n, hz_flush_n_E, pcNext_D,    pcNext_E);
+    sm_register_cs #(32) r_regData1_E(clk, rst_n, hz_flush_n_E, regData1F_D, regData1_E);
+    sm_register_cs #(32) r_regData2_E(clk, rst_n, hz_flush_n_E, regData2F_D, regData2_E);
+    sm_register_cs #(32) r_signImm_E (clk, rst_n, hz_flush_n_E, signImm_D,   signImm_E);
+    sm_register_cs #( 5) r_instrRs_E (clk, rst_n, hz_flush_n_E, instrRs_D,   instrRs_E);
+    sm_register_cs #( 5) r_instrRt_E (clk, rst_n, hz_flush_n_E, instrRt_D,   instrRt_E);
+    sm_register_cs #( 5) r_instrRd_E (clk, rst_n, hz_flush_n_E, instrRd_D,   instrRd_E);
+    sm_register_cs #( 5) r_instrSa_E (clk, rst_n, hz_flush_n_E, instrSa_D,   instrSa_E);
 
     //stage control border
     wire        cw_regWrite_E;
@@ -156,12 +156,12 @@ module sm_pcpu
     wire [2:0]  cw_aluCtrl_E;
     wire        cw_memWrite_E;
     wire        cw_memToReg_E;
-    sm_register_c      r_cw_regWrite_E (clk ,hz_flush_n_E, cw_regWrite_D, cw_regWrite_E);
-    sm_register_c      r_cw_regDst_E   (clk ,hz_flush_n_E, cw_regDst_D,   cw_regDst_E);
-    sm_register_c      r_cw_aluSrc_E   (clk ,hz_flush_n_E, cw_aluSrc_D,   cw_aluSrc_E);
-    sm_register_c #(3) r_cw_aluCtrl_E  (clk ,hz_flush_n_E, cw_aluCtrl_D,  cw_aluCtrl_E);
-    sm_register_c      r_cw_memWrite_E (clk ,hz_flush_n_E, cw_memWrite_D, cw_memWrite_E);
-    sm_register_c      r_cw_memToReg_E (clk ,hz_flush_n_E, cw_memToReg_D, cw_memToReg_E);
+    sm_register_cs      r_cw_regWrite_E (clk, rst_n, hz_flush_n_E, cw_regWrite_D, cw_regWrite_E);
+    sm_register_cs      r_cw_regDst_E   (clk, rst_n, hz_flush_n_E, cw_regDst_D,   cw_regDst_E);
+    sm_register_cs      r_cw_aluSrc_E   (clk, rst_n, hz_flush_n_E, cw_aluSrc_D,   cw_aluSrc_E);
+    sm_register_cs #(3) r_cw_aluCtrl_E  (clk, rst_n, hz_flush_n_E, cw_aluCtrl_D,  cw_aluCtrl_E);
+    sm_register_cs      r_cw_memWrite_E (clk, rst_n, hz_flush_n_E, cw_memWrite_D, cw_memWrite_E);
+    sm_register_cs      r_cw_memToReg_E (clk, rst_n, hz_flush_n_E, cw_memToReg_D, cw_memToReg_E);
 
     // **********************************************************
     // E - Execution
@@ -205,12 +205,12 @@ module sm_pcpu
     sm_register #( 5) r_writeReg_M  (clk, writeReg_E,  writeReg_M);
 
     //stage control border
-    wire        cw_regWrite_M;
-    wire        cw_memWrite_M;
-    wire        cw_memToReg_M;
-    sm_register r_cw_regWrite_M (clk, cw_regWrite_E, cw_regWrite_M);
-    sm_register r_cw_memWrite_M (clk, cw_memWrite_E, cw_memWrite_M);
-    sm_register r_cw_memToReg_M (clk, cw_memToReg_E, cw_memToReg_M);
+    wire          cw_regWrite_M;
+    wire          cw_memWrite_M;
+    wire          cw_memToReg_M;
+    sm_register_c r_cw_regWrite_M (clk, rst_n, cw_regWrite_E, cw_regWrite_M);
+    sm_register_c r_cw_memWrite_M (clk, rst_n, cw_memWrite_E, cw_memWrite_M);
+    sm_register_c r_cw_memToReg_M (clk, rst_n, cw_memToReg_E, cw_memToReg_M);
 
     // **********************************************************
     // M - Memory
@@ -231,9 +231,9 @@ module sm_pcpu
     sm_register #(5)  r_writeReg_W (clk, writeReg_M,  writeReg_W);
 
     //stage control border
-    wire        cw_memToReg_W;
-    sm_register r_cw_memToReg_W (clk, cw_memToReg_M, cw_memToReg_W);
-    sm_register r_cw_regWrite_W (clk, cw_regWrite_M, cw_regWrite_W);
+    wire          cw_memToReg_W;
+    sm_register_c r_cw_memToReg_W (clk, rst_n, cw_memToReg_M, cw_memToReg_W);
+    sm_register_c r_cw_regWrite_W (clk, rst_n, cw_regWrite_M, cw_regWrite_W);
 
     // **********************************************************
     // W - Writeback
