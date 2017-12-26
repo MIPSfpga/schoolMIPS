@@ -80,7 +80,7 @@ module sm_clk_divider
 );
     wire [31:0] cntr;
     wire [31:0] cntrNext = cntr + 1;
-    sm_register_we r_cntr(clkIn, rst_n, enable, cntrNext, cntr);
+    sm_register_we #(32) r_cntr(clkIn, rst_n, enable, cntrNext, cntr);
 
     assign clkOut = cntr[shift + devide];
 endmodule
