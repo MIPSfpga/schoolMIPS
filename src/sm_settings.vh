@@ -8,3 +8,9 @@
  */ 
 
 `define SM_CONFIG_ROM_SIZE  128
+
+`define SM_CONFIG_EXCEPTIONS
+
+`ifdef SM_CONFIG_EXCEPTIONS
+    `define SM_CONFIG_EXCEPTION_HANDLER_ADDR    32'h40
+`endif
