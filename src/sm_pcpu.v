@@ -143,8 +143,8 @@ module sm_pcpu
     wire [ 4:0] instrRd_E;
     wire [ 4:0] instrSa_E;
     sm_register_cs #(32) r_pcNext_E  (clk, rst_n, hz_flush_n_E, pcNext_D,    pcNext_E);
-    sm_register_cs #(32) r_regData1_E(clk, rst_n, hz_flush_n_E, regData1F_D, regData1_E);
-    sm_register_cs #(32) r_regData2_E(clk, rst_n, hz_flush_n_E, regData2F_D, regData2_E);
+    sm_register_cs #(32) r_regData1_E(clk, rst_n, hz_flush_n_E, regData1_D,  regData1_E);
+    sm_register_cs #(32) r_regData2_E(clk, rst_n, hz_flush_n_E, regData2_D,  regData2_E);
     sm_register_cs #(32) r_signImm_E (clk, rst_n, hz_flush_n_E, signImm_D,   signImm_E);
     sm_register_cs #( 5) r_instrRs_E (clk, rst_n, hz_flush_n_E, instrRs_D,   instrRs_E);
     sm_register_cs #( 5) r_instrRt_E (clk, rst_n, hz_flush_n_E, instrRt_D,   instrRt_E);
