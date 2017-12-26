@@ -8,7 +8,7 @@ write:      sw      $t0, 0x0 ($0)
             nop
 
 start:      lw      $t1, 0x0 ($0)
-            addu    $t2, $t1, $t1
+            addu    $v0, $t1, $t1   # pipleline should be stalled
 
             nop
             nop
