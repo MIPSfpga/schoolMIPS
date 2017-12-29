@@ -1,14 +1,15 @@
 /*
- * schoolMIPS - small MIPS CPU for "Young Russian Chip Architects" 
+ * schoolMIPS - small MIPS CPU for "Young Russian Chip Architects"
  *              summer school ( yrca@googlegroups.com )
  *
- * originally based on Sarah L. Harris MIPS CPU 
- * 
- * Copyright(c) 2017 Stanislav Zhelnio 
- *                   Alexander Romanov 
- */ 
+ * originally based on Sarah L. Harris MIPS CPU
+ *
+ * Copyright(c) 2017 Stanislav Zhelnio
+ *                   Alexander Romanov
+ */
 
 `include "sm_cpu.vh"
+`include "sm_settings.vh"
 
 module sm_cpu
 (
@@ -68,6 +69,7 @@ module sm_cpu
 
     //alu
     wire [31:0] srcB = aluSrc ? signImm : rd2;
+    wire [31:0] aluResult;
 
     sm_alu alu
     (
@@ -76,7 +78,7 @@ module sm_cpu
         .oper       ( aluControl   ),
         .shift      ( instr[10:6 ] ),
         .zero       ( aluZero      ),
-        .result     ( wd3          ) 
+        .result     ( aluResult    )
     );
 
     //control
@@ -85,12 +87,53 @@ module sm_cpu
         .cmdOper    ( instr[31:26] ),
         .cmdFunk    ( instr[ 5:0 ] ),
         .aluZero    ( aluZero      ),
-        .pcSrc      ( pcSrc        ), 
-        .regDst     ( regDst       ), 
-        .regWrite   ( regWrite     ), 
+        .pcSrc      ( pcSrc        ),
+        .regDst     ( regDst       ),
+        .regWrite   ( regWrite     ),
         .aluSrc     ( aluSrc       ),
         .aluControl ( aluControl   )
     );
+
+    `ifdef SM_CONFIG_ENABLE_CP0
+
+        wire        cw_cpzToReg;        //TODO
+        wire        cw_cpzRegWrite;     //TODO: cp0 register access Write Enable
+
+        wire [31:0] cp0_EPC;                    // return address for eret
+        wire [31:0] cp0_ExcHandler;             // exception Handler Addr
+        wire        cp0_ExcRequest;             // request for Exception
+        wire        co0_ExcEret;                // return from Exception
+        wire [ 4:0] cp0_regNum = instr[15:11];  // cp0 register access num
+        wire [ 2:0] cp0_regSel = instr[ 2:0 ];  // cp0 register access sel
+        wire [31:0] cp0_regRD;                  // cp0 register access Read Data
+        wire [31:0] cp0_regWD   = rd2;          // cp0 register access Write Data
+        wire        cp0_ExcIP2  = 1'b0;         //TODO: Hardware Interrupt 0
+        wire        cp0_ExcRI   = 1'b0;         //TODO: Reserved Instruction exception
+        wire        cp0_ExcOv   = 1'b0;         //TODO: Arithmetic Overflow exception
+
+        sm_cpz sm_cpz
+        (
+            clk             ( clk            ),
+            rst_n           ( rst_n          ),
+            cp0_PC          ( pc             ),
+            cp0_EPC         ( cp0_EPC        ),
+            cp0_ExcHandler  ( cp0_ExcHandler ),
+            cp0_ExcRequest  ( cp0_ExcRequest ),
+            co0_ExcEret     ( co0_ExcEret    ),
+            cp0_regNum      ( cp0_regNum     ),
+            cp0_regSel      ( cp0_regSel     ),
+            cp0_regRD       ( cp0_regRD      ),
+            cp0_regWD       ( cp0_regWD      ),
+            cp0_regWE       ( cw_cpzRegWrite ),
+            cp0_ExcIP2      ( cp0_ExcIP2     ),
+            cp0_ExcRI       ( cp0_ExcRI      ),
+            cp0_ExcOv       ( cp0_ExcOv      )
+        );
+
+        assign wd3 = cw_cpzToReg ? cp0_regRD : aluResult;
+    `else
+        assign wd3 = aluResult;
+    `endif
 
 endmodule
 
@@ -98,12 +141,15 @@ module sm_control
 (
     input      [5:0] cmdOper,
     input      [5:0] cmdFunk,
+    input      [4:0] cmdRegS,
     input            aluZero,
-    output           pcSrc, 
-    output reg       regDst, 
-    output reg       regWrite, 
+    output           pcSrc,
+    output reg       regDst,
+    output reg       regWrite,
     output reg       aluSrc,
-    output reg [2:0] aluControl
+    output reg [2:0] aluControl,
+    output reg       cpzToReg,
+    output reg       cpzRegWrite
 );
     reg          branch;
     reg          condZero;
@@ -116,21 +162,26 @@ module sm_control
         regWrite    = 1'b0;
         aluSrc      = 1'b0;
         aluControl  = `ALU_ADD;
+        cpzToReg    = 1'b0;
+        cpzRegWrite = 1'b0;
 
-        casez( {cmdOper,cmdFunk} )
+        casez( {cmdOper,cmdFunk, cmdRegS} )
             default               : ;
 
-            { `C_SPEC,  `F_ADDU } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_ADD;  end
-            { `C_SPEC,  `F_OR   } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_OR;   end
-            { `C_SPEC,  `F_SRL  } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SRL;  end
-            { `C_SPEC,  `F_SLTU } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SLTU; end
-            { `C_SPEC,  `F_SUBU } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SUBU; end
+            { `C_SPEC,  `F_ADDU, `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_ADD;  end
+            { `C_SPEC,  `F_OR,   `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_OR;   end
+            { `C_SPEC,  `F_SRL,  `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SRL;  end
+            { `C_SPEC,  `F_SLTU, `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SLTU; end
+            { `C_SPEC,  `F_SUBU, `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SUBU; end
 
-            { `C_ADDIU, `F_ANY  } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD;  end
-            { `C_LUI,   `F_ANY  } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_LUI;  end
+            { `C_ADDIU, `F_ANY,  `S_ANY } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD;  end
+            { `C_LUI,   `F_ANY,  `S_ANY } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_LUI;  end
 
-            { `C_BEQ,   `F_ANY  } : begin branch = 1'b1; condZero = 1'b1; aluControl = `ALU_SUBU; end
-            { `C_BNE,   `F_ANY  } : begin branch = 1'b1; aluControl = `ALU_SUBU; end
+            { `C_BEQ,   `F_ANY,  `S_ANY } : begin branch = 1'b1; condZero = 1'b1; aluControl = `ALU_SUBU; end
+            { `C_BNE,   `F_ANY,  `S_ANY } : begin branch = 1'b1; aluControl = `ALU_SUBU; end
+
+            { `C_COP0, `F_ANY, `S_COP0_MF } : begin cpzToReg = 1'b1; regWrite = 1'b1; end
+            { `C_COP0, `F_ANY, `S_COP0_MT } : begin cpzRegWrite = 1'b1; end
         endcase
     end
 endmodule

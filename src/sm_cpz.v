@@ -22,7 +22,7 @@
 `define CP0_EXCCODE_RI      5'h0a
 `define CP0_EXCCODE_OV      5'h0c
 
-module sm_cp0
+module sm_cpz
 (
     input         clk,
     input         rst_n,

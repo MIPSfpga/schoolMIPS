@@ -39,3 +39,11 @@
 `define F_SUBU      6'b100011 // R-type, Unsigned Subtract
                               //         Rd = Rs – Rt
 `define F_ANY       6'b??????
+
+//coprocessor 
+`define C_COP0      6'b010000 // R-type, Soprocessor 0 instruction
+`define S_COP0_MF   5'b00000  // R-type, MFC0, Move from Coprocessor 0
+                              //         Rt = CP0 [Rd, Sel]
+`define S_COP0_MT   5'b00100  // R-type, MTC0, Move to Coprocessor 0
+                              //         CP0 [Rd, Sel] = Rt
+`define S_ANY       5'b?????
