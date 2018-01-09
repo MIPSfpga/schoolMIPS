@@ -76,6 +76,7 @@ module sm_testbench;
         reg        [ 4:0] cmdSa;
         reg        [15:0] cmdImm;
         reg signed [15:0] cmdImmS;
+        reg        [ 2:0] cmdSel;
 
         begin
             cmdOper = instr[31:26];
@@ -86,28 +87,32 @@ module sm_testbench;
             cmdSa   = instr[10:6 ];
             cmdImm  = instr[15:0 ];
             cmdImmS = instr[15:0 ];
+            cmdSel  = instr[ 2:0 ];
 
             $write("   ");
 
-            casez( {cmdOper,cmdFunk} )
+            casez( {cmdOper, cmdFunk, cmdRs} )
                 default               : if (instr == 32'b0) 
                                             $write ("nop");
                                         else
                                             $write ("new/unknown");
 
-                { `C_SPEC,  `F_ADDU } : $write ("addu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_OR   } : $write ("or    $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SRL  } : $write ("srl   $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SLTU } : $write ("sltu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SUBU } : $write ("subu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_ADDU, `S_ANY } : $write ("addu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_OR  , `S_ANY } : $write ("or    $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_SRL , `S_ANY } : $write ("srl   $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_SLTU, `S_ANY } : $write ("sltu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_SUBU, `S_ANY } : $write ("subu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                 
+                { `C_ADDIU, `F_ANY , `S_ANY } : $write ("addiu $%1d, $%1d, %1d", cmdRt, cmdRs, cmdImm);
+                { `C_LUI,   `F_ANY , `S_ANY } : $write ("lui   $%1d, %1d",       cmdRt, cmdImm);
+                { `C_LW,    `F_ANY , `S_ANY } : $write ("lw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
+                { `C_SW,    `F_ANY , `S_ANY } : $write ("sw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
+                
+                { `C_BEQ,   `F_ANY , `S_ANY } : $write ("beq   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
+                { `C_BNE,   `F_ANY , `S_ANY } : $write ("bne   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
 
-                { `C_ADDIU, `F_ANY  } : $write ("addiu $%1d, $%1d, %1d", cmdRt, cmdRs, cmdImm);
-                { `C_LUI,   `F_ANY  } : $write ("lui   $%1d, %1d",       cmdRt, cmdImm);
-                { `C_LW,    `F_ANY  } : $write ("lw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
-                { `C_SW,    `F_ANY  } : $write ("sw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
-
-                { `C_BEQ,   `F_ANY  } : $write ("beq   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
-                { `C_BNE,   `F_ANY  } : $write ("bne   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
+                { `C_COP0, `F_ANY, `S_COP0_MF } : $write ("mfc0  $%1d, $%1d, %1d", cmdRt, cmdRd, cmdSel);
+                { `C_COP0, `F_ANY, `S_COP0_MT } : $write ("mtc0  $%1d, $%1d, %1d", cmdRt, cmdRd, cmdSel);
             endcase
         end
 

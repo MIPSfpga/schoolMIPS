@@ -44,7 +44,7 @@ module sm_top
     //instruction memory
     wire    [31:0]  imAddr;
     wire    [31:0]  imData;
-    sm_rom reset_rom(imAddr, imData);
+    sm_rom #(`SM_CONFIG_ROM_SIZE) reset_rom(imAddr, imData);
 
     //data memory
     wire    [31:0]  dmAddr;
