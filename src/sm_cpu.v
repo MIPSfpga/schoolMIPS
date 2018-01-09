@@ -82,74 +82,72 @@ module sm_cpu
     );
 
     //control
+    wire        cw_cpzToReg;
+    wire        cw_cpzRegWrite;
+
     sm_control sm_control
     (
         .cmdOper    ( instr[31:26] ),
+        .cmdRegS    ( instr[25:21] ),
         .cmdFunk    ( instr[ 5:0 ] ),
         .aluZero    ( aluZero      ),
         .pcSrc      ( pcSrc        ),
         .regDst     ( regDst       ),
         .regWrite   ( regWrite     ),
         .aluSrc     ( aluSrc       ),
-        .aluControl ( aluControl   )
+        .aluControl ( aluControl   ),
+        .cw_cpzToReg    ( cw_cpzToReg    ),
+        .cw_cpzRegWrite ( cw_cpzRegWrite )
     );
 
-    `ifdef SM_CONFIG_ENABLE_CP0
+    wire [31:0] cp0_EPC;                    // return address for eret
+    wire [31:0] cp0_ExcHandler;             // exception Handler Addr
+    wire        cp0_ExcRequest;             // request for Exception
+    wire        co0_ExcEret;                // return from Exception
+    wire [ 4:0] cp0_regNum = instr[15:11];  // cp0 register access num
+    wire [ 2:0] cp0_regSel = instr[ 2:0 ];  // cp0 register access sel
+    wire [31:0] cp0_regRD;                  // cp0 register access Read Data
+    wire [31:0] cp0_regWD   = rd2;          // cp0 register access Write Data
+    wire        cp0_ExcIP2  = 1'b0;         //TODO: Hardware Interrupt 0
+    wire        cp0_ExcRI   = 1'b0;         //TODO: Reserved Instruction exception
+    wire        cp0_ExcOv   = 1'b0;         //TODO: Arithmetic Overflow exception
 
-        wire        cw_cpzToReg;        //TODO
-        wire        cw_cpzRegWrite;     //TODO: cp0 register access Write Enable
+    sm_cpz sm_cpz
+    (
+        clk             ( clk            ),
+        rst_n           ( rst_n          ),
+        cp0_PC          ( pc             ),
+        cp0_EPC         ( cp0_EPC        ),
+        cp0_ExcHandler  ( cp0_ExcHandler ),
+        cp0_ExcRequest  ( cp0_ExcRequest ),
+        co0_ExcEret     ( co0_ExcEret    ),
+        cp0_regNum      ( cp0_regNum     ),
+        cp0_regSel      ( cp0_regSel     ),
+        cp0_regRD       ( cp0_regRD      ),
+        cp0_regWD       ( cp0_regWD      ),
+        cp0_regWE       ( cw_cpzRegWrite ),
+        cp0_ExcIP2      ( cp0_ExcIP2     ),
+        cp0_ExcRI       ( cp0_ExcRI      ),
+        cp0_ExcOv       ( cp0_ExcOv      )
+    );
 
-        wire [31:0] cp0_EPC;                    // return address for eret
-        wire [31:0] cp0_ExcHandler;             // exception Handler Addr
-        wire        cp0_ExcRequest;             // request for Exception
-        wire        co0_ExcEret;                // return from Exception
-        wire [ 4:0] cp0_regNum = instr[15:11];  // cp0 register access num
-        wire [ 2:0] cp0_regSel = instr[ 2:0 ];  // cp0 register access sel
-        wire [31:0] cp0_regRD;                  // cp0 register access Read Data
-        wire [31:0] cp0_regWD   = rd2;          // cp0 register access Write Data
-        wire        cp0_ExcIP2  = 1'b0;         //TODO: Hardware Interrupt 0
-        wire        cp0_ExcRI   = 1'b0;         //TODO: Reserved Instruction exception
-        wire        cp0_ExcOv   = 1'b0;         //TODO: Arithmetic Overflow exception
-
-        sm_cpz sm_cpz
-        (
-            clk             ( clk            ),
-            rst_n           ( rst_n          ),
-            cp0_PC          ( pc             ),
-            cp0_EPC         ( cp0_EPC        ),
-            cp0_ExcHandler  ( cp0_ExcHandler ),
-            cp0_ExcRequest  ( cp0_ExcRequest ),
-            co0_ExcEret     ( co0_ExcEret    ),
-            cp0_regNum      ( cp0_regNum     ),
-            cp0_regSel      ( cp0_regSel     ),
-            cp0_regRD       ( cp0_regRD      ),
-            cp0_regWD       ( cp0_regWD      ),
-            cp0_regWE       ( cw_cpzRegWrite ),
-            cp0_ExcIP2      ( cp0_ExcIP2     ),
-            cp0_ExcRI       ( cp0_ExcRI      ),
-            cp0_ExcOv       ( cp0_ExcOv      )
-        );
-
-        assign wd3 = cw_cpzToReg ? cp0_regRD : aluResult;
-    `else
-        assign wd3 = aluResult;
-    `endif
+    assign wd3 = cw_cpzToReg ? cp0_regRD : aluResult;
 
 endmodule
 
 module sm_control
 (
     input      [5:0] cmdOper,
-    input      [5:0] cmdFunk,
     input      [4:0] cmdRegS,
+    input      [5:0] cmdFunk,
     input            aluZero,
     output           pcSrc,
     output reg       regDst,
     output reg       regWrite,
     output reg       aluSrc,
     output reg [2:0] aluControl,
-    output reg       cpzToReg,
-    output reg       cpzRegWrite
+    output reg       cw_cpzToReg,
+    output reg       cw_cpzRegWrite
 );
     reg          branch;
     reg          condZero;
@@ -162,8 +160,8 @@ module sm_control
         regWrite    = 1'b0;
         aluSrc      = 1'b0;
         aluControl  = `ALU_ADD;
-        cpzToReg    = 1'b0;
-        cpzRegWrite = 1'b0;
+        cw_cpzToReg    = 1'b0;
+        cw_cpzRegWrite = 1'b0;
 
         casez( {cmdOper,cmdFunk, cmdRegS} )
             default               : ;
@@ -180,8 +178,8 @@ module sm_control
             { `C_BEQ,   `F_ANY,  `S_ANY } : begin branch = 1'b1; condZero = 1'b1; aluControl = `ALU_SUBU; end
             { `C_BNE,   `F_ANY,  `S_ANY } : begin branch = 1'b1; aluControl = `ALU_SUBU; end
 
-            { `C_COP0, `F_ANY, `S_COP0_MF } : begin cpzToReg = 1'b1; regWrite = 1'b1; end
-            { `C_COP0, `F_ANY, `S_COP0_MT } : begin cpzRegWrite = 1'b1; end
+            { `C_COP0, `F_ANY, `S_COP0_MF } : begin cw_cpzToReg = 1'b1; regWrite = 1'b1; end
+            { `C_COP0, `F_ANY, `S_COP0_MT } : begin cw_cpzRegWrite = 1'b1; end
         endcase
     end
 endmodule
