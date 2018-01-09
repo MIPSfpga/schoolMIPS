@@ -88,7 +88,7 @@ clean:
 #########################################################
 # Modelsim simulation
 
-modelsim:
+modelsim: program.hex
 	rm -rf sim
 	mkdir sim
 	cp *.hex sim
@@ -107,7 +107,7 @@ IVARG += -s $(TOPMODULE)
 IVARG += ../../../src/*.v
 IVARG += ../../../testbench/*.v
 
-icarus:
+icarus: program.hex
 	rm -rf sim
 	mkdir sim
 	cp *.hex sim
