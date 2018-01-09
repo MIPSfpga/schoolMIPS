@@ -181,7 +181,6 @@ module sm_control
 );
     reg          branch;
     reg          condZero;
-    reg          eret;
 
     assign pcSrc = cp0_ExcRequest ? `PC_EXC  :
                    cw_cpzExcEret  ? `PC_ERET :
@@ -199,8 +198,6 @@ module sm_control
         cw_cpzToReg    = 1'b0;
         cw_cpzRegWrite = 1'b0;
         cw_cpzExcEret  = 1'b0;
-
-        //pcSrc = branch & (aluZero == condZero) ? `PC_BRANCH : `PC_NEXT
 
         casez( {cmdOper,cmdFunk, cmdRegS} )
             default               : ;
@@ -221,6 +218,7 @@ module sm_control
 
             { `C_COP0, `F_ANY, `S_COP0_MF } : begin cw_cpzToReg = 1'b1; regWrite = 1'b1; end
             { `C_COP0, `F_ANY, `S_COP0_MT } : begin cw_cpzRegWrite = 1'b1; end
+            { `C_COP0, `F_ERET, `S_ERET   } : begin cw_cpzExcEret  = 1'b1; end
         endcase
     end
 endmodule
