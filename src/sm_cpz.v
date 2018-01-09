@@ -149,8 +149,8 @@ module sm_cpz
     sm_register_we r_cp0_CauseDC(clk, rst_n, cp0_Cause_load, cp0_CauseDC_next, cp0_CauseDC);
 
     // Timer Interrupt flag
-    wire cp0_CauseTI_next = cp0_Compare_we ? 1'b0 :
-                            cp0_CauseTI    ? 1'b1 :
+    wire cp0_CauseTI_next = cp0_Compare_load ? 1'b0 :
+                            cp0_CauseTI      ? 1'b1 :
                             cp0_StatusIE & ~cp0_CauseDC & (cp0_Compare == cp0_Count);
     sm_register_c r_cp0_CauseTI(clk, rst_n, cp0_CauseTI_next, cp0_CauseTI);
 
@@ -162,7 +162,7 @@ module sm_cpz
                                         4'b0,
                                         cp0_CauseIP [2] | (cp0_StatusIE & cp0_ExcIP2)
                                     };
-    sm_register_c r_cp0_CauseIP(clk, rst_n, cp0_CauseIP_next, cp0_CauseIP);
+    sm_register_c #(8) r_cp0_CauseIP(clk, rst_n, cp0_CauseIP_next, cp0_CauseIP);
 
     // Exception Code
     wire [ 4:0] cp0_CauseExcCode_next = cp0_ExcRI ? `CP0_EXCCODE_RI : (
