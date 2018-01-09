@@ -41,12 +41,16 @@
                               //         Rd = (Rs∅ < Rt∅) ? 1 : 0
 `define F_SUBU      6'b100011 // R-type, Unsigned Subtract
                               //         Rd = Rs – Rt
+`define F_ERET      6'b011000 // ERET,   Exception Return
+                              //         
 `define F_ANY       6'b??????
 
 //coprocessor 
-`define C_COP0      6'b010000 // R-type, Soprocessor 0 instruction
-`define S_COP0_MF   5'b00000  // R-type, MFC0, Move from Coprocessor 0
+`define C_COP0      6'b010000 // Soprocessor 0 instruction
+`define S_COP0_MF   5'b00000  // MFC0, Move from Coprocessor 0
                               //         Rt = CP0 [Rd, Sel]
-`define S_COP0_MT   5'b00100  // R-type, MTC0, Move to Coprocessor 0
+`define S_COP0_MT   5'b00100  // MTC0, Move to Coprocessor 0
+                              //         CP0 [Rd, Sel] = Rt
+`define S_ERET      5'b10000  // ERET, Exception Return
                               //         CP0 [Rd, Sel] = Rt
 `define S_ANY       5'b?????

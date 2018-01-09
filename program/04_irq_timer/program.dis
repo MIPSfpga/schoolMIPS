@@ -73,5 +73,6 @@ Disassembly of section .text:
   fc:	00000000 	sll	zero,zero,0x0
 
 00000100 <exception>:
- 100:	1000ffff 	beqz	zero,100 <exception>
- 104:	00000000 	sll	zero,zero,0x0
+ 100:	40885800 	mtc0	t0,c0_compare
+ 104:	40804800 	mtc0	zero,c0_count
+ 108:	42000018 	eret
