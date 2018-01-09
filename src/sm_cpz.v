@@ -7,6 +7,8 @@
  * Copyright(c) 2017 Stanislav Zhelnio 
  */ 
 
+`include "sm_settings.vh"
+
 `define CP0_REG_NUM_COUNT   5'd9
 `define CP0_REG_SEL_COUNT   3'd0
 `define CP0_REG_NUM_COMPARE 5'd11
@@ -32,7 +34,7 @@ module sm_cpz
                                     // after an exception has been serviced
     output [31:0] cp0_ExcHandler,   // Exception Handler Addr
     output        cp0_ExcRequest,   // request for Exception
-    input         co0_ExcEret,      // return from Exception
+    input         cp0_ExcEret,      // return from Exception
 
     input  [ 4:0] cp0_regNum,       // cp0 register access num
     input  [ 2:0] cp0_regSel,       // cp0 register access sel
@@ -127,10 +129,11 @@ module sm_cpz
     sm_register_we #(8) r_cp0_StatusIM(clk, rst_n, cp0_Status_load, cp0_StatusIM_new, cp0_StatusIM);
 
     // Exception Level
-    wire cp0_RequestForIrq = cp0_CauseIP && cp0_StatusIM;
+    wire [ 7:0] cp0_CauseIP_next;
+    wire cp0_RequestForIrq = cp0_CauseIP_next && cp0_StatusIM;
     wire cp0_RequestForExc = cp0_RequestForIrq | cp0_ExcRI | cp0_ExcOv;
     wire cp0_StatusEXL_new = cp0_Status_load ? cp0_regWD [1] : (
-                             co0_ExcEret     ? 1'b0          
+                             cp0_ExcEret     ? 1'b0          
                                              : cp0_StatusEXL | cp0_RequestForExc );
     sm_register_c  r_cp0_StatusEXL(clk, rst_n, cp0_StatusEXL_new, cp0_StatusEXL);
     
@@ -155,7 +158,6 @@ module sm_cpz
     sm_register_c r_cp0_CauseTI(clk, rst_n, cp0_CauseTI_next, cp0_CauseTI);
 
     // Interrupt is pending
-    wire [ 7:0] cp0_CauseIP_next;
     assign cp0_CauseIP_next [1:0] = cp0_Cause_load ? cp0_regWD [9:8] : cp0_CauseIP [1:0];
     assign cp0_CauseIP_next [7:2] = { 
                                         cp0_CauseTI_next, 
@@ -167,6 +169,7 @@ module sm_cpz
     // Exception Code
     wire [ 4:0] cp0_CauseExcCode_next = cp0_ExcRI ? `CP0_EXCCODE_RI : (
                                         cp0_ExcOv ? `CP0_EXCCODE_OV : `CP0_EXCCODE_INT );
+    sm_register_we #(5) r_cp0_CauseExcCode(clk, rst_n, cp0_ExcRequest, cp0_CauseExcCode_next, cp0_CauseExcCode);
 
     // ####################################################################
     // Exception Program Counter (EPC) Register

@@ -11,6 +11,11 @@
 `include "sm_cpu.vh"
 `include "sm_settings.vh"
 
+`define PC_NEXT     2'b00
+`define PC_BRANCH   2'b01
+`define PC_EXC      2'b10
+`define PC_ERET     2'b11
+
 module sm_cpu
 (
     input           clk,        // clock
@@ -25,7 +30,7 @@ module sm_cpu
     input   [31:0]  dmRData     // data memory read data
 );
     //control wires
-    wire        pcSrc;
+    wire [ 1:0] pcSrc;
     wire        regDst;
     wire        regWrite;
     wire        aluSrc;
@@ -38,7 +43,7 @@ module sm_cpu
     wire [31:0] pc;
     wire [31:0] pcBranch;
     wire [31:0] pcNext  = pc + 1;
-    wire [31:0] pc_new   = ~pcSrc ? pcNext : pcBranch;
+    wire [31:0] pc_new;
     sm_register_c #(32) r_pc(clk ,rst_n, pc_new, pc);
 
     //program memory access
@@ -96,6 +101,8 @@ module sm_cpu
     //control
     wire        cw_cpzToReg;
     wire        cw_cpzRegWrite;
+    wire        cp0_ExcRequest;     // request for Exception
+    wire        cw_cpzExcEret;      // return from Exception
 
     sm_control sm_control
     (
@@ -111,13 +118,13 @@ module sm_cpu
         .memWrite   ( memWrite     ),
         .memToReg   ( memToReg     ),
         .cw_cpzToReg    ( cw_cpzToReg    ),
-        .cw_cpzRegWrite ( cw_cpzRegWrite )
+        .cw_cpzRegWrite ( cw_cpzRegWrite ),
+        .cw_cpzExcEret  ( cw_cpzExcEret  ),
+        .cp0_ExcRequest ( cp0_ExcRequest )
     );
 
     wire [31:0] cp0_EPC;                    // return address for eret
     wire [31:0] cp0_ExcHandler;             // exception Handler Addr
-    wire        cp0_ExcRequest;             // request for Exception
-    wire        co0_ExcEret;                // return from Exception
     wire [ 4:0] cp0_regNum = instr[15:11];  // cp0 register access num
     wire [ 2:0] cp0_regSel = instr[ 2:0 ];  // cp0 register access sel
     wire [31:0] cp0_regRD;                  // cp0 register access Read Data
@@ -134,7 +141,7 @@ module sm_cpu
         .cp0_EPC        ( cp0_EPC        ),
         .cp0_ExcHandler ( cp0_ExcHandler ),
         .cp0_ExcRequest ( cp0_ExcRequest ),
-        .co0_ExcEret    ( co0_ExcEret    ),
+        .cp0_ExcEret    ( cw_cpzExcEret  ),
         .cp0_regNum     ( cp0_regNum     ),
         .cp0_regSel     ( cp0_regSel     ),
         .cp0_regRD      ( cp0_regRD      ),
@@ -148,6 +155,10 @@ module sm_cpu
     assign wd3 = memToReg    ? dmRData   : (
                  cw_cpzToReg ? cp0_regRD : aluResult );
 
+    assign pc_new = pcSrc == `PC_BRANCH ? pcBranch       :
+                    pcSrc == `PC_EXC    ? cp0_ExcHandler :
+                    pcSrc == `PC_ERET   ? cp0_EPC        : pcNext; //`PC_NEXT
+
 endmodule
 
 module sm_control
@@ -156,7 +167,7 @@ module sm_control
     input      [4:0] cmdRegS,
     input      [5:0] cmdFunk,
     input            aluZero,
-    output           pcSrc,
+    output     [1:0] pcSrc,
     output reg       regDst,
     output reg       regWrite,
     output reg       aluSrc,
@@ -164,11 +175,17 @@ module sm_control
     output reg       memWrite,
     output reg       memToReg,
     output reg       cw_cpzToReg,
-    output reg       cw_cpzRegWrite
+    output reg       cw_cpzRegWrite,
+    output reg       cw_cpzExcEret,
+    input            cp0_ExcRequest
 );
     reg          branch;
     reg          condZero;
-    assign pcSrc = branch & (aluZero == condZero);
+    reg          eret;
+
+    assign pcSrc = cp0_ExcRequest ? `PC_EXC  :
+                   cw_cpzExcEret  ? `PC_ERET :
+                   branch & (aluZero == condZero) ? `PC_BRANCH : `PC_NEXT;
 
     always @ (*) begin
         branch      = 1'b0;
@@ -181,6 +198,9 @@ module sm_control
         memToReg    = 1'b0;
         cw_cpzToReg    = 1'b0;
         cw_cpzRegWrite = 1'b0;
+        cw_cpzExcEret  = 1'b0;
+
+        //pcSrc = branch & (aluZero == condZero) ? `PC_BRANCH : `PC_NEXT
 
         casez( {cmdOper,cmdFunk, cmdRegS} )
             default               : ;
