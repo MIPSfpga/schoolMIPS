@@ -28,7 +28,8 @@
                               //         if (Rs != Rt) PC += (int)offset
 `define C_LW        6'b100011 // I-type, Load Word
                               //         Rt = memory[Rs + Immed]
-`define C_SW        6'b101011 //I-type,  Store Word
+`define C_SW        6'b101011 // I-type,  Store Word
+`define C_NOP       6'b000000 // No Operation
 
 //instruction function field
 `define F_ADDU      6'b100001 // R-type, Integer Add Unsigned
@@ -42,8 +43,10 @@
 `define F_SUBU      6'b100011 // R-type, Unsigned Subtract
                               //         Rd = Rs – Rt
 `define F_ERET      6'b011000 // ERET,   Exception Return
-                              //         
+                              //        
+`define F_NOP       6'b000000 // No Operation
 `define F_ANY       6'b??????
+
 
 //coprocessor 
 `define C_COP0      6'b010000 // Soprocessor 0 instruction
@@ -53,4 +56,5 @@
                               //         CP0 [Rd, Sel] = Rt
 `define S_ERET      5'b10000  // ERET, Exception Return
                               //         CP0 [Rd, Sel] = Rt
+`define S_NOP       5'b00000  // No Operation
 `define S_ANY       5'b?????
