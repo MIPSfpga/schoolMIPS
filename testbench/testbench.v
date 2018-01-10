@@ -113,6 +113,8 @@ module sm_testbench;
 
                 { `C_COP0, `F_ANY, `S_COP0_MF } : $write ("mfc0  $%1d, $%1d, %1d", cmdRt, cmdRd, cmdSel);
                 { `C_COP0, `F_ANY, `S_COP0_MT } : $write ("mtc0  $%1d, $%1d, %1d", cmdRt, cmdRd, cmdSel);
+                { `C_COP0, `F_ERET, `S_ERET   } : $write ("eret");
+
             endcase
         end
 

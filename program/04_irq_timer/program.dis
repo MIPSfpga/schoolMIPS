@@ -5,24 +5,24 @@ program.elf:     file format elf32-tradlittlemips
 Disassembly of section .text:
 
 00000000 <.text>:
-   0:	24080040 	addiu	t0,zero,64
+   0:	24080038 	addiu	t0,zero,56
    4:	40885800 	mtc0	t0,c0_compare
    8:	40804800 	mtc0	zero,c0_count
    c:	24088001 	addiu	t0,zero,-32767
   10:	40886000 	mtc0	t0,c0_status
 
 00000014 <end>:
-  14:	00000000 	sll	zero,zero,0x0
-  18:	00000000 	sll	zero,zero,0x0
-  1c:	00000000 	sll	zero,zero,0x0
-  20:	00000000 	sll	zero,zero,0x0
-  24:	00000000 	sll	zero,zero,0x0
-  28:	00000000 	sll	zero,zero,0x0
-  2c:	00000000 	sll	zero,zero,0x0
-  30:	00000000 	sll	zero,zero,0x0
-  34:	00000000 	sll	zero,zero,0x0
-  38:	00000000 	sll	zero,zero,0x0
-  3c:	1000fff5 	beqz	zero,14 <end>
+  14:	24090001 	addiu	t1,zero,1
+  18:	00491021 	addu	v0,v0,t1
+  1c:	00491023 	subu	v0,v0,t1
+  20:	00491021 	addu	v0,v0,t1
+  24:	00491023 	subu	v0,v0,t1
+  28:	00491021 	addu	v0,v0,t1
+  2c:	00491023 	subu	v0,v0,t1
+  30:	00491021 	addu	v0,v0,t1
+  34:	00491023 	subu	v0,v0,t1
+  38:	1000fff6 	beqz	zero,14 <end>
+  3c:	00000000 	sll	zero,zero,0x0
   40:	00000000 	sll	zero,zero,0x0
   44:	00000000 	sll	zero,zero,0x0
   48:	00000000 	sll	zero,zero,0x0
@@ -73,6 +73,7 @@ Disassembly of section .text:
   fc:	00000000 	sll	zero,zero,0x0
 
 00000100 <exception>:
- 100:	40885800 	mtc0	t0,c0_compare
- 104:	40804800 	mtc0	zero,c0_count
- 108:	42000018 	eret
+ 100:	24080038 	addiu	t0,zero,56
+ 104:	40885800 	mtc0	t0,c0_compare
+ 108:	40804800 	mtc0	zero,c0_count
+ 10c:	42000018 	eret
