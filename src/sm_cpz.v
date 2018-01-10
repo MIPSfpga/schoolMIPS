@@ -34,6 +34,7 @@ module sm_cpz
                                     // after an exception has been serviced
     output [31:0] cp0_ExcHandler,   // Exception Handler Addr
     output        cp0_ExcRequest,   // request for Exception
+    output        cp0_ExcIsSync,    // the requesting Exception is synchronous
     input         cp0_ExcEret,      // return from Exception
 
     input  [ 4:0] cp0_regNum,       // cp0 register access num
@@ -170,6 +171,8 @@ module sm_cpz
     wire [ 4:0] cp0_CauseExcCode_next = cp0_ExcRI ? `CP0_EXCCODE_RI : (
                                         cp0_ExcOv ? `CP0_EXCCODE_OV : `CP0_EXCCODE_INT );
     sm_register_we #(5) r_cp0_CauseExcCode(clk, rst_n, cp0_ExcRequest, cp0_CauseExcCode_next, cp0_CauseExcCode);
+
+    assign cp0_ExcIsSync = cp0_CauseExcCode != `CP0_EXCCODE_INT;
 
     // ####################################################################
     // Exception Program Counter (EPC) Register

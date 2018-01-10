@@ -11,10 +11,9 @@
 `include "sm_cpu.vh"
 `include "sm_settings.vh"
 
-`define PC_NEXT     2'b00
-`define PC_BRANCH   2'b01
-`define PC_EXC      2'b10
-`define PC_ERET     2'b11
+`define PC_FLOW     2'b00
+`define PC_EXC      2'b01
+`define PC_ERET     2'b10
 
 module sm_cpu
 (
@@ -30,7 +29,8 @@ module sm_cpu
     input   [31:0]  dmRData     // data memory read data
 );
     //control wires
-    wire [ 1:0] pcSrc;
+    wire        pcSrc;
+    wire [ 1:0] pcExc;
     wire        regDst;
     wire        regWrite;
     wire        aluSrc;
@@ -44,6 +44,7 @@ module sm_cpu
     wire [31:0] pcBranch;
     wire [31:0] pcNext  = pc + 1;
     wire [31:0] pc_new;
+    wire [31:0] pc_flow = ~pcSrc ? pcNext : pcBranch;
     sm_register_c #(32) r_pc(clk ,rst_n, pc_new, pc);
 
     //program memory access
@@ -111,6 +112,7 @@ module sm_cpu
         .cmdFunk    ( instr[ 5:0 ] ),
         .aluZero    ( aluZero      ),
         .pcSrc      ( pcSrc        ),
+        .pcExc      ( pcExc        ),
         .regDst     ( regDst       ),
         .regWrite   ( regWrite     ),
         .aluSrc     ( aluSrc       ),
@@ -132,15 +134,18 @@ module sm_cpu
     wire        cp0_ExcIP2  = 1'b0;         //TODO: Hardware Interrupt 0
     wire        cp0_ExcRI   = 1'b0;         //TODO: Reserved Instruction exception
     wire        cp0_ExcOv   = 1'b0;         //TODO: Arithmetic Overflow exception
+    wire        cp0_ExcIsSync;              // cp0 detect sync exception
+    wire [31:0] cp0_PC = cp0_ExcIsSync ? pc : pc_flow;
 
     sm_cpz sm_cpz
     (
         .clk            ( clk            ),
         .rst_n          ( rst_n          ),
-        .cp0_PC         ( pc             ),
+        .cp0_PC         ( cp0_PC         ),
         .cp0_EPC        ( cp0_EPC        ),
         .cp0_ExcHandler ( cp0_ExcHandler ),
         .cp0_ExcRequest ( cp0_ExcRequest ),
+        .cp0_ExcIsSync  ( cp0_ExcIsSync  ),
         .cp0_ExcEret    ( cw_cpzExcEret  ),
         .cp0_regNum     ( cp0_regNum     ),
         .cp0_regSel     ( cp0_regSel     ),
@@ -155,9 +160,9 @@ module sm_cpu
     assign wd3 = memToReg    ? dmRData   : (
                  cw_cpzToReg ? cp0_regRD : aluResult );
 
-    assign pc_new = pcSrc == `PC_BRANCH ? pcBranch       :
-                    pcSrc == `PC_EXC    ? cp0_ExcHandler :
-                    pcSrc == `PC_ERET   ? cp0_EPC        : pcNext; //`PC_NEXT
+    assign pc_new = pcExc == `PC_EXC  ?  cp0_ExcHandler :
+                    pcExc == `PC_ERET ?  cp0_EPC        :
+                 /* pcExc == `PC_FLOW */ pc_flow;
 
 endmodule
 
@@ -167,7 +172,8 @@ module sm_control
     input      [4:0] cmdRegS,
     input      [5:0] cmdFunk,
     input            aluZero,
-    output     [1:0] pcSrc,
+    output           pcSrc,
+    output     [1:0] pcExc,
     output reg       regDst,
     output reg       regWrite,
     output reg       aluSrc,
@@ -182,9 +188,10 @@ module sm_control
     reg          branch;
     reg          condZero;
 
-    assign pcSrc = cp0_ExcRequest ? `PC_EXC  :
-                   cw_cpzExcEret  ? `PC_ERET :
-                   branch & (aluZero == condZero) ? `PC_BRANCH : `PC_NEXT;
+    assign pcSrc = branch & (aluZero == condZero);
+
+    assign pcExc = cp0_ExcRequest ? `PC_EXC  :
+                   cw_cpzExcEret  ? `PC_ERET : `PC_FLOW;
 
     always @ (*) begin
         branch      = 1'b0;
