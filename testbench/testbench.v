@@ -92,10 +92,7 @@ module sm_testbench;
             $write("   ");
 
             casez( {cmdOper, cmdFunk, cmdRs} )
-                default               : if (instr == 32'b0) 
-                                            $write ("nop");
-                                        else
-                                            $write ("new/unknown");
+                default               : $write ("new/unknown");
 
                 { `C_SPEC,  `F_ADDU, `S_ANY } : $write ("addu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
                 { `C_SPEC,  `F_OR  , `S_ANY } : $write ("or    $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
@@ -114,6 +111,7 @@ module sm_testbench;
                 { `C_COP0, `F_ANY, `S_COP0_MF } : $write ("mfc0  $%1d, $%1d, %1d", cmdRt, cmdRd, cmdSel);
                 { `C_COP0, `F_ANY, `S_COP0_MT } : $write ("mtc0  $%1d, $%1d, %1d", cmdRt, cmdRd, cmdSel);
                 { `C_COP0, `F_ERET, `S_ERET   } : $write ("eret");
+                { `C_NOP,  `F_NOP,  `S_NOP    } : $write ("nop");
 
             endcase
         end

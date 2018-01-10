@@ -129,18 +129,21 @@ module sm_cpz
     wire [ 7:0] cp0_StatusIM_new = cp0_regWD [15:8];
     sm_register_we #(8) r_cp0_StatusIM(clk, rst_n, cp0_Status_load, cp0_StatusIM_new, cp0_StatusIM);
 
+    // Exception request input wires
+    // async (imprecise) - EPC contains the next instruction (example: interrupt)
+    // sync  (precise)   - EPC contains current instruction  (example: overflow )
+    wire cp0_RequestForAsync = cp0_CauseIP && cp0_StatusIM; 
+    wire cp0_RequestForSync  = cp0_ExcRI | cp0_ExcOv;
+
     // Exception Level
-    wire [ 7:0] cp0_CauseIP_next;
-    wire cp0_RequestForIrq = cp0_CauseIP_next && cp0_StatusIM;
-    wire cp0_RequestForExc = cp0_RequestForIrq | cp0_ExcRI | cp0_ExcOv;
-    wire cp0_StatusEXL_new = cp0_Status_load ? cp0_regWD [1] : (
-                             cp0_ExcEret     ? 1'b0          
-                                             : cp0_StatusEXL | cp0_RequestForExc );
+    wire cp0_StatusEXL_new = cp0_Status_load ? cp0_regWD [1] :
+                             cp0_ExcEret     ? 1'b0          :
+                             cp0_StatusEXL | cp0_RequestForAsync | cp0_RequestForSync;
     sm_register_c  r_cp0_StatusEXL(clk, rst_n, cp0_StatusEXL_new, cp0_StatusEXL);
     
-    // Exception Request Strobe (not register field)
-    wire cp0_ExcRequest_new = cp0_RequestForExc & ~cp0_StatusEXL;
-    sm_register_c  r_cp0_ExcRequest(clk, rst_n, cp0_ExcRequest_new, cp0_ExcRequest);
+    // Exception request output wires
+    assign cp0_ExcRequest = (cp0_RequestForSync | cp0_RequestForAsync) & ~cp0_StatusEXL;
+    assign cp0_ExcIsSync  = cp0_RequestForSync;
 
     // ####################################################################
     // Cause register
@@ -159,6 +162,7 @@ module sm_cpz
     sm_register_c r_cp0_CauseTI(clk, rst_n, cp0_CauseTI_next, cp0_CauseTI);
 
     // Interrupt is pending
+    wire [ 7:0] cp0_CauseIP_next;
     assign cp0_CauseIP_next [1:0] = cp0_Cause_load ? cp0_regWD [9:8] : cp0_CauseIP [1:0];
     assign cp0_CauseIP_next [7:2] = { 
                                         cp0_CauseTI_next, 
@@ -172,12 +176,15 @@ module sm_cpz
                                         cp0_ExcOv ? `CP0_EXCCODE_OV : `CP0_EXCCODE_INT );
     sm_register_we #(5) r_cp0_CauseExcCode(clk, rst_n, cp0_ExcRequest, cp0_CauseExcCode_next, cp0_CauseExcCode);
 
-    assign cp0_ExcIsSync = cp0_CauseExcCode != `CP0_EXCCODE_INT;
-
     // ####################################################################
     // Exception Program Counter (EPC) Register
 
-    wire cp0_EPC_we;
-    sm_register_we #(32) r_cp0_epc(clk, rst_n, cp0_ExcRequest, cp0_PC, cp0_EPC);
+    // Register load
+    wire cp0_EPC_load = (cp0_regWE && cp0_EPC_sel);
+    
+    wire [31:0] cp0_EPC_next = cp0_EPC_load   ? cp0_regWD : 
+                               cp0_ExcRequest ? cp0_PC    : cp0_EPC;
+
+    sm_register_c #(32) r_cp0_epc(clk, rst_n, cp0_EPC_next, cp0_EPC);
 
 endmodule

@@ -94,7 +94,6 @@ module sm_cpu
     );
 
     //data memory access
-    assign wd3 = memToReg ? dmRData : aluResult;
     assign dmWe = memWrite;
     assign dmAddr = aluResult;
     assign dmWData = rd2;
@@ -104,6 +103,7 @@ module sm_cpu
     wire        cw_cpzRegWrite;
     wire        cp0_ExcRequest;     // request for Exception
     wire        cw_cpzExcEret;      // return from Exception
+    wire        cw_RiFound;         // reserved instruction found
 
     sm_control sm_control
     (
@@ -122,7 +122,8 @@ module sm_cpu
         .cw_cpzToReg    ( cw_cpzToReg    ),
         .cw_cpzRegWrite ( cw_cpzRegWrite ),
         .cw_cpzExcEret  ( cw_cpzExcEret  ),
-        .cp0_ExcRequest ( cp0_ExcRequest )
+        .cp0_ExcRequest ( cp0_ExcRequest ),
+        .cw_RiFound     ( cw_RiFound     )
     );
 
     wire [31:0] cp0_EPC;                    // return address for eret
@@ -132,7 +133,7 @@ module sm_cpu
     wire [31:0] cp0_regRD;                  // cp0 register access Read Data
     wire [31:0] cp0_regWD   = rd2;          // cp0 register access Write Data
     wire        cp0_ExcIP2  = 1'b0;         //TODO: Hardware Interrupt 0
-    wire        cp0_ExcRI   = 1'b0;         //TODO: Reserved Instruction exception
+    wire        cp0_ExcRI   = cw_RiFound;   // Reserved Instruction exception
     wire        cp0_ExcOv   = 1'b0;         //TODO: Arithmetic Overflow exception
     wire        cp0_ExcIsSync;              // cp0 detect sync exception
     wire [31:0] cp0_PC = cp0_ExcIsSync ? pc : pc_flow;
@@ -157,8 +158,8 @@ module sm_cpu
         .cp0_ExcOv      ( cp0_ExcOv      )
     );
 
-    assign wd3 = memToReg    ? dmRData   : (
-                 cw_cpzToReg ? cp0_regRD : aluResult );
+    assign wd3 = memToReg    ? dmRData   :
+                ( cw_cpzToReg ? cp0_regRD : aluResult );
 
     assign pc_new = pcExc == `PC_EXC  ?  cp0_ExcHandler :
                     pcExc == `PC_ERET ?  cp0_EPC        :
@@ -183,7 +184,8 @@ module sm_control
     output reg       cw_cpzToReg,
     output reg       cw_cpzRegWrite,
     output reg       cw_cpzExcEret,
-    input            cp0_ExcRequest
+    input            cp0_ExcRequest,
+    output reg       cw_RiFound     // reserved instruction found
 );
     reg          branch;
     reg          condZero;
@@ -205,9 +207,10 @@ module sm_control
         cw_cpzToReg    = 1'b0;
         cw_cpzRegWrite = 1'b0;
         cw_cpzExcEret  = 1'b0;
+        cw_RiFound  = 1'b0;
 
         casez( {cmdOper,cmdFunk, cmdRegS} )
-            default               : ;
+            default               : cw_RiFound = 1'b1;
 
             { `C_SPEC,  `F_ADDU, `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_ADD;  end
             { `C_SPEC,  `F_OR,   `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_OR;   end
@@ -226,6 +229,7 @@ module sm_control
             { `C_COP0, `F_ANY, `S_COP0_MF } : begin cw_cpzToReg = 1'b1; regWrite = 1'b1; end
             { `C_COP0, `F_ANY, `S_COP0_MT } : begin cw_cpzRegWrite = 1'b1; end
             { `C_COP0, `F_ERET, `S_ERET   } : begin cw_cpzExcEret  = 1'b1; end
+            { `C_NOP,  `F_NOP,  `S_NOP    } : ;
         endcase
     end
 endmodule
