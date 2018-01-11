@@ -80,8 +80,8 @@ module sm_cpu
     assign pcBranch = pcNext + signImm;
 
     //alu
-    wire [31:0] srcB = aluSrc ? signImm : rd2;
     wire [31:0] aluResult;
+    wire [31:0] srcB = aluSrc ? signImm : rd2;
 
     sm_alu alu
     (
@@ -185,6 +185,7 @@ module sm_control
     output reg [2:0] aluControl,
     output reg       memWrite,
     output reg       memToReg,
+    output reg       branch,
     output reg       cw_cpzToReg,
     output reg       cw_cpzRegWrite,
     output reg       cw_cpzExcEret,
@@ -193,7 +194,6 @@ module sm_control
     output           cw_epcSrc,
     output reg       excRiFound     // reserved instruction found
 );
-    reg          branch;
     reg          condZero;
 
     assign pcSrc = branch & (aluZero == condZero);

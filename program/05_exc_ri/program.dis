@@ -73,8 +73,9 @@ Disassembly of section .text:
 00000100 <exception>:
  100:	00024825 	or	t1,zero,v0
  104:	40026000 	mfc0	v0,c0_status
- 108:	40027000 	mfc0	v0,c0_epc
- 10c:	24420001 	addiu	v0,v0,1
- 110:	40827000 	mtc0	v0,c0_epc
- 114:	00091025 	or	v0,zero,t1
- 118:	42000018 	eret
+ 108:	40026800 	mfc0	v0,c0_cause
+ 10c:	40027000 	mfc0	v0,c0_epc
+ 110:	24420001 	addiu	v0,v0,1
+ 114:	40827000 	mtc0	v0,c0_epc
+ 118:	00091025 	or	v0,zero,t1
+ 11c:	42000018 	eret
