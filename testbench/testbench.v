@@ -127,9 +127,15 @@ module sm_testbench;
     always @ (posedge clk)
     begin
 
+    `ifdef SM_CONFIG_PIPELINE
+        $write ("%5d  pc = %2d  pcaddr = %h  instr = %h   v0 = %1d", 
+                  cycle, regData, (regData << 2), sm_top.sm_cpu.instr_D, sm_top.sm_cpu.rf.rf[2]);
+        disasmInstr(sm_top.sm_cpu.instr_D);
+    `else
         $write ("%5d  pc = %2d  pcaddr = %h  instr = %h   v0 = %1d", 
                   cycle, regData, (regData << 2), sm_top.sm_cpu.instr, sm_top.sm_cpu.rf.rf[2]);
         disasmInstr(sm_top.sm_cpu.instr);
+    `endif
 
         $write("\n");
 
