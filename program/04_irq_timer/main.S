@@ -10,6 +10,8 @@ init:       li      $t0, TimerPeriod    # timer init
             addiu   $t0, $0, 0x8001     # exceptions init 8001
             mtc0    $t0, $12            #   cp0.Status = {IE = 1, IM7 = 1}
 
+            li      $v0, 0x0            # reset bug detecting value
+
 end:        addiu   $t1, $0, 0x1
             addu    $v0, $v0, $t1
             subu    $v0, $v0, $t1

@@ -10,19 +10,19 @@ Disassembly of section .text:
    8:	40804800 	mtc0	zero,c0_count
    c:	24088001 	addiu	t0,zero,-32767
   10:	40886000 	mtc0	t0,c0_status
+  14:	24020000 	addiu	v0,zero,0
 
-00000014 <end>:
-  14:	24090001 	addiu	t1,zero,1
-  18:	00491021 	addu	v0,v0,t1
-  1c:	00491023 	subu	v0,v0,t1
-  20:	00491021 	addu	v0,v0,t1
-  24:	00491023 	subu	v0,v0,t1
-  28:	00491021 	addu	v0,v0,t1
-  2c:	00491023 	subu	v0,v0,t1
-  30:	00491021 	addu	v0,v0,t1
-  34:	00491023 	subu	v0,v0,t1
-  38:	1000fff6 	beqz	zero,14 <end>
-  3c:	00000000 	sll	zero,zero,0x0
+00000018 <end>:
+  18:	24090001 	addiu	t1,zero,1
+  1c:	00491021 	addu	v0,v0,t1
+  20:	00491023 	subu	v0,v0,t1
+  24:	00491021 	addu	v0,v0,t1
+  28:	00491023 	subu	v0,v0,t1
+  2c:	00491021 	addu	v0,v0,t1
+  30:	00491023 	subu	v0,v0,t1
+  34:	00491021 	addu	v0,v0,t1
+  38:	00491023 	subu	v0,v0,t1
+  3c:	1000fff6 	beqz	zero,18 <end>
   40:	00000000 	sll	zero,zero,0x0
   44:	00000000 	sll	zero,zero,0x0
   48:	00000000 	sll	zero,zero,0x0
