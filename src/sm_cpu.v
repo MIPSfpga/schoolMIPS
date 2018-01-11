@@ -11,10 +11,6 @@
 `include "sm_cpu.vh"
 `include "sm_settings.vh"
 
-`define PC_FLOW     2'b00
-`define PC_EXC      2'b01
-`define PC_ERET     2'b10
-
 module sm_cpu
 (
     input           clk,        // clock
@@ -136,7 +132,8 @@ module sm_cpu
     wire [ 2:0] cp0_regSel = instr[ 2:0 ];  // cp0 register access sel
     wire [31:0] cp0_regRD;                  // cp0 register access Read Data
     wire [31:0] cp0_regWD   = rd2;          // cp0 register access Write Data
-    wire        cp0_ExcIP2  = 1'b0;         //TODO: Hardware Interrupt 0
+    wire        cp0_TI;                     // cp0 timer interrupt
+    wire [ 5:0] cp0_ExcIP = { cp0_TI, 4'b0 }; //TODO: External Interrupt
     wire        cp0_ExcRI   = excRiFound;   // Reserved Instruction exception
     wire        cp0_ExcOv   = 1'b0;         //TODO: Arithmetic Overflow exception
     
@@ -157,9 +154,10 @@ module sm_cpu
         .cp0_regRD      ( cp0_regRD      ),
         .cp0_regWD      ( cp0_regWD      ),
         .cp0_regWE      ( cw_cpzRegWrite ),
-        .cp0_ExcIP2     ( cp0_ExcIP2     ),
+        .cp0_ExcIP      ( cp0_ExcIP      ),
         .cp0_ExcRI      ( cp0_ExcRI      ),
-        .cp0_ExcOv      ( cp0_ExcOv      )
+        .cp0_ExcOv      ( cp0_ExcOv      ),
+        .cp0_TI         ( cp0_TI         )
     );
 
     assign wd3 = memToReg    ? dmRData   :
