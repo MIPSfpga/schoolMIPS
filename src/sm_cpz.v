@@ -43,9 +43,10 @@ module sm_cpz
     input  [31:0] cp0_regWD,        // cp0 register access Write Data
     input         cp0_regWE,        // cp0 register access Write Enable
 
-    input         cp0_ExcIP2,       // Hardware Interrupt 0
+    input  [ 5:0] cp0_ExcIP,        // Hardware Interrupts
     input         cp0_ExcRI,        // Reserved Instruction exception
-    input         cp0_ExcOv         // Arithmetic Overflow exception
+    input         cp0_ExcOv,        // Arithmetic Overflow exception
+    output        cp0_TI            // Timer Interrupt
 );
     assign cp0_ExcHandler = `SM_CONFIG_EXCEPTION_HANDLER_ADDR;
 
@@ -158,6 +159,7 @@ module sm_cpz
     sm_register_we r_cp0_CauseDC(clk, rst_n, cp0_Cause_load, cp0_CauseDC_next, cp0_CauseDC);
 
     // Timer Interrupt flag
+    assign cp0_TI = cp0_CauseTI;
     wire cp0_CauseTI_next = cp0_Compare_load ? 1'b0 :
                             cp0_CauseTI      ? 1'b1 :
                             cp0_StatusIE & ~cp0_CauseDC & (cp0_Compare == cp0_Count);
@@ -166,11 +168,10 @@ module sm_cpz
     // Interrupt is pending
     wire [ 7:0] cp0_CauseIP_next;
     assign cp0_CauseIP_next [1:0] = cp0_Cause_load ? cp0_regWD [9:8] : cp0_CauseIP [1:0];
-    assign cp0_CauseIP_next [7:2] = { 
-                                        cp0_CauseTI_next, 
-                                        4'b0,
-                                        cp0_CauseIP [2] | (cp0_StatusIE & cp0_ExcIP2)
-                                    };
+
+    assign cp0_CauseIP_next [7:2] = cp0_StatusEXL ? cp0_CauseIP [7:2] :
+                                    cp0_StatusIE  ? cp0_ExcIP         : cp0_CauseIP [7:2];
+
     sm_register_c #(8) r_cp0_CauseIP(clk, rst_n, cp0_CauseIP_next, cp0_CauseIP);
 
     // Exception Code

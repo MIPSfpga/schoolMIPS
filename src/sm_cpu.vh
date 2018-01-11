@@ -58,3 +58,8 @@
                               //         CP0 [Rd, Sel] = Rt
 `define S_NOP       5'b00000  // No Operation
 `define S_ANY       5'b?????
+
+//PC_new selector
+`define PC_FLOW     2'b00
+`define PC_EXC      2'b01
+`define PC_ERET     2'b10
