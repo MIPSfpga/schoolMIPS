@@ -33,8 +33,8 @@ module sm_cpz
     output [31:0] cp0_EPC,          // the address at which processing resumes
                                     // after an exception has been serviced
     output [31:0] cp0_ExcHandler,   // Exception Handler Addr
-    output        cp0_ExcRequest,   // request for Exception
-    output        cp0_ExcIsSync,    // the requesting Exception is synchronous
+    output        cp0_ExcAsync,  // request for Asynchronous Exception (interrupt)
+    output        cp0_ExcSync,   // request for  Synchronous Exception (overflow and etc)
     input         cp0_ExcEret,      // return from Exception
 
     input  [ 4:0] cp0_regNum,       // cp0 register access num
@@ -142,8 +142,10 @@ module sm_cpz
     sm_register_c  r_cp0_StatusEXL(clk, rst_n, cp0_StatusEXL_new, cp0_StatusEXL);
     
     // Exception request output wires
-    assign cp0_ExcRequest = (cp0_RequestForSync | cp0_RequestForAsync) & ~cp0_StatusEXL;
-    assign cp0_ExcIsSync  = cp0_RequestForSync;
+    assign cp0_ExcAsync = cp0_RequestForAsync & ~cp0_StatusEXL;
+    assign cp0_ExcSync  = cp0_RequestForSync  & ~cp0_StatusEXL;
+
+    assign cp0_ExcRequest  = cp0_ExcAsync | cp0_ExcSync;
 
     // ####################################################################
     // Cause register
