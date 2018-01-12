@@ -92,26 +92,26 @@ module sm_testbench;
             $write("   ");
 
             casez( {cmdOper, cmdFunk, cmdRs} )
-                default               : $write ("new/unknown");
+                default                         : $write ("new/unknown           ");
 
-                { `C_SPEC,  `F_ADDU, `S_ANY } : $write ("addu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_OR  , `S_ANY } : $write ("or    $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SRL , `S_ANY } : $write ("srl   $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SLTU, `S_ANY } : $write ("sltu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SUBU, `S_ANY } : $write ("subu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_ADDU, `S_ANY }   : $write ("addu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_OR  , `S_ANY }   : $write ("or    $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_SRL , `S_ANY }   : $write ("srl   $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_SLTU, `S_ANY }   : $write ("sltu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_SUBU, `S_ANY }   : $write ("subu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
                  
-                { `C_ADDIU, `F_ANY , `S_ANY } : $write ("addiu $%1d, $%1d, %1d", cmdRt, cmdRs, cmdImm);
-                { `C_LUI,   `F_ANY , `S_ANY } : $write ("lui   $%1d, %1d",       cmdRt, cmdImm);
-                { `C_LW,    `F_ANY , `S_ANY } : $write ("lw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
-                { `C_SW,    `F_ANY , `S_ANY } : $write ("sw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
+                { `C_ADDIU, `F_ANY , `S_ANY }   : $write ("addiu $%1d, $%1d, %2d", cmdRt, cmdRs, cmdImm);
+                { `C_LUI,   `F_ANY , `S_ANY }   : $write ("lui   $%1d, %2d      ", cmdRt, cmdImm);
+                { `C_LW,    `F_ANY , `S_ANY }   : $write ("lw    $%1d, %2d($%1d)", cmdRt, cmdImm, cmdRs);
+                { `C_SW,    `F_ANY , `S_ANY }   : $write ("sw    $%1d, %2d($%1d)", cmdRt, cmdImm, cmdRs);
                 
-                { `C_BEQ,   `F_ANY , `S_ANY } : $write ("beq   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
-                { `C_BNE,   `F_ANY , `S_ANY } : $write ("bne   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
+                { `C_BEQ,   `F_ANY , `S_ANY }   : $write ("beq   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
+                { `C_BNE,   `F_ANY , `S_ANY }   : $write ("bne   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
 
-                { `C_COP0, `F_ANY, `S_COP0_MF } : $write ("mfc0  $%1d, $%1d, %1d", cmdRt, cmdRd, cmdSel);
-                { `C_COP0, `F_ANY, `S_COP0_MT } : $write ("mtc0  $%1d, $%1d, %1d", cmdRt, cmdRd, cmdSel);
-                { `C_COP0, `F_ERET, `S_ERET   } : $write ("eret");
-                { `C_NOP,  `F_NOP,  `S_NOP    } : $write ("nop");
+                { `C_COP0, `F_ANY, `S_COP0_MF } : $write ("mfc0  $%1d, $%1d, %2d", cmdRt, cmdRd, cmdSel);
+                { `C_COP0, `F_ANY, `S_COP0_MT } : $write ("mtc0  $%1d, $%1d, %2d", cmdRt, cmdRd, cmdSel);
+                { `C_COP0, `F_ERET, `S_ERET   } : $write ("eret            ");
+                { `C_NOP,  `F_NOP,  `S_NOP    } : $write ("nop             ");
 
             endcase
         end
@@ -128,11 +128,14 @@ module sm_testbench;
     begin
 
     `ifdef SM_CONFIG_PIPELINE
-        $write ("%5d  pc = %2d  pcaddr = %h  instr = %h   v0 = %1d", 
+        $write ("%5d  pc = %2h  pc_F = %h  instr_D = %h   v0 = %1d", 
                   cycle, regData, (regData << 2), sm_top.sm_cpu.instr_D, sm_top.sm_cpu.rf.rf[2]);
-        disasmInstr(sm_top.sm_cpu.instr_D);
+        disasmInstr(sm_top.sm_cpu.instr_D); $write (" ");
+        disasmInstr(sm_top.sm_cpu.instr_E); $write (" ");
+        disasmInstr(sm_top.sm_cpu.instr_M); $write (" ");
+        disasmInstr(sm_top.sm_cpu.instr_W);
     `else
-        $write ("%5d  pc = %2d  pcaddr = %h  instr = %h   v0 = %1d", 
+        $write ("%5d  pc = %2h  pcaddr = %h  instr = %h   v0 = %1d", 
                   cycle, regData, (regData << 2), sm_top.sm_cpu.instr, sm_top.sm_cpu.rf.rf[2]);
         disasmInstr(sm_top.sm_cpu.instr);
     `endif
