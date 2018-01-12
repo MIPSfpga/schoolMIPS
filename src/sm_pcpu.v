@@ -216,6 +216,10 @@ module sm_pcpu
     sm_register_cs      r_cw_cpzExcEret_E  (clk, rst_n, hz_flush_n_E, cw_cpzExcEret_D,  cw_cpzExcEret_E);
     sm_register_cs      r_cw_cpzToReg_E    (clk, rst_n, hz_flush_n_E, cw_cpzToReg_D,    cw_cpzToReg_E);
 
+    //instruction code for debug
+    wire [31:0] instr_E;
+    sm_register_cs #(32) r_instr_E  (clk, rst_n, hz_flush_n_E, instr_D, instr_E);
+
     // **********************************************************
     // E - Execution
     // **********************************************************
@@ -281,6 +285,10 @@ module sm_pcpu
     sm_register_c r_cw_cpzExcEret_M  (clk, rst_n, cw_cpzExcEret_E,  cw_cpzExcEret_M);
     sm_register_c r_cw_cpzToReg_M    (clk, rst_n, cw_cpzToReg_E,    cw_cpzToReg_M);
 
+    //instruction code for debug
+    wire [31:0] instr_M;
+    sm_register #(32) r_instr_M  (clk, instr_E, instr_M);
+
     // **********************************************************
     // M - Memory
     // **********************************************************
@@ -332,6 +340,10 @@ module sm_pcpu
     sm_register_c r_cw_memToReg_W (clk, rst_n, cw_memToReg_M, cw_memToReg_W);
     sm_register_c r_cw_cpzToReg_W (clk, rst_n, cw_cpzToReg_M, cw_cpzToReg_W);
     sm_register_c r_cw_regWrite_W (clk, rst_n, cw_regWrite_M, cw_regWrite_W);
+
+    //instruction code for debug
+    wire [31:0] instr_W;
+    sm_register #(32) r_instr_W (clk, instr_M, instr_W);
 
     // **********************************************************
     // W - Writeback
