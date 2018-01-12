@@ -133,7 +133,7 @@ module sm_cpz
     // Exception request input wires
     // async (imprecise) - EPC contains the next instruction (example: interrupt)
     // sync  (precise)   - EPC contains current instruction  (example: overflow )
-    wire cp0_RequestForAsync = cp0_CauseIP && cp0_StatusIM; 
+    wire cp0_RequestForAsync = |(cp0_CauseIP & cp0_StatusIM); 
     wire cp0_RequestForSync  = cp0_ExcRI | cp0_ExcOv;
 
     // Exception Level
@@ -169,7 +169,8 @@ module sm_cpz
     wire [ 7:0] cp0_CauseIP_next;
     assign cp0_CauseIP_next [1:0] = cp0_Cause_load ? cp0_regWD [9:8] : cp0_CauseIP [1:0];
 
-    assign cp0_CauseIP_next [7:2] = cp0_StatusEXL ? cp0_CauseIP [7:2] :
+    assign cp0_CauseIP_next [7:2] = cp0_ExcEret   ? 6'b0              :
+                                    cp0_StatusEXL ? cp0_CauseIP [7:2] :
                                     cp0_StatusIE  ? cp0_ExcIP         : cp0_CauseIP [7:2];
 
     sm_register_c #(8) r_cp0_CauseIP(clk, rst_n, cp0_CauseIP_next, cp0_CauseIP);
