@@ -36,6 +36,7 @@ module sm_pcpu
     wire hz_cancel_branch_F;
     wire hz_stall_n_D;
     wire hz_flush_n_D;   //flush D stage
+    wire [1:0] hz_forward_EPC_F;
 
     //program counter
     wire [31:0] pc_F;
@@ -45,8 +46,15 @@ module sm_pcpu
 
     wire [31:0] cp0_ExcHandler_M;
     wire [31:0] cp0_EPC_M;
+    wire [31:0] writeData_E;
+    wire [31:0] writeData_M;
+
+    wire [31:0] EPC_F     = ( hz_forward_EPC_F == `HZ_FW_EF ) ? writeData_E :
+                            ( hz_forward_EPC_F == `HZ_FW_MF ) ? writeData_M :
+                           /* hz_forward_EPC_F == `HZ_FW_NONE */ cp0_EPC_M;
+
     wire [31:0] pcNew_F   = cw_pcExc_D == `PC_EXC  ?  cp0_ExcHandler_M :
-                            cw_pcExc_D == `PC_ERET ?  cp0_EPC_M        :
+                            cw_pcExc_D == `PC_ERET ?  EPC_F            :
                          /* cw_pcExc_D == `PC_FLOW */ pcFlow_F;
 
     sm_register_we #(32) r_pc_f (clk ,rst_n, hz_stall_n_F, pcNew_F, pc_F);
@@ -229,7 +237,7 @@ module sm_pcpu
                             ( hz_forwardA_E == `HZ_FW_ME ) ? aluResult_M : regData1_E );
 
     //data to write from RF to Mem
-    wire [31:0] writeData_E = ( hz_forwardB_E == `HZ_FW_WE ) ? writeData_W : (
+    assign      writeData_E = ( hz_forwardB_E == `HZ_FW_WE ) ? writeData_W : (
                               ( hz_forwardB_E == `HZ_FW_ME ) ? aluResult_M : regData2_E );
 
     wire [31:0] aluSrcB_E =   cw_aluSrc_E ? signImm_E : writeData_E;
@@ -256,7 +264,6 @@ module sm_pcpu
 
     //stage data border
     wire [31:0] epcNext_M;
-    wire [31:0] writeData_M;
     wire [ 4:0] writeReg_M;
     wire [ 4:0] instrRd_M;
     wire [ 2:0] instrSel_M;
@@ -384,17 +391,29 @@ module sm_pcpu
         .cw_regWrite_E  ( cw_regWrite_E ),
         .cw_memToReg_M  ( cw_memToReg_M ),
         .hz_forwardA_D  ( hz_forwardA_D ),
-        .hz_forwardB_D  ( hz_forwardB_D )
+        .hz_forwardB_D  ( hz_forwardB_D ),
+
+        .cw_cpzToReg_E  ( cw_cpzToReg_E )
     );
 
     // hazards prototypes
+    wire   hz_branch_after_irq = cw_pcSrc_D & irqRequest_E;
+    
     assign hz_flush_n_D = ~((cw_pcSrc_D & ~irqRequest_E) 
                            | cw_cpzExcEret_D 
                            | cp0_ExcSync_D);
     
-    assign hz_cancel_branch_F = cw_pcSrc_D & irqRequest_E;
-    assign hz_forwardEPC_E = cw_branch_D & irqRequest_E;
+    assign hz_cancel_branch_F  = hz_branch_after_irq;
+    assign hz_forwardEPC_E     = hz_branch_after_irq;
     assign hz_irq_processing_D = irqRequest_E | irqRequest_M;
+
+    // forward EPC from E or M stage
+    assign hz_forward_EPC_F = ( cw_cpzExcEret_D && writeData_E && 
+                                instrRd_E  == `CP0_REG_NUM_EPC && 
+                                instrSel_E == `CP0_REG_SEL_EPC ) ? `HZ_FW_EF :
+                              ( cw_cpzExcEret_D && writeData_M && 
+                                instrRd_M  == `CP0_REG_NUM_EPC && 
+                                instrSel_M == `CP0_REG_SEL_EPC ) ? `HZ_FW_MF : `HZ_FW_NONE;
 
 endmodule
 
@@ -422,7 +441,9 @@ module sm_hazard_unit
     input           cw_regWrite_E,
     input           cw_memToReg_M,
     output          hz_forwardA_D,  //forward srcA
-    output          hz_forwardB_D   //forward srcB
+    output          hz_forwardB_D,  //forward srcB
+
+    input           cw_cpzToReg_E
 );
     //data forwarding
     assign hz_forwardA_E =  ( instrRs_E == 5'b0                        ) ? `HZ_FW_NONE : (
@@ -434,7 +455,7 @@ module sm_hazard_unit
                             ( instrRt_E == writeReg_W && cw_regWrite_W ) ? `HZ_FW_WE   : `HZ_FW_NONE ));
 
     //stalling for memory fetch
-    wire hz_mem_stall = cw_memToReg_E && ( instrRs_D == writeReg_E || instrRt_D == writeReg_E );
+    wire hz_mem_stall = ( cw_cpzToReg_E || cw_memToReg_E ) && ( instrRs_D == writeReg_E || instrRt_D == writeReg_E );
 
     //control forwarding && branch stalling
     assign hz_forwardA_D = ( instrRs_D != 5'b0 && instrRs_D == writeReg_M && cw_regWrite_M );

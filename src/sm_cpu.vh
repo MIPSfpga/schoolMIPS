@@ -63,3 +63,19 @@
 `define PC_FLOW     2'b00
 `define PC_EXC      2'b01
 `define PC_ERET     2'b10
+
+//cp0 registers
+`define CP0_REG_NUM_COUNT   5'd9
+`define CP0_REG_SEL_COUNT   3'd0
+`define CP0_REG_NUM_COMPARE 5'd11
+`define CP0_REG_SEL_COMPARE 3'd0
+`define CP0_REG_NUM_STATUS  5'd12
+`define CP0_REG_SEL_STATUS  3'd0
+`define CP0_REG_NUM_CAUSE   5'd13
+`define CP0_REG_SEL_CAUSE   3'd0
+`define CP0_REG_NUM_EPC     5'd14
+`define CP0_REG_SEL_EPC     3'd0
+
+`define CP0_EXCCODE_INT     5'h00
+`define CP0_EXCCODE_RI      5'h0a
+`define CP0_EXCCODE_OV      5'h0c
