@@ -107,7 +107,7 @@ module sm_pcpu
 
     sm_register_file rf
     (
-        .clk        ( ~clk          ),
+        .clk        ( clk           ),
         .a0         ( regAddr       ),
         .a1         ( instrRs_D     ),
         .a2         ( instrRt_D     ),
