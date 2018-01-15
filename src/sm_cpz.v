@@ -138,7 +138,7 @@ module sm_cpz
     assign cp0_ExcAsync = cp0_ExcAsyncAck     & ~cp0_StatusEXL;
     assign cp0_ExcSync  = cp0_RequestForSync  & ~cp0_StatusEXL;
 
-    assign cp0_ExcRequest  = cp0_ExcAsync | cp0_ExcSync;
+    wire cp0_ExcRequest = cp0_ExcAsync | cp0_ExcSync;
 
     // ####################################################################
     // Cause register
