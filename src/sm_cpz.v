@@ -33,6 +33,8 @@ module sm_cpz
     output [31:0] cp0_EPC,          // the address at which processing resumes
                                     // after an exception has been serviced
     output [31:0] cp0_ExcHandler,   // Exception Handler Addr
+    output        cp0_ExcAsyncReq,  
+    input         cp0_ExcAsyncAck,
     output        cp0_ExcAsync,  // request for Asynchronous Exception (interrupt)
     output        cp0_ExcSync,   // request for  Synchronous Exception (overflow and etc)
     input         cp0_ExcEret,      // return from Exception
@@ -130,20 +132,24 @@ module sm_cpz
     wire [ 7:0] cp0_StatusIM_new = cp0_regWD [15:8];
     sm_register_we #(8) r_cp0_StatusIM(clk, rst_n, cp0_Status_load, cp0_StatusIM_new, cp0_StatusIM);
 
+    // TODO!
+    // cp0_ExcAsyncReq is folowwed back in cp0_ExcAsyncAck
+    assign cp0_ExcAsyncReq =  |(cp0_CauseIP & cp0_StatusIM) & ~cp0_StatusEXL;
+
     // Exception request input wires
     // async (imprecise) - EPC contains the next instruction (example: interrupt)
     // sync  (precise)   - EPC contains current instruction  (example: overflow )
-    wire cp0_RequestForAsync = |(cp0_CauseIP & cp0_StatusIM); 
+    //wire cp0_RequestForAsync = |(cp0_CauseIP & cp0_StatusIM); 
     wire cp0_RequestForSync  = cp0_ExcRI | cp0_ExcOv;
 
     // Exception Level
     wire cp0_StatusEXL_new = cp0_Status_load ? cp0_regWD [1] :
                              cp0_ExcEret     ? 1'b0          :
-                             cp0_StatusEXL | cp0_RequestForAsync | cp0_RequestForSync;
+                             cp0_StatusEXL | cp0_ExcAsyncAck | cp0_RequestForSync;
     sm_register_c  r_cp0_StatusEXL(clk, rst_n, cp0_StatusEXL_new, cp0_StatusEXL);
     
     // Exception request output wires
-    assign cp0_ExcAsync = cp0_RequestForAsync & ~cp0_StatusEXL;
+    assign cp0_ExcAsync = cp0_ExcAsyncAck     & ~cp0_StatusEXL;
     assign cp0_ExcSync  = cp0_RequestForSync  & ~cp0_StatusEXL;
 
     assign cp0_ExcRequest  = cp0_ExcAsync | cp0_ExcSync;

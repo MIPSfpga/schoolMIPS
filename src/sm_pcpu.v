@@ -29,18 +29,19 @@ module sm_pcpu
 
     //control wires
     wire cw_pcSrc_D;
-    wire cw_epcSrc_D;
     wire [ 1:0] cw_pcExc_D;
 
     //hazard wires
     wire hz_stall_n_F;
+    wire hz_cancel_branch_F;
     wire hz_stall_n_D;
+    wire hz_flush_n_D;   //flush D stage
 
     //program counter
     wire [31:0] pc_F;
     wire [31:0] pcBranch_D;
     wire [31:0] pcNext_F  = pc_F + 1;
-    wire [31:0] pcFlow_F  = ~cw_pcSrc_D ? pcNext_F : pcBranch_D;
+    wire [31:0] pcFlow_F  = cw_pcSrc_D & ~hz_cancel_branch_F ? pcBranch_D : pcNext_F;
 
     wire [31:0] cp0_ExcHandler_M;
     wire [31:0] cp0_EPC_M;
@@ -50,26 +51,17 @@ module sm_pcpu
 
     sm_register_we #(32) r_pc_f (clk ,rst_n, hz_stall_n_F, pcNew_F, pc_F);
 
-    //next EPC value
-    wire [31:0] epcNext_F = cw_epcSrc_D ? pc_F : pcFlow_F;
-
-    //hardware interrupts input
-    wire cp0_TI_M;                               // cp0 timer interrupt output
-    wire [ 5:0] cp0_ExcIP_F = { cp0_TI_M, 5'b0}; // TODO: connect external interrupts
-
     //program memory access
     assign imAddr = pc_F;
     wire [31:0] instr_F = imData;
 
     //stage data border
+    wire [31:0] pc_D;
     wire [31:0] pcNext_D;
     wire [31:0] instr_D;
-    wire [31:0] epcNext_D;
-    wire [ 5:0] cp0_ExcIP_D;
-    sm_register_wes #(32) r_pcNext_D (clk, rst_n, ~cw_pcSrc_D, hz_stall_n_D, pcNext_F, pcNext_D);
-    sm_register_wes #(32) r_instr_D  (clk, rst_n, ~cw_pcSrc_D, hz_stall_n_D, instr_F, instr_D);
-    sm_register_wes #(32) r_epcNext_D   (clk, rst_n, ~cw_pcSrc_D, hz_stall_n_D, epcNext_F, epcNext_D);
-    sm_register_wes #( 6) r_cp0_ExcIP_D (clk, rst_n, ~cw_pcSrc_D, hz_stall_n_D, cp0_ExcIP_F, cp0_ExcIP_D);
+    sm_register_wes #(32) r_pc_D (clk, rst_n, hz_flush_n_D, hz_stall_n_D, pc_F, pc_D);
+    sm_register_wes #(32) r_pcNext_D (clk, rst_n, hz_flush_n_D, hz_stall_n_D, pcNext_F, pcNext_D);
+    sm_register_wes #(32) r_instr_D  (clk, rst_n, hz_flush_n_D, hz_stall_n_D, instr_F, instr_D);
 
     // **********************************************************
     // D - Instruction Decode & Register
@@ -86,6 +78,7 @@ module sm_pcpu
     //hazard wires
     wire hz_forwardA_D;  //forward srcA
     wire hz_forwardB_D;  //forward srcB
+    wire hz_irq_processing_D;
 
     // instaturction fields
     wire [ 5:0] instrOp_D  = instr_D[31:26];
@@ -142,9 +135,12 @@ module sm_pcpu
     wire        cw_cpzExcEret_D;
     wire        excRiFound_D;
 
-    //stub for future
-    wire        cp0_ExcAsync_M;
+    //exceptions
+    wire        cp0_ExcAsyncReq_M;
+    wire        irqRequest_D  = cp0_ExcAsyncReq_M & ~hz_irq_processing_D;  
     wire        cp0_ExcSync_D = excRiFound_D;  //TODO: add overflow from E stage
+
+    wire [31:0] epcNext_D =  cp0_ExcSync_D ? pc_D : pcFlow_F;
 
     sm_control sm_control
     (
@@ -164,7 +160,7 @@ module sm_pcpu
         .cw_cpzToReg    ( cw_cpzToReg_D    ),
         .cw_cpzRegWrite ( cw_cpzRegWrite_D ),
         .cw_cpzExcEret  ( cw_cpzExcEret_D  ),
-        .cp0_ExcAsync   ( cp0_ExcAsync_M   ),
+        .cp0_ExcAsync   ( irqRequest_D     ),
         .cp0_ExcSync    ( cp0_ExcSync_D    ),
         .cw_epcSrc      ( cw_epcSrc_D      ),
         .excRiFound     ( excRiFound_D     ) 
@@ -182,7 +178,7 @@ module sm_pcpu
     wire [ 4:0] instrSa_E;
     wire [ 2:0] instrSel_E;
     wire        excRiFound_E;
-    wire [ 5:0] cp0_ExcIP_E;
+    wire        irqRequest_E;
     sm_register_cs #(32) r_epcNext_E (clk, rst_n, hz_flush_n_E, epcNext_D,   epcNext_E);
     sm_register_cs #(32) r_pcNext_E  (clk, rst_n, hz_flush_n_E, pcNext_D,    pcNext_E);
     sm_register_cs #(32) r_regData1_E(clk, rst_n, hz_flush_n_E, regData1_D,  regData1_E);
@@ -194,7 +190,7 @@ module sm_pcpu
     sm_register_cs #( 5) r_instrSa_E (clk, rst_n, hz_flush_n_E, instrSa_D,   instrSa_E);
     sm_register_cs #( 3) r_instrSel_E(clk, rst_n, hz_flush_n_E, instrSel_D,  instrSel_E);
     sm_register_cs       r_excRiFound_E (clk, rst_n, hz_flush_n_E, excRiFound_D, excRiFound_E);
-    sm_register_cs #( 6) r_cp0_ExcIP_E  (clk, rst_n, hz_flush_n_E, cp0_ExcIP_D,  cp0_ExcIP_E);
+    sm_register_cs       r_irqRequest_E  (clk, rst_n, hz_flush_n_E, irqRequest_D,  irqRequest_E);
 
     //stage control border
     wire        cw_regWrite_E;
@@ -227,6 +223,7 @@ module sm_pcpu
     //hazard wires
     wire [ 1:0] hz_forwardA_E;  //forward srcA
     wire [ 1:0] hz_forwardB_E;  //forward srcB
+    wire        hz_forwardEPC_E;
 
     wire [31:0] aluSrcA_E = ( hz_forwardA_E == `HZ_FW_WE ) ? writeData_W : (
                             ( hz_forwardA_E == `HZ_FW_ME ) ? aluResult_M : regData1_E );
@@ -254,6 +251,9 @@ module sm_pcpu
     //reg to write
     wire [ 4:0] writeReg_E = cw_regDst_E ? instrRd_E : instrRt_E;
 
+    //exceptions
+    wire [31:0] epcNext_E_new = hz_forwardEPC_E ? pcBranch_D : epcNext_E;
+
     //stage data border
     wire [31:0] epcNext_M;
     wire [31:0] writeData_M;
@@ -261,15 +261,15 @@ module sm_pcpu
     wire [ 4:0] instrRd_M;
     wire [ 2:0] instrSel_M;
     wire        excRiFound_M;
-    wire [ 5:0] cp0_ExcIP_M;
-    sm_register #(32) r_epcNext_M   (clk, epcNext_E,   epcNext_M);
+    wire        irqRequest_M;
+    sm_register #(32) r_epcNext_M   (clk, epcNext_E_new,   epcNext_M);
     sm_register #(32) r_aluResult_M (clk, aluResult_E, aluResult_M);
     sm_register #(32) r_writeData_M (clk, writeData_E, writeData_M);
     sm_register #( 5) r_writeReg_M  (clk, writeReg_E,  writeReg_M);
     sm_register #( 5) r_instrRd_M   (clk, instrRd_E,   instrRd_M);
     sm_register #( 3) r_instrSel_M  (clk, instrSel_E,  instrSel_M);
     sm_register       r_excRiFound_M(clk, excRiFound_E, excRiFound_M);
-    sm_register_c #( 6) r_cp0_ExcIP_M (clk, rst_n, cp0_ExcIP_E,  cp0_ExcIP_M);
+    sm_register_c     r_irqRequest_M (clk, rst_n, irqRequest_E,  irqRequest_M);
 
     //stage control border
     wire          cw_regWrite_M;
@@ -304,6 +304,9 @@ module sm_pcpu
     wire cp0_ExcOv_M  = 1'b0;   //TODO: overflow from E stage
     wire [31:0] cp0_Data_M;
 
+    wire cp0_TI_M;
+    wire [5:0] cp0_ExcIP_M = { cp0_TI_M, 5'b0 };
+
     sm_cpz sm_cpz
     (
         .clk            ( clk              ),
@@ -311,7 +314,8 @@ module sm_pcpu
         .cp0_PC         ( epcNext_M        ),
         .cp0_EPC        ( cp0_EPC_M        ),
         .cp0_ExcHandler ( cp0_ExcHandler_M ),
-        .cp0_ExcAsync   ( cp0_ExcAsync_M   ),
+        .cp0_ExcAsyncReq ( cp0_ExcAsyncReq_M ),
+        .cp0_ExcAsyncAck ( irqRequest_M    ),
         .cp0_ExcSync    ( cp0_ExcSync_M    ),
         .cp0_ExcEret    ( cw_cpzExcEret_M  ),
         .cp0_regNum     ( instrRd_M        ),
@@ -382,6 +386,15 @@ module sm_pcpu
         .hz_forwardA_D  ( hz_forwardA_D ),
         .hz_forwardB_D  ( hz_forwardB_D )
     );
+
+    // hazards prototypes
+    assign hz_flush_n_D = ~((cw_pcSrc_D & ~irqRequest_E) 
+                           | cw_cpzExcEret_D 
+                           | cp0_ExcSync_D);
+    
+    assign hz_cancel_branch_F = cw_pcSrc_D & irqRequest_E;
+    assign hz_forwardEPC_E = cw_branch_D & irqRequest_E;
+    assign hz_irq_processing_D = irqRequest_E | irqRequest_M;
 
 endmodule
 

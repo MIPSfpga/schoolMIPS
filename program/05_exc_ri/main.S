@@ -29,4 +29,5 @@ exception:  or      $t1, $0, $v0        # save v0
             addiu   $v0, $v0, 0x1       # increment EPC to skip error
             mtc0    $v0, c0_EPC         # save cp0.EPC
             or      $v0, $0, $t1        # restore v0
+            nop
             eret

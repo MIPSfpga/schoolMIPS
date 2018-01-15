@@ -133,7 +133,7 @@ module sm_cpu
     wire [31:0] cp0_regRD;                  // cp0 register access Read Data
     wire [31:0] cp0_regWD   = rd2;          // cp0 register access Write Data
     wire        cp0_TI;                     // cp0 timer interrupt
-    wire [ 5:0] cp0_ExcIP = { cp0_TI, 4'b0 }; //TODO: External Interrupt
+    wire [ 5:0] cp0_ExcIP = { cp0_TI, 5'b0 }; //TODO: External Interrupt
     wire        cp0_ExcRI   = excRiFound;   // Reserved Instruction exception
     wire        cp0_ExcOv   = 1'b0;         //TODO: Arithmetic Overflow exception
     
@@ -146,7 +146,8 @@ module sm_cpu
         .cp0_PC         ( cp0_PC         ),
         .cp0_EPC        ( cp0_EPC        ),
         .cp0_ExcHandler ( cp0_ExcHandler ),
-        .cp0_ExcAsync   ( cp0_ExcAsync   ),
+        .cp0_ExcAsyncReq( cp0_ExcAsync   ),
+        .cp0_ExcAsyncAck( cp0_ExcAsync   ),
         .cp0_ExcSync    ( cp0_ExcSync    ),
         .cp0_ExcEret    ( cw_cpzExcEret  ),
         .cp0_regNum     ( cp0_regNum     ),

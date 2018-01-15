@@ -76,4 +76,7 @@ Disassembly of section .text:
  100:	24080038 	addiu	t0,zero,56
  104:	40885800 	mtc0	t0,c0_compare
  108:	40804800 	mtc0	zero,c0_count
- 10c:	42000018 	eret
+ 10c:	00000000 	sll	zero,zero,0x0
+ 110:	00000000 	sll	zero,zero,0x0
+ 114:	00000000 	sll	zero,zero,0x0
+ 118:	42000018 	eret
