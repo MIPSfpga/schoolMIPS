@@ -36,7 +36,7 @@ module sm_pcpu
     wire hz_cancel_branch_F;
     wire hz_stall_n_D;
     wire hz_flush_n_D;   //flush D stage
-    wire [1:0] hz_forward_EPC_F;
+    wire [1:0] hz_forwardEPC_F;
 
     //program counter
     wire [31:0] pc_F;
@@ -49,9 +49,9 @@ module sm_pcpu
     wire [31:0] writeData_E;
     wire [31:0] writeData_M;
 
-    wire [31:0] EPC_F     = ( hz_forward_EPC_F == `HZ_FW_EF ) ? writeData_E :
-                            ( hz_forward_EPC_F == `HZ_FW_MF ) ? writeData_M :
-                           /* hz_forward_EPC_F == `HZ_FW_NONE */ cp0_EPC_M;
+    wire [31:0] EPC_F     = ( hz_forwardEPC_F == `HZ_FW_EF ) ? writeData_E :
+                            ( hz_forwardEPC_F == `HZ_FW_MF ) ? writeData_M :
+                           /* hz_forwardEPC_F == `HZ_FW_NONE */ cp0_EPC_M;
 
     wire [31:0] pcNew_F   = cw_pcExc_D == `PC_EXC  ?  cp0_ExcHandler_M :
                             cw_pcExc_D == `PC_ERET ?  EPC_F            :
@@ -86,7 +86,7 @@ module sm_pcpu
     //hazard wires
     wire hz_forwardA_D;  //forward srcA
     wire hz_forwardB_D;  //forward srcB
-    wire hz_irq_processing_D;
+    wire hz_irq_process_D;
 
     // instaturction fields
     wire [ 5:0] instrOp_D  = instr_D[31:26];
@@ -145,7 +145,7 @@ module sm_pcpu
 
     //exceptions
     wire        cp0_ExcAsyncReq_M;
-    wire        irqRequest_D  = cp0_ExcAsyncReq_M & ~hz_irq_processing_D;  
+    wire        irqRequest_D  = cp0_ExcAsyncReq_M & ~hz_irq_process_D;  
     wire        cp0_ExcSync_D = excRiFound_D;  //TODO: add overflow from E stage
 
     wire [31:0] epcNext_D =  cp0_ExcSync_D ? pc_D : pcFlow_F;
@@ -393,27 +393,24 @@ module sm_pcpu
         .hz_forwardA_D  ( hz_forwardA_D ),
         .hz_forwardB_D  ( hz_forwardB_D ),
 
-        .cw_cpzToReg_E  ( cw_cpzToReg_E )
+        .cw_cpzToReg_E      ( cw_cpzToReg_E      ),
+        .cw_pcSrc_D         ( cw_pcSrc_D         ),
+        .irqRequest_E       ( irqRequest_E       ),
+        .irqRequest_M       ( irqRequest_M       ),
+        .hz_flush_n_D       ( hz_flush_n_D       ),
+        .cw_cpzExcEret_D    ( cw_cpzExcEret_D    ),
+        .cp0_ExcSync_D      ( cp0_ExcSync_D      ),
+        .hz_cancel_branch_F ( hz_cancel_branch_F ),
+        .hz_forwardEPC_E    ( hz_forwardEPC_E    ),
+        .hz_irq_process_D   ( hz_irq_process_D   ),
+        .hz_forwardEPC_F    ( hz_forwardEPC_F    ),
+        .cw_cpzRegWrite_E   ( cw_cpzRegWrite_E   ),
+        .cw_cpzRegWrite_M   ( cw_cpzRegWrite_M   ),
+        .instrRd_E          ( instrRd_E          ),
+        .instrRd_M          ( instrRd_M          ),
+        .instrSel_E         ( instrSel_E         ),
+        .instrSel_M         ( instrSel_M         )
     );
-
-    // hazards prototypes
-    wire   hz_branch_after_irq = cw_pcSrc_D & irqRequest_E;
-    
-    assign hz_flush_n_D = ~((cw_pcSrc_D & ~irqRequest_E) 
-                           | cw_cpzExcEret_D 
-                           | cp0_ExcSync_D);
-    
-    assign hz_cancel_branch_F  = hz_branch_after_irq;
-    assign hz_forwardEPC_E     = hz_branch_after_irq;
-    assign hz_irq_processing_D = irqRequest_E | irqRequest_M;
-
-    // forward EPC from E or M stage
-    assign hz_forward_EPC_F = ( cw_cpzExcEret_D && writeData_E && 
-                                instrRd_E  == `CP0_REG_NUM_EPC && 
-                                instrSel_E == `CP0_REG_SEL_EPC ) ? `HZ_FW_EF :
-                              ( cw_cpzExcEret_D && writeData_M && 
-                                instrRd_M  == `CP0_REG_NUM_EPC && 
-                                instrSel_M == `CP0_REG_SEL_EPC ) ? `HZ_FW_MF : `HZ_FW_NONE;
 
 endmodule
 
@@ -443,7 +440,23 @@ module sm_hazard_unit
     output          hz_forwardA_D,  //forward srcA
     output          hz_forwardB_D,  //forward srcB
 
-    input           cw_cpzToReg_E
+    input           cw_cpzToReg_E,
+    input           cw_pcSrc_D,
+    input           irqRequest_E,
+    input           irqRequest_M,
+    output          hz_flush_n_D,      //flush_n D stage
+    input           cw_cpzExcEret_D,
+    input           cp0_ExcSync_D,
+    output          hz_cancel_branch_F,
+    output          hz_forwardEPC_E,
+    output          hz_irq_process_D,
+    output   [ 1:0] hz_forwardEPC_F,
+    input           cw_cpzRegWrite_E,
+    input           cw_cpzRegWrite_M,
+    input   [ 4:0]  instrRd_E,
+    input   [ 4:0]  instrRd_M,
+    input   [ 2:0]  instrSel_E,
+    input   [ 2:0]  instrSel_M
 );
     //data forwarding
     assign hz_forwardA_E =  ( instrRs_E == 5'b0                        ) ? `HZ_FW_NONE : (
@@ -467,6 +480,28 @@ module sm_hazard_unit
                             );
 
     wire hz_stall = hz_mem_stall || hz_branch_stall;
+
+    //exceptions branch hazards
+    wire   hz_branch_after_irq = cw_pcSrc_D & irqRequest_E;     // when branch was fetched after async exception request
+    assign hz_cancel_branch_F  = hz_branch_after_irq;           // - canceling branch execution
+    assign hz_forwardEPC_E     = hz_branch_after_irq;           // - forwarding branch PC to EPC
+
+    //prevents from continious entering into interrupt handler
+    assign hz_irq_process_D = irqRequest_E | irqRequest_M;
+
+    //flushing D stage
+    assign hz_flush_n_D = ~((cw_pcSrc_D & ~irqRequest_E) // branching when no irq was before
+                           | cw_cpzExcEret_D             // after eret
+                           | cp0_ExcSync_D);             // after sync interrupt
+
+    // forward EPC from E or M stage
+    //  when EPC was written just before ERET
+    assign hz_forwardEPC_F = ( cw_cpzExcEret_D && cw_cpzRegWrite_E && 
+                               instrRd_E  == `CP0_REG_NUM_EPC && 
+                               instrSel_E == `CP0_REG_SEL_EPC ) ? `HZ_FW_EF :
+                             ( cw_cpzExcEret_D && cw_cpzRegWrite_M && 
+                               instrRd_M  == `CP0_REG_NUM_EPC && 
+                               instrSel_M == `CP0_REG_SEL_EPC ) ? `HZ_FW_MF : `HZ_FW_NONE;
 
     //stalling
     assign hz_stall_n_F = ~hz_stall;
