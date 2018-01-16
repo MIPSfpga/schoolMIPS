@@ -307,6 +307,7 @@ module sm_pcpu
 
     //coprocessor 0
     wire cp0_ExcSync_M;         //not used, branch processed on D stage
+    wire cp0_ExcAsync_M;        //not used
     wire cp0_ExcOv_M  = 1'b0;   //TODO: overflow from E stage
     wire [31:0] cp0_Data_M;
 
@@ -322,6 +323,7 @@ module sm_pcpu
         .cp0_ExcHandler ( cp0_ExcHandler_M ),
         .cp0_ExcAsyncReq ( cp0_ExcAsyncReq_M ),
         .cp0_ExcAsyncAck ( irqRequest_M    ),
+        .cp0_ExcAsync   ( cp0_ExcAsync_M   ),
         .cp0_ExcSync    ( cp0_ExcSync_M    ),
         .cp0_ExcEret    ( cw_cpzExcEret_M  ),
         .cp0_regNum     ( instrRd_M        ),
