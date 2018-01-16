@@ -102,6 +102,7 @@ module sm_cpu
     wire        cw_cpzExcEret;      // return from Exception
     wire        excRiFound;         // reserved instruction found
     wire        cw_epcSrc;
+    wire        cw_branch;          // not used
 
     sm_control sm_control
     (
@@ -117,6 +118,7 @@ module sm_cpu
         .aluControl ( aluControl   ),
         .memWrite   ( memWrite     ),
         .memToReg   ( memToReg     ),
+        .branch     ( cw_branch    ),
         .cw_cpzToReg    ( cw_cpzToReg    ),
         .cw_cpzRegWrite ( cw_cpzRegWrite ),
         .cw_cpzExcEret  ( cw_cpzExcEret  ),
@@ -135,7 +137,8 @@ module sm_cpu
     wire        cp0_TI;                     // cp0 timer interrupt
     wire [ 5:0] cp0_ExcIP = { cp0_TI, 5'b0 }; //TODO: External Interrupt
     wire        cp0_ExcRI   = excRiFound;   // Reserved Instruction exception
-    wire        cp0_ExcOv   = 1'b0;         //TODO: Arithmetic Overflow exception
+    wire        cp0_ExcOv   = 1'b0;         // TODO: Arithmetic Overflow exception
+    wire        cp0_ExcAsyncRq;             // IRQ request feedback (used in pipeline)
     
     wire [31:0] cp0_PC = cw_epcSrc ? pc : pc_flow;
 
@@ -146,8 +149,9 @@ module sm_cpu
         .cp0_PC         ( cp0_PC         ),
         .cp0_EPC        ( cp0_EPC        ),
         .cp0_ExcHandler ( cp0_ExcHandler ),
-        .cp0_ExcAsyncReq( cp0_ExcAsync   ),
-        .cp0_ExcAsyncAck( cp0_ExcAsync   ),
+        .cp0_ExcAsyncReq( cp0_ExcAsyncRq ),
+        .cp0_ExcAsyncAck( cp0_ExcAsyncRq ),
+        .cp0_ExcAsync   ( cp0_ExcAsync   ),
         .cp0_ExcSync    ( cp0_ExcSync    ),
         .cp0_ExcEret    ( cw_cpzExcEret  ),
         .cp0_regNum     ( cp0_regNum     ),
