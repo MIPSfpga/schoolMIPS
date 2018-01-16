@@ -146,9 +146,9 @@ module sm_pcpu
     //exceptions
     wire        cp0_ExcAsyncReq_M;
     wire        irqRequest_D  = cp0_ExcAsyncReq_M & ~hz_irq_process_D;  
-    wire        cp0_ExcSync_D = excRiFound_D;  //TODO: add overflow from E stage
-
-    wire [31:0] epcNext_D =  cp0_ExcSync_D ? pc_D : pcFlow_F;
+    wire        cp0_ExcSync_D = excRiFound_D;
+    wire        cw_epcSrc_D;
+    wire [31:0] epcNext_D =  cw_epcSrc_D ? pc_D : pcFlow_F;
 
     sm_control sm_control
     (
@@ -168,8 +168,8 @@ module sm_pcpu
         .cw_cpzToReg    ( cw_cpzToReg_D    ),
         .cw_cpzRegWrite ( cw_cpzRegWrite_D ),
         .cw_cpzExcEret  ( cw_cpzExcEret_D  ),
-        .cp0_ExcAsync   ( irqRequest_D     ),
-        .cp0_ExcSync    ( cp0_ExcSync_D    ),
+        .excAsync       ( irqRequest_D     ),
+        .excSync        ( cp0_ExcSync_D    ),
         .cw_epcSrc      ( cw_epcSrc_D      ),
         .excRiFound     ( excRiFound_D     ) 
     );
