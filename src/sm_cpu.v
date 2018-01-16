@@ -120,8 +120,8 @@ module sm_cpu
         .cw_cpzToReg    ( cw_cpzToReg    ),
         .cw_cpzRegWrite ( cw_cpzRegWrite ),
         .cw_cpzExcEret  ( cw_cpzExcEret  ),
-        .cp0_ExcAsync   ( cp0_ExcAsync   ),
-        .cp0_ExcSync    ( cp0_ExcSync    ),
+        .excAsync       ( cp0_ExcAsync   ),
+        .excSync        ( cp0_ExcSync    ),
         .cw_epcSrc      ( cw_epcSrc      ),
         .excRiFound     ( excRiFound     )
     );
@@ -188,8 +188,8 @@ module sm_control
     output reg       cw_cpzToReg,
     output reg       cw_cpzRegWrite,
     output reg       cw_cpzExcEret,
-    input            cp0_ExcAsync,
-    input            cp0_ExcSync,
+    input            excAsync,
+    input            excSync,
     output           cw_epcSrc,
     output reg       excRiFound     // reserved instruction found
 );
@@ -197,9 +197,9 @@ module sm_control
 
     assign pcSrc = branch & (aluZero == condZero);
 
-    assign cw_epcSrc = cp0_ExcSync;
+    assign cw_epcSrc = excSync;
 
-    wire   exception = cp0_ExcAsync | cp0_ExcSync;
+    wire   exception = excAsync | excSync;
     assign pcExc = exception      ? `PC_EXC  :
                    cw_cpzExcEret  ? `PC_ERET : `PC_FLOW;
 
