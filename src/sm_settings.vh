@@ -15,6 +15,7 @@
 
 `ifdef SM_CONFIG_PIPELINE
     `define SM_CPU sm_pcpu
+    `define SM_FORCE_RF_RDW
 `else
     `define SM_CPU sm_cpu
 `endif

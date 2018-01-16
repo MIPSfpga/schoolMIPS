@@ -87,6 +87,7 @@ module sm_pcpu
     wire hz_forwardA_D;  //forward srcA
     wire hz_forwardB_D;  //forward srcB
     wire hz_irq_process_D;
+    wire hz_flush_n_E;
 
     // instaturction fields
     wire [ 5:0] instrOp_D  = instr_D[31:26];
@@ -106,7 +107,7 @@ module sm_pcpu
 
     sm_register_file rf
     (
-        .clk        ( ~clk          ),
+        .clk        ( clk           ),
         .a0         ( regAddr       ),
         .a1         ( instrRs_D     ),
         .a2         ( instrRt_D     ),
@@ -176,7 +177,6 @@ module sm_pcpu
 
     //stage data border
     wire [31:0] epcNext_E;
-    wire [31:0] pcNext_E;
     wire [31:0] regData1_E;
     wire [31:0] regData2_E;
     wire [31:0] signImm_E;
@@ -188,7 +188,6 @@ module sm_pcpu
     wire        excRiFound_E;
     wire        irqRequest_E;
     sm_register_cs #(32) r_epcNext_E (clk, rst_n, hz_flush_n_E, epcNext_D,   epcNext_E);
-    sm_register_cs #(32) r_pcNext_E  (clk, rst_n, hz_flush_n_E, pcNext_D,    pcNext_E);
     sm_register_cs #(32) r_regData1_E(clk, rst_n, hz_flush_n_E, regData1_D,  regData1_E);
     sm_register_cs #(32) r_regData2_E(clk, rst_n, hz_flush_n_E, regData2_D,  regData2_E);
     sm_register_cs #(32) r_signImm_E (clk, rst_n, hz_flush_n_E, signImm_D,   signImm_E);
