@@ -147,7 +147,7 @@ module sm_pcpu
     //exceptions
     wire        cp0_ExcAsyncReq_M;
     wire        irqRequest_D  = cp0_ExcAsyncReq_M & ~hz_irq_process_D;  
-    wire        cp0_ExcSync_D = excRiFound_D;
+    wire        excSync_D     = excRiFound_D;
     wire        cw_epcSrc_D;
     wire [31:0] epcNext_D =  cw_epcSrc_D ? pc_D : pcFlow_F;
 
@@ -170,7 +170,7 @@ module sm_pcpu
         .cw_cpzRegWrite ( cw_cpzRegWrite_D ),
         .cw_cpzExcEret  ( cw_cpzExcEret_D  ),
         .excAsync       ( irqRequest_D     ),
-        .excSync        ( cp0_ExcSync_D    ),
+        .excSync        ( excSync_D        ),
         .cw_epcSrc      ( cw_epcSrc_D      ),
         .excRiFound     ( excRiFound_D     ) 
     );
@@ -400,7 +400,7 @@ module sm_pcpu
         .irqRequest_M       ( irqRequest_M       ),
         .hz_flush_n_D       ( hz_flush_n_D       ),
         .cw_cpzExcEret_D    ( cw_cpzExcEret_D    ),
-        .cp0_ExcSync_D      ( cp0_ExcSync_D      ),
+        .excSync_D          ( excSync_D          ),
         .hz_cancel_branch_F ( hz_cancel_branch_F ),
         .hz_forwardEPC_E    ( hz_forwardEPC_E    ),
         .hz_irq_process_D   ( hz_irq_process_D   ),
@@ -447,7 +447,7 @@ module sm_hazard_unit
     input           irqRequest_M,
     output          hz_flush_n_D,      //flush_n D stage
     input           cw_cpzExcEret_D,
-    input           cp0_ExcSync_D,
+    input           excSync_D,
     output          hz_cancel_branch_F,
     output          hz_forwardEPC_E,
     output          hz_irq_process_D,
@@ -493,7 +493,7 @@ module sm_hazard_unit
     //flushing D stage
     assign hz_flush_n_D = ~((cw_pcSrc_D & ~irqRequest_E) // branching when no irq was before
                            | cw_cpzExcEret_D             // after eret
-                           | cp0_ExcSync_D);             // after sync interrupt
+                           | excSync_D );                // after sync interrupt
 
     // forward EPC from E or M stage
     //  when EPC was written just before ERET
