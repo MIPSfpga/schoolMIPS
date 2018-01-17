@@ -259,7 +259,7 @@ module sm_pcpu
     wire [ 4:0] writeReg_E = cw_regDst_E ? instrRd_E : instrRt_E;
 
     //exceptions
-    wire [31:0] epcNext_E_new = hz_forwardEPC_E ? pcBranch_D : epcNext_E;
+    wire [31:0] epcNext_f_E = hz_forwardEPC_E ? pcBranch_D : epcNext_E;
 
     //stage data border
     wire [31:0] epcNext_M;
@@ -268,7 +268,7 @@ module sm_pcpu
     wire [ 2:0] instrSel_M;
     wire        excRiFound_M;
     wire        irqRequest_M;
-    sm_register #(32) r_epcNext_M   (clk, epcNext_E_new,   epcNext_M);
+    sm_register #(32) r_epcNext_M   (clk, epcNext_f_E,   epcNext_M);
     sm_register #(32) r_aluResult_M (clk, aluResult_E, aluResult_M);
     sm_register #(32) r_writeData_M (clk, writeData_E, writeData_M);
     sm_register #( 5) r_writeReg_M  (clk, writeReg_E,  writeReg_M);
