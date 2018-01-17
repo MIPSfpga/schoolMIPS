@@ -10,10 +10,10 @@ for /f %%f in ('dir /A:D /B %TOP_BOARD%') do (
     )
 )
 
-rem replace program\*\*.sh with scripts\program\common\*.bat
-for /f %%f in ('dir /A:D /B %TOP_PROGRAM%') do (
-    if not %%f == program (
-        del  %TOP_PROGRAM%\%%f\*.sh
-        copy .\program\common\*.bat %TOP_PROGRAM%\%%f
-    )
-)
+REM rem replace program\*\*.sh with scripts\program\common\*.bat
+REM for /f %%f in ('dir /A:D /B %TOP_PROGRAM%') do (
+REM     if not %%f == program (
+REM         del  %TOP_PROGRAM%\%%f\*.sh
+REM         copy .\program\common\*.bat %TOP_PROGRAM%\%%f
+REM     )
+REM )
