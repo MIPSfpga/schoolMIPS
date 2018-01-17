@@ -29,6 +29,7 @@
 `define C_LW        6'b100011 // I-type, Load Word
                               //         Rt = memory[Rs + Immed]
 `define C_SW        6'b101011 // I-type,  Store Word
+                              //         memory[Rs + Immed] = Rt
 `define C_NOP       6'b000000 // No Operation
 
 //instruction function field
