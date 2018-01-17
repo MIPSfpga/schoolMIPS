@@ -33,6 +33,7 @@ module sm_pcpu
     //hazard wires
     wire hz_stall_n_F;
     wire hz_stall_n_D;
+    wire hz_flush_n_D;   //flush D stage
 
     //program counter
     wire [31:0] pc_F;
@@ -49,8 +50,8 @@ module sm_pcpu
     //stage data border
     wire [31:0] pcNext_D;
     wire [31:0] instr_D;
-    sm_register_wes #(32) r_pcNext_D (clk, rst_n, ~cw_pcSrc_D, hz_stall_n_D, pcNext_F, pcNext_D);
-    sm_register_wes #(32) r_instr_D  (clk, rst_n, ~cw_pcSrc_D, hz_stall_n_D, instr_F, instr_D);
+    sm_register_wes #(32) r_pcNext_D (clk, rst_n, hz_flush_n_D, hz_stall_n_D, pcNext_F, pcNext_D);
+    sm_register_wes #(32) r_instr_D  (clk, rst_n, hz_flush_n_D, hz_stall_n_D, instr_F, instr_D);
 
     // **********************************************************
     // D - Instruction Decode & Register
@@ -85,7 +86,7 @@ module sm_pcpu
 
     sm_register_file rf
     (
-        .clk        ( ~clk          ),
+        .clk        ( clk           ),
         .a0         ( regAddr       ),
         .a1         ( instrRs_D     ),
         .a2         ( instrRt_D     ),
@@ -165,6 +166,10 @@ module sm_pcpu
     sm_register_cs      r_cw_memWrite_E (clk, rst_n, hz_flush_n_E, cw_memWrite_D, cw_memWrite_E);
     sm_register_cs      r_cw_memToReg_E (clk, rst_n, hz_flush_n_E, cw_memToReg_D, cw_memToReg_E);
 
+    //instruction code for debug
+    wire [31:0] instr_E;
+    sm_register_cs #(32) r_instr_E  (clk, rst_n, hz_flush_n_E, instr_D, instr_E);
+
     // **********************************************************
     // E - Execution
     // **********************************************************
@@ -214,6 +219,10 @@ module sm_pcpu
     sm_register_c r_cw_memWrite_M (clk, rst_n, cw_memWrite_E, cw_memWrite_M);
     sm_register_c r_cw_memToReg_M (clk, rst_n, cw_memToReg_E, cw_memToReg_M);
 
+    //instruction code for debug
+    wire [31:0] instr_M;
+    sm_register #(32) r_instr_M  (clk, instr_E, instr_M);
+
     // **********************************************************
     // M - Memory
     // **********************************************************
@@ -236,6 +245,10 @@ module sm_pcpu
     wire          cw_memToReg_W;
     sm_register_c r_cw_memToReg_W (clk, rst_n, cw_memToReg_M, cw_memToReg_W);
     sm_register_c r_cw_regWrite_W (clk, rst_n, cw_regWrite_M, cw_regWrite_W);
+
+    //instruction code for debug
+    wire [31:0] instr_W;
+    sm_register #(32) r_instr_W (clk, instr_M, instr_W);
 
     // **********************************************************
     // W - Writeback
@@ -271,7 +284,10 @@ module sm_pcpu
         .cw_regWrite_E  ( cw_regWrite_E ),
         .cw_memToReg_M  ( cw_memToReg_M ),
         .hz_forwardA_D  ( hz_forwardA_D ),
-        .hz_forwardB_D  ( hz_forwardB_D )
+        .hz_forwardB_D  ( hz_forwardB_D ),
+
+        .cw_pcSrc_D         ( cw_pcSrc_D         ),
+        .hz_flush_n_D       ( hz_flush_n_D       )
     );
 
 endmodule
@@ -300,7 +316,10 @@ module sm_hazard_unit
     input           cw_regWrite_E,
     input           cw_memToReg_M,
     output          hz_forwardA_D,  //forward srcA
-    output          hz_forwardB_D   //forward srcB
+    output          hz_forwardB_D,  //forward srcB
+
+    input           cw_pcSrc_D,
+    output          hz_flush_n_D    //flush_n D stage
 );
     //data forwarding
     assign hz_forwardA_E =  ( instrRs_E == 5'b0                        ) ? `HZ_FW_NONE : (
@@ -324,6 +343,9 @@ module sm_hazard_unit
                             );
 
     wire hz_stall = hz_mem_stall || hz_branch_stall;
+
+    //flushing D stage
+    assign hz_flush_n_D = ~cw_pcSrc_D;
 
     //stalling
     assign hz_stall_n_F = ~hz_stall;

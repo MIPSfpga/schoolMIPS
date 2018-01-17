@@ -9,6 +9,7 @@
  */ 
 
 `include "sm_cpu.vh"
+`include "sm_settings.vh"
 
 module sm_cpu
 (
@@ -196,9 +197,19 @@ module sm_register_file
 );
     reg [31:0] rf [31:0];
 
+    `ifdef SM_FORCE_RF_RDW
+        //Pass-through logic to match the read-during-write behavior
+        assign rd0 = ( a0 == 5'b0      ) ? 32'b0 :
+                     ( a0 == a3 && we3 ) ? wd3   : rf [a0];
+        assign rd1 = ( a1 == 5'b0      ) ? 32'b0 :
+                     ( a1 == a3 && we3 ) ? wd3   : rf [a1];
+        assign rd2 = ( a2 == 5'b0      ) ? 32'b0 :
+                     ( a2 == a3 && we3 ) ? wd3   : rf [a2];
+    `else
     assign rd0 = (a0 != 0) ? rf [a0] : 32'b0;
     assign rd1 = (a1 != 0) ? rf [a1] : 32'b0;
     assign rd2 = (a2 != 0) ? rf [a2] : 32'b0;
+    `endif
 
     always @ (posedge clk)
         if(we3) rf [a3] <= wd3;
