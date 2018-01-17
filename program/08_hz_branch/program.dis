@@ -1,0 +1,46 @@
+
+program.elf:     file format elf32-tradlittlemips
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	24080001 	addiu	t0,zero,1
+   4:	ac080000 	sw	t0,0(zero)
+
+00000008 <check>:
+   8:	15000005 	bnez	t0,20 <w1>
+   c:	00000000 	sll	zero,zero,0x0
+  10:	00481021 	addu	v0,v0,t0
+  14:	00481021 	addu	v0,v0,t0
+  18:	00481021 	addu	v0,v0,t0
+  1c:	00000000 	sll	zero,zero,0x0
+
+00000020 <w1>:
+  20:	24090003 	addiu	t1,zero,3
+  24:	240a0003 	addiu	t2,zero,3
+  28:	112a0005 	beq	t1,t2,40 <w2>
+  2c:	00000000 	sll	zero,zero,0x0
+  30:	00481021 	addu	v0,v0,t0
+  34:	00481021 	addu	v0,v0,t0
+  38:	00481021 	addu	v0,v0,t0
+  3c:	00000000 	sll	zero,zero,0x0
+
+00000040 <w2>:
+  40:	8c090000 	lw	t1,0(zero)
+  44:	152a0005 	bne	t1,t2,5c <w3>
+  48:	00000000 	sll	zero,zero,0x0
+  4c:	00481021 	addu	v0,v0,t0
+  50:	00481021 	addu	v0,v0,t0
+  54:	00481021 	addu	v0,v0,t0
+  58:	00000000 	sll	zero,zero,0x0
+
+0000005c <w3>:
+  5c:	00000000 	sll	zero,zero,0x0
+  60:	00000000 	sll	zero,zero,0x0
+  64:	00000000 	sll	zero,zero,0x0
+  68:	00000000 	sll	zero,zero,0x0
+
+0000006c <end>:
+  6c:	1000ffff 	beqz	zero,6c <end>
+  70:	00000000 	sll	zero,zero,0x0
