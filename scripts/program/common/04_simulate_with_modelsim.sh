@@ -6,6 +6,6 @@ cd sim
 
 cp ../*.hex .
 
-vsim -do ../modelsim_script.tcl
+vsim -novopt -do ../modelsim_script.tcl
 
 cd ..

@@ -1,0 +1,79 @@
+
+program.elf:     file format elf32-tradlittlemips
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	24080031 	addiu	t0,zero,49
+   4:	40885800 	mtc0	t0,c0_compare
+   8:	40804800 	mtc0	zero,c0_count
+   c:	24088001 	addiu	t0,zero,-32767
+  10:	40886000 	mtc0	t0,c0_status
+  14:	24020000 	addiu	v0,zero,0
+
+00000018 <end>:
+  18:	24090001 	addiu	t1,zero,1
+  1c:	00491021 	addu	v0,v0,t1
+  20:	00491023 	subu	v0,v0,t1
+  24:	00491021 	addu	v0,v0,t1
+  28:	00491023 	subu	v0,v0,t1
+  2c:	00491021 	addu	v0,v0,t1
+  30:	00491023 	subu	v0,v0,t1
+  34:	00491021 	addu	v0,v0,t1
+  38:	00491023 	subu	v0,v0,t1
+  3c:	1000fff6 	beqz	zero,18 <end>
+  40:	00000000 	sll	zero,zero,0x0
+  44:	00000000 	sll	zero,zero,0x0
+  48:	00000000 	sll	zero,zero,0x0
+  4c:	00000000 	sll	zero,zero,0x0
+  50:	00000000 	sll	zero,zero,0x0
+  54:	00000000 	sll	zero,zero,0x0
+  58:	00000000 	sll	zero,zero,0x0
+  5c:	00000000 	sll	zero,zero,0x0
+  60:	00000000 	sll	zero,zero,0x0
+  64:	00000000 	sll	zero,zero,0x0
+  68:	00000000 	sll	zero,zero,0x0
+  6c:	00000000 	sll	zero,zero,0x0
+  70:	00000000 	sll	zero,zero,0x0
+  74:	00000000 	sll	zero,zero,0x0
+  78:	00000000 	sll	zero,zero,0x0
+  7c:	00000000 	sll	zero,zero,0x0
+  80:	00000000 	sll	zero,zero,0x0
+  84:	00000000 	sll	zero,zero,0x0
+  88:	00000000 	sll	zero,zero,0x0
+  8c:	00000000 	sll	zero,zero,0x0
+  90:	00000000 	sll	zero,zero,0x0
+  94:	00000000 	sll	zero,zero,0x0
+  98:	00000000 	sll	zero,zero,0x0
+  9c:	00000000 	sll	zero,zero,0x0
+  a0:	00000000 	sll	zero,zero,0x0
+  a4:	00000000 	sll	zero,zero,0x0
+  a8:	00000000 	sll	zero,zero,0x0
+  ac:	00000000 	sll	zero,zero,0x0
+  b0:	00000000 	sll	zero,zero,0x0
+  b4:	00000000 	sll	zero,zero,0x0
+  b8:	00000000 	sll	zero,zero,0x0
+  bc:	00000000 	sll	zero,zero,0x0
+  c0:	00000000 	sll	zero,zero,0x0
+  c4:	00000000 	sll	zero,zero,0x0
+  c8:	00000000 	sll	zero,zero,0x0
+  cc:	00000000 	sll	zero,zero,0x0
+  d0:	00000000 	sll	zero,zero,0x0
+  d4:	00000000 	sll	zero,zero,0x0
+  d8:	00000000 	sll	zero,zero,0x0
+  dc:	00000000 	sll	zero,zero,0x0
+  e0:	00000000 	sll	zero,zero,0x0
+  e4:	00000000 	sll	zero,zero,0x0
+  e8:	00000000 	sll	zero,zero,0x0
+  ec:	00000000 	sll	zero,zero,0x0
+  f0:	00000000 	sll	zero,zero,0x0
+  f4:	00000000 	sll	zero,zero,0x0
+  f8:	00000000 	sll	zero,zero,0x0
+  fc:	00000000 	sll	zero,zero,0x0
+
+00000100 <exception>:
+ 100:	24080031 	addiu	t0,zero,49
+ 104:	40885800 	mtc0	t0,c0_compare
+ 108:	40804800 	mtc0	zero,c0_count
+ 10c:	42000018 	eret

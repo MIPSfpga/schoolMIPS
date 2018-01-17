@@ -1,36 +1,38 @@
 
 `timescale 1 ns / 100 ps
 
+`include "sm_settings.vh"
 `include "sm_cpu.vh"
+
+`ifndef SIMULATION_CYCLES
+    `define SIMULATION_CYCLES   120
+`endif
 
 module sm_testbench;
 
     // simulation options
     parameter Tt     = 20;
-    parameter Ncycle = 120;
 
     reg         clk;
     reg         rst_n;
     reg  [ 4:0] regAddr;
     wire [31:0] regData;
+    wire        cpuClk;
 
     // ***** DUT start ************************
 
-    //instruction memory
-    wire    [31:0]  imAddr;
-    wire    [31:0]  imData;
-    sm_rom reset_rom(imAddr, imData);
-
-    //cpu core
-    sm_cpu sm_cpu
+    sm_top sm_top
     (
-        .clk     ( clk     ),
-        .rst_n   ( rst_n   ),
-        .regAddr ( regAddr ),
-        .regData ( regData ),
-        .imAddr  ( imAddr  ),
-        .imData  ( imData  )
+        .clkIn     ( clk     ),
+        .rst_n     ( rst_n   ),
+        .clkDevide ( 4'b0    ),
+        .clkEnable ( 1'b1    ),
+        .clk       ( cpuClk  ),
+        .regAddr   ( regAddr ),
+        .regData   ( regData )
     );
+
+    defparam sm_top.sm_clk_divider.bypass = 1;
 
     // ***** DUT  end  ************************
 
@@ -39,7 +41,7 @@ module sm_testbench;
     initial $dumpvars;
     genvar k;
     for (k = 0; k < 32; k = k + 1) begin
-        initial $dumpvars(0, sm_cpu.rf.rf[k]);
+        initial $dumpvars(0, sm_top.sm_cpu.rf.rf[k]);
     end
 `endif
 
@@ -59,7 +61,7 @@ module sm_testbench;
     integer i;
     initial begin
         for (i = 0; i < 32; i = i + 1)
-            sm_cpu.rf.rf[i] = 0;
+            sm_top.sm_cpu.rf.rf[i] = 0;
     end
 
     task disasmInstr
@@ -74,6 +76,7 @@ module sm_testbench;
         reg        [ 4:0] cmdSa;
         reg        [15:0] cmdImm;
         reg signed [15:0] cmdImmS;
+        reg        [ 2:0] cmdSel;
 
         begin
             cmdOper = instr[31:26];
@@ -84,26 +87,32 @@ module sm_testbench;
             cmdSa   = instr[10:6 ];
             cmdImm  = instr[15:0 ];
             cmdImmS = instr[15:0 ];
+            cmdSel  = instr[ 2:0 ];
 
             $write("   ");
 
-            casez( {cmdOper,cmdFunk} )
-                default               : if (instr == 32'b0) 
-                                            $write ("nop");
-                                        else
-                                            $write ("new/unknown");
+            casez( {cmdOper, cmdFunk, cmdRs} )
+                default               : $write ("new/unknown");
 
-                { `C_SPEC,  `F_ADDU } : $write ("addu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_OR   } : $write ("or    $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SRL  } : $write ("srl   $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SLTU } : $write ("sltu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SUBU } : $write ("subu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_ADDU, `S_ANY } : $write ("addu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_OR  , `S_ANY } : $write ("or    $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_SRL , `S_ANY } : $write ("srl   $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_SLTU, `S_ANY } : $write ("sltu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_SUBU, `S_ANY } : $write ("subu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                 
+                { `C_ADDIU, `F_ANY , `S_ANY } : $write ("addiu $%1d, $%1d, %1d", cmdRt, cmdRs, cmdImm);
+                { `C_LUI,   `F_ANY , `S_ANY } : $write ("lui   $%1d, %1d",       cmdRt, cmdImm);
+                { `C_LW,    `F_ANY , `S_ANY } : $write ("lw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
+                { `C_SW,    `F_ANY , `S_ANY } : $write ("sw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
+                
+                { `C_BEQ,   `F_ANY , `S_ANY } : $write ("beq   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
+                { `C_BNE,   `F_ANY , `S_ANY } : $write ("bne   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
 
-                { `C_ADDIU, `F_ANY  } : $write ("addiu $%1d, $%1d, %1d", cmdRt, cmdRs, cmdImm);
-                { `C_LUI,   `F_ANY  } : $write ("lui   $%1d, %1d",       cmdRt, cmdImm);
+                { `C_COP0, `F_ANY, `S_COP0_MF } : $write ("mfc0  $%1d, $%1d, %1d", cmdRt, cmdRd, cmdSel);
+                { `C_COP0, `F_ANY, `S_COP0_MT } : $write ("mtc0  $%1d, $%1d, %1d", cmdRt, cmdRd, cmdSel);
+                { `C_COP0, `F_ERET, `S_ERET   } : $write ("eret");
+                { `C_NOP,  `F_NOP,  `S_NOP    } : $write ("nop");
 
-                { `C_BEQ,   `F_ANY  } : $write ("beq   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
-                { `C_BNE,   `F_ANY  } : $write ("bne   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
             endcase
         end
 
@@ -117,16 +126,16 @@ module sm_testbench;
 
     always @ (posedge clk)
     begin
-        $write ("%5d  pc = %2d  pcaddr = %h  instr = %h   v0 = %1d", 
-                  cycle, regData, (regData << 2), sm_cpu.instr, sm_cpu.rf.rf[2]);
 
-        disasmInstr(sm_cpu.instr);
+        $write ("%5d  pc = %2d  pcaddr = %h  instr = %h   v0 = %1d", 
+                  cycle, regData, (regData << 2), sm_top.sm_cpu.instr, sm_top.sm_cpu.rf.rf[2]);
+        disasmInstr(sm_top.sm_cpu.instr);
 
         $write("\n");
 
         cycle = cycle + 1;
 
-        if (cycle > Ncycle)
+        if (cycle > `SIMULATION_CYCLES)
         begin
             $display ("Timeout");
             $stop;

@@ -1,3 +1,14 @@
+/*
+ * schoolMIPS - small MIPS CPU for "Young Russian Chip Architects"
+ *              summer school ( yrca@googlegroups.com )
+ *
+ * originally based on Sarah L. Harris MIPS CPU
+ * 
+ * Copyright(c) 2017 Stanislav Zhelnio
+ *                   Alexander Romanov
+ */
+
+`include "sm_settings.vh"
 
 //hardware top level module
 module sm_top
@@ -15,9 +26,9 @@ module sm_top
     wire            enable;
     wire    [ 4:0 ] addr;
 
-    sm_metafilter #(.SIZE(4)) f0(clkIn, clkDevide, devide);
-    sm_metafilter #(.SIZE(1)) f1(clkIn, clkEnable, enable);
-    sm_metafilter #(.SIZE(5)) f2(clkIn, regAddr,   addr  );
+    sm_debouncer #(.SIZE(4)) f0(clkIn, clkDevide, devide);
+    sm_debouncer #(.SIZE(1)) f1(clkIn, clkEnable, enable);
+    sm_debouncer #(.SIZE(5)) f2(clkIn, regAddr,   addr  );
 
     //cores
     //clock devider
@@ -33,8 +44,23 @@ module sm_top
     //instruction memory
     wire    [31:0]  imAddr;
     wire    [31:0]  imData;
-    sm_rom reset_rom(imAddr, imData);
+    sm_rom #(`SM_CONFIG_ROM_SIZE) reset_rom(imAddr, imData);
 
+    //data memory
+    wire    [31:0]  dmAddr;
+    wire            dmWe;
+    wire    [31:0]  dmWData;
+    wire    [31:0]  dmRData;
+    sm_ram data_ram
+    (
+        .clk ( clk      ),
+        .a   ( dmAddr   ),
+        .we  ( dmWe     ),
+        .wd  ( dmWData  ),
+        .rd  ( dmRData  )
+    );
+
+    //cpu core
     sm_cpu sm_cpu
     (
         .clk        ( clk       ),
@@ -42,13 +68,17 @@ module sm_top
         .regAddr    ( addr      ),
         .regData    ( regData   ),
         .imAddr     ( imAddr    ),
-        .imData     ( imData    )
+        .imData     ( imData    ),
+        .dmAddr     ( dmAddr    ),
+        .dmWe       ( dmWe      ),
+        .dmWData    ( dmWData   ),
+        .dmRData    ( dmRData   )
     );
 
 endmodule
 
-//metastability input filter module
-module sm_metafilter
+//metastability input debouncer module
+module sm_debouncer
 #(
     parameter SIZE = 1
 )
@@ -69,7 +99,8 @@ endmodule
 //tunable clock devider
 module sm_clk_divider
 #(
-    parameter shift = 16
+    parameter shift  = 16,
+              bypass = 0
 )
 (
     input           clkIn,
@@ -80,7 +111,8 @@ module sm_clk_divider
 );
     wire [31:0] cntr;
     wire [31:0] cntrNext = cntr + 1;
-    sm_register_we r_cntr(clkIn, rst_n, enable, cntrNext, cntr);
+    sm_register_we #(32) r_cntr(clkIn, rst_n, enable, cntrNext, cntr);
 
-    assign clkOut = cntr[shift + devide];
+    assign clkOut = bypass ? clkIn 
+                           : cntr[shift + devide];
 endmodule
