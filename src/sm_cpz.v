@@ -125,7 +125,6 @@ module sm_cpz
     // Exception request input wires
     // async (imprecise) - EPC contains the next instruction (example: interrupt)
     // sync  (precise)   - EPC contains current instruction  (example: overflow )
-    //wire cp0_RequestForAsync = |(cp0_CauseIP & cp0_StatusIM); 
     wire cp0_RequestForSync  = cp0_ExcRI | cp0_ExcOv;
 
     // Exception Level
