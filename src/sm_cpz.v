@@ -8,21 +8,7 @@
  */ 
 
 `include "sm_settings.vh"
-
-`define CP0_REG_NUM_COUNT   5'd9
-`define CP0_REG_SEL_COUNT   3'd0
-`define CP0_REG_NUM_COMPARE 5'd11
-`define CP0_REG_SEL_COMPARE 3'd0
-`define CP0_REG_NUM_STATUS  5'd12
-`define CP0_REG_SEL_STATUS  3'd0
-`define CP0_REG_NUM_CAUSE   5'd13
-`define CP0_REG_SEL_CAUSE   3'd0
-`define CP0_REG_NUM_EPC     5'd14
-`define CP0_REG_SEL_EPC     3'd0
-
-`define CP0_EXCCODE_INT     5'h00
-`define CP0_EXCCODE_RI      5'h0a
-`define CP0_EXCCODE_OV      5'h0c
+`include "sm_cpu.vh"
 
 module sm_cpz
 (
@@ -33,6 +19,8 @@ module sm_cpz
     output [31:0] cp0_EPC,          // the address at which processing resumes
                                     // after an exception has been serviced
     output [31:0] cp0_ExcHandler,   // Exception Handler Addr
+    output        cp0_ExcAsyncReq,  
+    input         cp0_ExcAsyncAck,
     output        cp0_ExcAsync,  // request for Asynchronous Exception (interrupt)
     output        cp0_ExcSync,   // request for  Synchronous Exception (overflow and etc)
     input         cp0_ExcEret,      // return from Exception
@@ -43,9 +31,10 @@ module sm_cpz
     input  [31:0] cp0_regWD,        // cp0 register access Write Data
     input         cp0_regWE,        // cp0 register access Write Enable
 
-    input         cp0_ExcIP2,       // Hardware Interrupt 0
+    input  [ 5:0] cp0_ExcIP,        // Hardware Interrupts
     input         cp0_ExcRI,        // Reserved Instruction exception
-    input         cp0_ExcOv         // Arithmetic Overflow exception
+    input         cp0_ExcOv,        // Arithmetic Overflow exception
+    output        cp0_TI            // Timer Interrupt
 );
     assign cp0_ExcHandler = `SM_CONFIG_EXCEPTION_HANDLER_ADDR;
 
@@ -129,23 +118,26 @@ module sm_cpz
     wire [ 7:0] cp0_StatusIM_new = cp0_regWD [15:8];
     sm_register_we #(8) r_cp0_StatusIM(clk, rst_n, cp0_Status_load, cp0_StatusIM_new, cp0_StatusIM);
 
+    // TODO!
+    // cp0_ExcAsyncReq is folowwed back in cp0_ExcAsyncAck
+    assign cp0_ExcAsyncReq =  |(cp0_CauseIP & cp0_StatusIM) & ~cp0_StatusEXL;
+
     // Exception request input wires
     // async (imprecise) - EPC contains the next instruction (example: interrupt)
     // sync  (precise)   - EPC contains current instruction  (example: overflow )
-    wire cp0_RequestForAsync = cp0_CauseIP && cp0_StatusIM; 
     wire cp0_RequestForSync  = cp0_ExcRI | cp0_ExcOv;
 
     // Exception Level
     wire cp0_StatusEXL_new = cp0_Status_load ? cp0_regWD [1] :
                              cp0_ExcEret     ? 1'b0          :
-                             cp0_StatusEXL | cp0_RequestForAsync | cp0_RequestForSync;
+                             cp0_StatusEXL | cp0_ExcAsyncAck | cp0_RequestForSync;
     sm_register_c  r_cp0_StatusEXL(clk, rst_n, cp0_StatusEXL_new, cp0_StatusEXL);
     
     // Exception request output wires
-    assign cp0_ExcAsync = cp0_RequestForAsync & ~cp0_StatusEXL;
+    assign cp0_ExcAsync = cp0_ExcAsyncAck     & ~cp0_StatusEXL;
     assign cp0_ExcSync  = cp0_RequestForSync  & ~cp0_StatusEXL;
 
-    assign cp0_ExcRequest  = cp0_ExcAsync | cp0_ExcSync;
+    wire cp0_ExcRequest = cp0_ExcAsync | cp0_ExcSync;
 
     // ####################################################################
     // Cause register
@@ -158,6 +150,7 @@ module sm_cpz
     sm_register_we r_cp0_CauseDC(clk, rst_n, cp0_Cause_load, cp0_CauseDC_next, cp0_CauseDC);
 
     // Timer Interrupt flag
+    assign cp0_TI = cp0_CauseTI;
     wire cp0_CauseTI_next = cp0_Compare_load ? 1'b0 :
                             cp0_CauseTI      ? 1'b1 :
                             cp0_StatusIE & ~cp0_CauseDC & (cp0_Compare == cp0_Count);
@@ -166,11 +159,11 @@ module sm_cpz
     // Interrupt is pending
     wire [ 7:0] cp0_CauseIP_next;
     assign cp0_CauseIP_next [1:0] = cp0_Cause_load ? cp0_regWD [9:8] : cp0_CauseIP [1:0];
-    assign cp0_CauseIP_next [7:2] = { 
-                                        cp0_CauseTI_next, 
-                                        4'b0,
-                                        cp0_CauseIP [2] | (cp0_StatusIE & cp0_ExcIP2)
-                                    };
+
+    assign cp0_CauseIP_next [7:2] = cp0_ExcEret   ? 6'b0              :
+                                    cp0_StatusEXL ? cp0_CauseIP [7:2] :
+                                    cp0_StatusIE  ? cp0_ExcIP         : cp0_CauseIP [7:2];
+
     sm_register_c #(8) r_cp0_CauseIP(clk, rst_n, cp0_CauseIP_next, cp0_CauseIP);
 
     // Exception Code

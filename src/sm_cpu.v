@@ -11,10 +11,6 @@
 `include "sm_cpu.vh"
 `include "sm_settings.vh"
 
-`define PC_FLOW     2'b00
-`define PC_EXC      2'b01
-`define PC_ERET     2'b10
-
 module sm_cpu
 (
     input           clk,        // clock
@@ -80,8 +76,8 @@ module sm_cpu
     assign pcBranch = pcNext + signImm;
 
     //alu
-    wire [31:0] srcB = aluSrc ? signImm : rd2;
     wire [31:0] aluResult;
+    wire [31:0] srcB = aluSrc ? signImm : rd2;
 
     sm_alu alu
     (
@@ -106,6 +102,7 @@ module sm_cpu
     wire        cw_cpzExcEret;      // return from Exception
     wire        excRiFound;         // reserved instruction found
     wire        cw_epcSrc;
+    wire        cw_branch;          // not used
 
     sm_control sm_control
     (
@@ -121,11 +118,12 @@ module sm_cpu
         .aluControl ( aluControl   ),
         .memWrite   ( memWrite     ),
         .memToReg   ( memToReg     ),
+        .branch     ( cw_branch    ),
         .cw_cpzToReg    ( cw_cpzToReg    ),
         .cw_cpzRegWrite ( cw_cpzRegWrite ),
         .cw_cpzExcEret  ( cw_cpzExcEret  ),
-        .cp0_ExcAsync   ( cp0_ExcAsync   ),
-        .cp0_ExcSync    ( cp0_ExcSync    ),
+        .excAsync       ( cp0_ExcAsync   ),
+        .excSync        ( cp0_ExcSync    ),
         .cw_epcSrc      ( cw_epcSrc      ),
         .excRiFound     ( excRiFound     )
     );
@@ -136,9 +134,11 @@ module sm_cpu
     wire [ 2:0] cp0_regSel = instr[ 2:0 ];  // cp0 register access sel
     wire [31:0] cp0_regRD;                  // cp0 register access Read Data
     wire [31:0] cp0_regWD   = rd2;          // cp0 register access Write Data
-    wire        cp0_ExcIP2  = 1'b0;         //TODO: Hardware Interrupt 0
+    wire        cp0_TI;                     // cp0 timer interrupt
+    wire [ 5:0] cp0_ExcIP = { cp0_TI, 5'b0 }; //TODO: External Interrupt
     wire        cp0_ExcRI   = excRiFound;   // Reserved Instruction exception
-    wire        cp0_ExcOv   = 1'b0;         //TODO: Arithmetic Overflow exception
+    wire        cp0_ExcOv   = 1'b0;         // TODO: Arithmetic Overflow exception
+    wire        cp0_ExcAsyncRq;             // IRQ request feedback (used in pipeline)
     
     wire [31:0] cp0_PC = cw_epcSrc ? pc : pc_flow;
 
@@ -149,6 +149,8 @@ module sm_cpu
         .cp0_PC         ( cp0_PC         ),
         .cp0_EPC        ( cp0_EPC        ),
         .cp0_ExcHandler ( cp0_ExcHandler ),
+        .cp0_ExcAsyncReq( cp0_ExcAsyncRq ),
+        .cp0_ExcAsyncAck( cp0_ExcAsyncRq ),
         .cp0_ExcAsync   ( cp0_ExcAsync   ),
         .cp0_ExcSync    ( cp0_ExcSync    ),
         .cp0_ExcEret    ( cw_cpzExcEret  ),
@@ -157,9 +159,10 @@ module sm_cpu
         .cp0_regRD      ( cp0_regRD      ),
         .cp0_regWD      ( cp0_regWD      ),
         .cp0_regWE      ( cw_cpzRegWrite ),
-        .cp0_ExcIP2     ( cp0_ExcIP2     ),
+        .cp0_ExcIP      ( cp0_ExcIP      ),
         .cp0_ExcRI      ( cp0_ExcRI      ),
-        .cp0_ExcOv      ( cp0_ExcOv      )
+        .cp0_ExcOv      ( cp0_ExcOv      ),
+        .cp0_TI         ( cp0_TI         )
     );
 
     assign wd3 = memToReg    ? dmRData   :
@@ -185,22 +188,22 @@ module sm_control
     output reg [2:0] aluControl,
     output reg       memWrite,
     output reg       memToReg,
+    output reg       branch,
     output reg       cw_cpzToReg,
     output reg       cw_cpzRegWrite,
     output reg       cw_cpzExcEret,
-    input            cp0_ExcAsync,
-    input            cp0_ExcSync,
+    input            excAsync,
+    input            excSync,
     output           cw_epcSrc,
     output reg       excRiFound     // reserved instruction found
 );
-    reg          branch;
     reg          condZero;
 
     assign pcSrc = branch & (aluZero == condZero);
 
-    assign cw_epcSrc = cp0_ExcSync;
+    assign cw_epcSrc = excSync;
 
-    wire   exception = cp0_ExcAsync | cp0_ExcSync;
+    wire   exception = excAsync | excSync;
     assign pcExc = exception      ? `PC_EXC  :
                    cw_cpzExcEret  ? `PC_ERET : `PC_FLOW;
 

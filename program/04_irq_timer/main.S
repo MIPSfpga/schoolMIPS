@@ -1,5 +1,5 @@
 
-            .set    TimerPeriod, 0x38
+            .set    TimerPeriod, 0x31
             
             .text
             .org    0x0
@@ -27,4 +27,7 @@ end:        addiu   $t1, $0, 0x1
 exception:  li      $t0, TimerPeriod    # timer reset
             mtc0    $t0, $11            #   cp0.Compare = 0x20
             mtc0    $0,  $9             #   cp0.Count   = 0;
+            # nop
+            # nop
+            # nop
             eret

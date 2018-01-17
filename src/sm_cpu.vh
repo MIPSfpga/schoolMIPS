@@ -29,6 +29,7 @@
 `define C_LW        6'b100011 // I-type, Load Word
                               //         Rt = memory[Rs + Immed]
 `define C_SW        6'b101011 // I-type,  Store Word
+                              //         memory[Rs + Immed] = Rt
 `define C_NOP       6'b000000 // No Operation
 
 //instruction function field
@@ -58,3 +59,24 @@
                               //         CP0 [Rd, Sel] = Rt
 `define S_NOP       5'b00000  // No Operation
 `define S_ANY       5'b?????
+
+//PC_new selector
+`define PC_FLOW     2'b00
+`define PC_EXC      2'b01
+`define PC_ERET     2'b10
+
+//cp0 registers
+`define CP0_REG_NUM_COUNT   5'd9
+`define CP0_REG_SEL_COUNT   3'd0
+`define CP0_REG_NUM_COMPARE 5'd11
+`define CP0_REG_SEL_COMPARE 3'd0
+`define CP0_REG_NUM_STATUS  5'd12
+`define CP0_REG_SEL_STATUS  3'd0
+`define CP0_REG_NUM_CAUSE   5'd13
+`define CP0_REG_SEL_CAUSE   3'd0
+`define CP0_REG_NUM_EPC     5'd14
+`define CP0_REG_SEL_EPC     3'd0
+
+`define CP0_EXCCODE_INT     5'h00
+`define CP0_EXCCODE_RI      5'h0a
+`define CP0_EXCCODE_OV      5'h0c

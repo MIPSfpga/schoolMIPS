@@ -88,7 +88,7 @@ clean:
 #########################################################
 # Modelsim simulation
 
-modelsim: program.hex
+modelsim: program.hex program.dis
 	rm -rf sim
 	mkdir sim
 	cp *.hex sim
