@@ -5,7 +5,7 @@ program.elf:     file format elf32-tradlittlemips
 Disassembly of section .text:
 
 00000000 <.text>:
-   0:	24080038 	addiu	t0,zero,56
+   0:	24080031 	addiu	t0,zero,49
    4:	40885800 	mtc0	t0,c0_compare
    8:	40804800 	mtc0	zero,c0_count
    c:	24088001 	addiu	t0,zero,-32767
@@ -73,7 +73,7 @@ Disassembly of section .text:
   fc:	00000000 	sll	zero,zero,0x0
 
 00000100 <exception>:
- 100:	24080038 	addiu	t0,zero,56
+ 100:	24080031 	addiu	t0,zero,49
  104:	40885800 	mtc0	t0,c0_compare
  108:	40804800 	mtc0	zero,c0_count
  10c:	42000018 	eret
