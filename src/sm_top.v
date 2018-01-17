@@ -1,3 +1,12 @@
+/*
+ * schoolMIPS - small MIPS CPU for "Young Russian Chip Architects"
+ *              summer school ( yrca@googlegroups.com )
+ *
+ * originally based on Sarah L. Harris MIPS CPU
+ * 
+ * Copyright(c) 2017 Stanislav Zhelnio
+ *                   Alexander Romanov
+ */
 
 `include "sm_settings.vh"
 
@@ -35,7 +44,7 @@ module sm_top
     //instruction memory
     wire    [31:0]  imAddr;
     wire    [31:0]  imData;
-    sm_rom reset_rom(imAddr, imData);
+    sm_rom #(`SM_CONFIG_ROM_SIZE) reset_rom(imAddr, imData);
 
     //data memory
     wire    [31:0]  dmAddr;

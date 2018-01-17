@@ -17,6 +17,8 @@ vsim -novopt work.sm_testbench
 
 # add wave -radix hex sim:/sm_testbench/*
 add wave -radix hex sim:/sm_testbench/sm_top/sm_cpu/*
+#add wave -radix hex sim:/sm_testbench/sm_top/sm_cpu/sm_control/*
+#add wave -radix hex sim:/sm_testbench/sm_top/sm_cpu/alu/*
 add wave -radix hex sim:/sm_testbench/sm_top/sm_cpu/rf/*
 add wave -radix hex sim:/sm_testbench/sm_top/sm_cpu/rf/rf
 add wave            sim:/sm_testbench/cycle
