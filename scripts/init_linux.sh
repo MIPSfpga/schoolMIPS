@@ -13,11 +13,11 @@ do
     fi
 done
 
-for program in $TOP_PROGRAM/*
-do
-    if [ -d $program ]; then
-	rm -f $program/*.bat
-	cp $SCRIPTPATH/program/common/*.sh $program
-	chmod a+x $program/*.sh
-    fi
-done
+# for program in $TOP_PROGRAM/*
+# do
+#     if [ -d $program ]; then
+# 	rm -f $program/*.bat
+# 	cp $SCRIPTPATH/program/common/*.sh $program
+# 	chmod a+x $program/*.sh
+#     fi
+# done
