@@ -35,7 +35,7 @@ exception:  move    $t1, $v0            # save v0
             mfc0    $v0, c0_EPC         # load cp0.EPC
             move    $t2, $v0
             move    $v0, $t1            # restore v0
-            addiu   $t2, $t2, 0x1       # increment EPC to skip error
+            addiu   $t2, $t2, 0x4       # increment EPC to skip error
             mtc0    $t2, c0_EPC         # save cp0.EPC
             eret                        # new EPC value is now on E stage
 
@@ -47,7 +47,7 @@ exception:  move    $t1, $v0            # save v0
             mfc0    $v0, c0_EPC         # load cp0.EPC
             move    $t2, $v0
             move    $v0, $t1            # restore v0
-            addiu   $t2, $t2, 0x1       # increment EPC to skip error
+            addiu   $t2, $t2, 0x4       # increment EPC to skip error
             mtc0    $t2, c0_EPC         # save cp0.EPC
             nop
             eret                        # new EPC value is now on M stage
@@ -59,7 +59,7 @@ exception:  move    $t1, $v0            # save v0
             mfc0    $v0, c0_status      # load cp0.Status
             mfc0    $v0, c0_cause       # load cp0.Cause
             mfc0    $v0, c0_EPC         # load cp0.EPC
-            addiu   $v0, $v0, 0x1       # increment EPC to skip error
+            addiu   $v0, $v0, 0x4       # increment EPC to skip error
             mtc0    $v0, c0_EPC         # save cp0.EPC
             move    $v0, $t1            # restore v0
             nop
