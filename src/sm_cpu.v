@@ -38,13 +38,13 @@ module sm_cpu
     //program counter
     wire [31:0] pc;
     wire [31:0] pcBranch;
-    wire [31:0] pcNext  = pc + 1;
+    wire [31:0] pcNext  = pc + 4;
     wire [31:0] pc_new;
     wire [31:0] pc_flow = ~pcSrc ? pcNext : pcBranch;
     sm_register_c #(32) r_pc(clk ,rst_n, pc_new, pc);
 
     //program memory access
-    assign imAddr = pc;
+    assign imAddr = pc >> 2;  //schoolMIPS instruction memory is word addressable
     wire [31:0] instr = imData;
 
     //debug register access
@@ -73,7 +73,7 @@ module sm_cpu
 
     //sign extension
     wire [31:0] signImm = { {16 { instr[15] }}, instr[15:0] };
-    assign pcBranch = pcNext + signImm;
+    assign pcBranch = pcNext + (signImm << 2);
 
     //alu
     wire [31:0] aluResult;
