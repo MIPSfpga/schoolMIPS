@@ -38,13 +38,13 @@ module sm_pcpu
     //program counter
     wire [31:0] pc_F;
     wire [31:0] pcBranch_D;
-    wire [31:0] pcNext_F  = pc_F + 1;
+    wire [31:0] pcNext_F  = pc_F + 4;
     wire [31:0] pcNew_F  = ~cw_pcSrc_D ? pcNext_F : pcBranch_D;
 
     sm_register_we #(32) r_pc_f (clk ,rst_n, hz_stall_n_F, pcNew_F, pc_F);
 
     //program memory access
-    assign imAddr = pc_F;
+    assign imAddr = pc_F >> 2;  //schoolMIPS instruction memory is word addressable
     wire [31:0] instr_F = imData;
 
     //stage data border
@@ -102,7 +102,7 @@ module sm_pcpu
     wire [31:0] signImm_D = { {16 { instrImm_D[15] }}, instrImm_D };
 
     //branch address
-    assign pcBranch_D = pcNext_D + signImm_D;
+    assign pcBranch_D = pcNext_D + (signImm_D << 2);
 
     wire [31:0] aluResult_M;
     wire [31:0] regData1F_D = hz_forwardA_D ? aluResult_M : regData1_D;
