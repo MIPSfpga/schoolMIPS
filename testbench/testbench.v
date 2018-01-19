@@ -3,34 +3,35 @@
 
 `include "sm_cpu.vh"
 
+`ifndef SIMULATION_CYCLES
+    `define SIMULATION_CYCLES 120
+`endif
+
 module sm_testbench;
 
     // simulation options
     parameter Tt     = 20;
-    parameter Ncycle = 120;
 
     reg         clk;
     reg         rst_n;
     reg  [ 4:0] regAddr;
     wire [31:0] regData;
+    wire        cpuClk;
 
     // ***** DUT start ************************
 
-    //instruction memory
-    wire    [31:0]  imAddr;
-    wire    [31:0]  imData;
-    sm_rom reset_rom(imAddr, imData);
-
-    //cpu core
-    sm_cpu sm_cpu
+    sm_top sm_top
     (
-        .clk     ( clk     ),
-        .rst_n   ( rst_n   ),
-        .regAddr ( regAddr ),
-        .regData ( regData ),
-        .imAddr  ( imAddr  ),
-        .imData  ( imData  )
+        .clkIn     ( clk     ),
+        .rst_n     ( rst_n   ),
+        .clkDevide ( 4'b0    ),
+        .clkEnable ( 1'b1    ),
+        .clk       ( cpuClk  ),
+        .regAddr   ( regAddr ),
+        .regData   ( regData )
     );
+
+    defparam sm_top.sm_clk_divider.bypass = 1;
 
     // ***** DUT  end  ************************
 
@@ -39,7 +40,7 @@ module sm_testbench;
     initial $dumpvars;
     genvar k;
     for (k = 0; k < 32; k = k + 1) begin
-        initial $dumpvars(0, sm_cpu.rf.rf[k]);
+        initial $dumpvars(0, sm_top.sm_cpu.rf.rf[k]);
     end
 `endif
 
@@ -59,7 +60,7 @@ module sm_testbench;
     integer i;
     initial begin
         for (i = 0; i < 32; i = i + 1)
-            sm_cpu.rf.rf[i] = 0;
+            sm_top.sm_cpu.rf.rf[i] = 0;
     end
 
     task disasmInstr
@@ -118,15 +119,15 @@ module sm_testbench;
     always @ (posedge clk)
     begin
         $write ("%5d  pc = %2d  pcaddr = %h  instr = %h   v0 = %1d", 
-                  cycle, regData, (regData << 2), sm_cpu.instr, sm_cpu.rf.rf[2]);
+                  cycle, regData, (regData << 2), sm_top.sm_cpu.instr, sm_top.sm_cpu.rf.rf[2]);
 
-        disasmInstr(sm_cpu.instr);
+        disasmInstr(sm_top.sm_cpu.instr);
 
         $write("\n");
 
         cycle = cycle + 1;
 
-        if (cycle > Ncycle)
+        if (cycle > `SIMULATION_CYCLES)
         begin
             $display ("Timeout");
             $stop;

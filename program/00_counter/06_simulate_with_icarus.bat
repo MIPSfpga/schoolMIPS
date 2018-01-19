@@ -1,13 +1,23 @@
 
 echo off
 
-rem Set the simulation topmodule name here
+rem START Simulation default params
+
+rem testbench top module name
 set TOPMODULE=sm_testbench
+rem simulation clock cycles count
+set SIMULATION_CYCLES=120
+
+rem END Simulation default params
+
+rem read simulation params from local icarus config file
+for /f "delims=" %%x in (icarus.cfg) do (set "%%x")
 
 rem iverilog compile settings
 set IVARG=-g2005 
 set IVARG=%IVARG% -D SIMULATION
 set IVARG=%IVARG% -D ICARUS
+set IVARG=%IVARG% -D SIMULATION_CYCLES=%SIMULATION_CYCLES%
 set IVARG=%IVARG% -I ..\..\..\src
 set IVARG=%IVARG% -I ..\..\..\testbench
 set IVARG=%IVARG% -s %TOPMODULE%
