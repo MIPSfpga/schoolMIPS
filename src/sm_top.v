@@ -15,9 +15,9 @@ module sm_top
     wire            enable;
     wire    [ 4:0 ] addr;
 
-    sm_metafilter #(.SIZE(4)) f0(clkIn, clkDevide, devide);
-    sm_metafilter #(.SIZE(1)) f1(clkIn, clkEnable, enable);
-    sm_metafilter #(.SIZE(5)) f2(clkIn, regAddr,   addr  );
+    sm_debouncer #(.SIZE(4)) f0(clkIn, clkDevide, devide);
+    sm_debouncer #(.SIZE(1)) f1(clkIn, clkEnable, enable);
+    sm_debouncer #(.SIZE(5)) f2(clkIn, regAddr,   addr  );
 
     //cores
     //clock devider
@@ -47,8 +47,8 @@ module sm_top
 
 endmodule
 
-//metastability input filter module
-module sm_metafilter
+//metastability input debouncer module
+module sm_debouncer
 #(
     parameter SIZE = 1
 )
@@ -69,7 +69,8 @@ endmodule
 //tunable clock devider
 module sm_clk_divider
 #(
-    parameter shift = 16
+    parameter shift  = 16,
+              bypass = 0
 )
 (
     input           clkIn,
@@ -82,5 +83,6 @@ module sm_clk_divider
     wire [31:0] cntrNext = cntr + 1;
     sm_register_we r_cntr(clkIn, rst_n, enable, cntrNext, cntr);
 
-    assign clkOut = cntr[shift + devide];
+    assign clkOut = bypass ? clkIn 
+                           : cntr[shift + devide];
 endmodule
