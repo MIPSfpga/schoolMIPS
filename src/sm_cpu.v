@@ -22,6 +22,8 @@ module sm_cpu
     output  [31:0]  dmAddr,     // data memory address
     output          dmWe,       // data memory write enable
     output  [31:0]  dmWData,    // data memory write data
+    output          dmValid,    // data memory read/write request
+    input           dmReady,    // data memory read/write done
     input   [31:0]  dmRData     // data memory read data
 );
     //control wires
@@ -34,6 +36,8 @@ module sm_cpu
     wire [ 2:0] aluControl;
     wire        memToReg;
     wire        memWrite;
+    wire        memAccess;
+    wire        hz_stall;
 
     //program counter
     wire [31:0] pc;
@@ -56,6 +60,7 @@ module sm_cpu
     wire [31:0] rd1;
     wire [31:0] rd2;
     wire [31:0] wd3;
+    wire        we3 = regWrite && ~hz_stall;
 
     sm_register_file rf
     (
@@ -68,7 +73,7 @@ module sm_cpu
         .rd1        ( rd1          ),
         .rd2        ( rd2          ),
         .wd3        ( wd3          ),
-        .we3        ( regWrite     )
+        .we3        ( we3          )
     );
 
     //sign extension
@@ -93,6 +98,7 @@ module sm_cpu
     assign dmWe = memWrite;
     assign dmAddr = aluResult;
     assign dmWData = rd2;
+    assign dmValid = memAccess;
 
     //control
     wire        cw_cpzToReg;
@@ -118,6 +124,7 @@ module sm_cpu
         .aluControl ( aluControl   ),
         .memWrite   ( memWrite     ),
         .memToReg   ( memToReg     ),
+        .memAccess  ( memAccess    ),
         .branch     ( cw_branch    ),
         .cw_cpzToReg    ( cw_cpzToReg    ),
         .cw_cpzRegWrite ( cw_cpzRegWrite ),
@@ -168,9 +175,13 @@ module sm_cpu
     assign wd3 = memToReg    ? dmRData   :
                 ( cw_cpzToReg ? cp0_regRD : aluResult );
 
-    assign pc_new = pcExc == `PC_EXC  ?  cp0_ExcHandler :
+    assign pc_new = hz_stall          ?  pc             :
+                    pcExc == `PC_EXC  ?  cp0_ExcHandler :
                     pcExc == `PC_ERET ?  cp0_EPC        :
                  /* pcExc == `PC_FLOW */ pc_flow;
+
+    // hazard
+    assign hz_stall = ~dmReady;
 
 endmodule
 
@@ -188,6 +199,7 @@ module sm_control
     output reg [2:0] aluControl,
     output reg       memWrite,
     output reg       memToReg,
+    output reg       memAccess,
     output reg       branch,
     output reg       cw_cpzToReg,
     output reg       cw_cpzRegWrite,
@@ -216,6 +228,7 @@ module sm_control
         aluControl  = `ALU_ADD;
         memWrite    = 1'b0;
         memToReg    = 1'b0;
+        memAccess   = 1'b0;
         cw_cpzToReg    = 1'b0;
         cw_cpzRegWrite = 1'b0;
         cw_cpzExcEret  = 1'b0;
@@ -232,8 +245,10 @@ module sm_control
 
             { `C_ADDIU, `F_ANY,  `S_ANY } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD;  end
             { `C_LUI,   `F_ANY,  `S_ANY } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_LUI;  end
-            { `C_LW,    `F_ANY,  `S_ANY } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD; memToReg = 1'b1; end
-            { `C_SW,    `F_ANY,  `S_ANY } : begin memWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD;  end
+            { `C_LW,    `F_ANY,  `S_ANY } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD; 
+                                                  memToReg = 1'b1; memAccess = 1'b1; end
+            { `C_SW,    `F_ANY,  `S_ANY } : begin memWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD; 
+                                                  memAccess = 1'b1; end
 
             { `C_BEQ,   `F_ANY,  `S_ANY } : begin branch = 1'b1; condZero = 1'b1; aluControl = `ALU_SUBU; end
             { `C_BNE,   `F_ANY,  `S_ANY } : begin branch = 1'b1; aluControl = `ALU_SUBU; end

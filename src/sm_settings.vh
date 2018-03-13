@@ -11,7 +11,9 @@
 
 `define SM_CONFIG_EXCEPTION_HANDLER_ADDR    32'h100
 
-`define SM_CONFIG_PIPELINE
+//`define SM_CONFIG_PIPELINE
+
+`define SM_CONFIG_BUSY_RAM
 
 `ifdef SM_CONFIG_PIPELINE
     `define SM_CPU sm_pcpu
