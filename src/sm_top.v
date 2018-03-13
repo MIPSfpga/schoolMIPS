@@ -54,9 +54,7 @@ module sm_top
     wire            dmValid;
     wire            dmReady;
 
-    `ifdef SM_CONFIG_BUSY_RAM
-
-    sm_ram_busy data_ram
+    `SM_RAM data_ram
     (
         .clk    ( clk     ),
         .rst_n  ( rst_n   ),
@@ -67,20 +65,6 @@ module sm_top
         .ready  ( dmReady ),
         .rd     ( dmRData )
     );
-
-    `else
-
-    sm_ram data_ram
-    (
-        .clk ( clk      ),
-        .a   ( dmAddr   ),
-        .we  ( dmWe     ),
-        .wd  ( dmWData  ),
-        .rd  ( dmRData  )
-    );
-    assign dmReady = 1'b1;
-
-    `endif
 
     //cpu core
     `SM_CPU sm_cpu

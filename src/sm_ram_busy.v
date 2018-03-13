@@ -41,3 +41,31 @@ module sm_ram_busy
     );
 
 endmodule
+
+
+module sm_ram_fast
+#(
+    parameter SIZE = 64,
+    parameter DELAY = 2
+)
+(
+    input         clk,
+    input         rst_n,
+    input  [31:0] a,        // address
+    input         we,       // write enable
+    input  [31:0] wd,       // write data
+    input         valid,    // read/write request
+    output        ready,    // read/write done
+    output [31:0] rd        // read data
+);
+    sm_ram #(SIZE) ram
+    (
+        .clk ( clk  ),
+        .a   ( a    ),
+        .we  ( we   ),
+        .wd  ( wd   ),
+        .rd  ( rd   )
+    );
+    assign ready = 1'b1;
+
+endmodule

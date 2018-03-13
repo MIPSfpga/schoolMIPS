@@ -21,3 +21,9 @@
 `else
     `define SM_CPU sm_cpu
 `endif
+
+`ifdef SM_CONFIG_BUSY_RAM
+    `define SM_RAM sm_ram_busy
+`else
+    `define SM_RAM sm_ram_fast
+`endif
