@@ -1,12 +1,12 @@
 
+`include "sm_settings.vh"
 
 //TODO: 
 // - add irq & memory access test programm
 
 module sm_ram_busy
 #(
-    parameter SIZE = 64, // memory size, in words
-    parameter DELAY = 2  // busy delay, from 2 to 255
+    parameter SIZE = 64 // memory size, in words
 )
 (
     input             clk,
@@ -28,7 +28,7 @@ module sm_ram_busy
     sm_register_we       r_ram_we (clk, rst_n, ibuf_we, we, ram_we);
 
     // Valid to Ready delay 
-    sm_delay #(DELAY) dly 
+    sm_delay #(`SM_CONFIG_BUSY_RAM_DELAY) dly 
     (
         .clk   ( clk     ),
         .rst_n ( rst_n   ),
@@ -58,7 +58,7 @@ endmodule
 
 module sm_delay
 #(
-    parameter DELAY = 2
+    parameter DELAY = 2 // busy delay, from 0 to 255
 )
 (
     input       clk,
