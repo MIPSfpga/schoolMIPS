@@ -1,5 +1,12 @@
 
 
+//TODO: 
+// - move one part of data memory to W stage
+// - add hazard unit to single cycle version
+// - simplify sm_delay module
+// - add X state to memory output in simulation mode
+// - add irq & memory access test programm
+
 module sm_ram_busy
 #(
     parameter SIZE = 64, // memory size, in words
@@ -91,7 +98,7 @@ module sm_delay
         ready = 1'b0;
         start = 1'b0;
         case(state)
-            S_IDLE  : begin ready = ~valid; 
+            S_IDLE  : begin ready = 1'b1; 
                             start =  valid; end
             S_BUSY  : ready = 1'b0;
             S_READY : ready = 1'b1;
