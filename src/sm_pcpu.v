@@ -313,12 +313,10 @@ module sm_pcpu
     wire hz_stall_n_W;
 
     // memory
-    wire [31:0] readData_M = dmRData;
     assign dmWe    = cw_memWrite_M;
     assign dmAddr  = aluResult_M;
     assign dmWData = writeData_M;
     assign dmValid = cw_memAccess_M;
-    wire   memBusy_M = ~dmReady;
 
     //coprocessor 0
     wire cp0_ExcSync_M;         //not used, branch processed on D stage
@@ -354,10 +352,8 @@ module sm_pcpu
 
     //stage data border
     wire [31:0] aluResult_W;
-    wire [31:0] readData_W;
     wire [31:0] cp0_Data_W;
     sm_register_we #(32) r_aluResult_W (clk, rst_n, hz_stall_n_W, aluResult_M, aluResult_W);
-    sm_register_we #(32) r_readData_W  (clk, rst_n, hz_stall_n_W, readData_M,  readData_W);
     sm_register_we #(32) r_cp0_Data_W  (clk, rst_n, hz_stall_n_W, cp0_Data_M,  cp0_Data_W);
     sm_register_we #(5)  r_writeReg_W  (clk, rst_n, hz_stall_n_W, writeReg_M,  writeReg_W);
 
@@ -375,6 +371,10 @@ module sm_pcpu
     // **********************************************************
     // W - Writeback
     // **********************************************************
+
+    // memory
+    wire [31:0] readData_W =  dmRData;
+    wire         memBusy_W = ~dmReady;
 
     //data to write from Mem to RF
     assign writeData_W = cw_memToReg_W ? readData_W : 
@@ -403,7 +403,7 @@ module sm_pcpu
         .hz_stall_n_D   ( hz_stall_n_D  ),
         .hz_flush_n_E   ( hz_flush_n_E  ),
 
-        .memBusy_M      ( memBusy_M     ),
+        .memBusy_W      ( memBusy_W     ),
         .cw_memWrite_M  ( cw_memWrite_M ),
         .hz_stall_n_E   ( hz_stall_n_E  ),
         .hz_stall_n_M   ( hz_stall_n_M  ),
@@ -456,7 +456,7 @@ module sm_hazard_unit
     output          hz_stall_n_D,   //stall D stage
     output          hz_flush_n_E,   //flush_n E stage
 
-    input           memBusy_M,
+    input           memBusy_W,
     input           cw_memWrite_M,
     output          hz_stall_n_E,
     output          hz_stall_n_M,
@@ -532,7 +532,7 @@ module sm_hazard_unit
                                instrSel_M == `CP0_REG_SEL_EPC ) ? `HZ_FW_MF : `HZ_FW_NONE;
 
     // stalling for data memory long fetch
-    wire hz_stall_prior_to_W = memBusy_M;
+    wire hz_stall_prior_to_W = memBusy_W;
 
     //stalling
     assign hz_stall_n_F = ~hz_stall_prior_to_E & ~hz_stall_prior_to_W;
