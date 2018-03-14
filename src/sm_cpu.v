@@ -45,7 +45,7 @@ module sm_cpu
     wire [31:0] pcNext  = pc + 4;
     wire [31:0] pc_new;
     wire [31:0] pc_flow = ~pcSrc ? pcNext : pcBranch;
-    sm_register_c #(32) r_pc(clk ,rst_n, pc_new, pc);
+    sm_register_we #(32) r_pc(clk ,rst_n, ~hz_stall, pc_new, pc);
 
     //program memory access
     assign imAddr = pc >> 2;  //schoolMIPS instruction memory is word addressable
@@ -60,7 +60,6 @@ module sm_cpu
     wire [31:0] rd1;
     wire [31:0] rd2;
     wire [31:0] wd3;
-    wire        we3 = regWrite && ~hz_stall;
 
     sm_register_file rf
     (
@@ -73,7 +72,7 @@ module sm_cpu
         .rd1        ( rd1          ),
         .rd2        ( rd2          ),
         .wd3        ( wd3          ),
-        .we3        ( we3          )
+        .we3        ( regWrite     )
     );
 
     //sign extension
@@ -175,8 +174,7 @@ module sm_cpu
     assign wd3 = memToReg    ? dmRData   :
                 ( cw_cpzToReg ? cp0_regRD : aluResult );
 
-    assign pc_new = hz_stall          ?  pc             :
-                    pcExc == `PC_EXC  ?  cp0_ExcHandler :
+    assign pc_new = pcExc == `PC_EXC  ?  cp0_ExcHandler :
                     pcExc == `PC_ERET ?  cp0_EPC        :
                  /* pcExc == `PC_FLOW */ pc_flow;
 
