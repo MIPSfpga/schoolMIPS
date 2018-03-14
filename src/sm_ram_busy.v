@@ -42,14 +42,21 @@ module sm_ram_busy
     );
 
     // Requested Memory
+    wire [31:0] ram_rd;
     sm_ram #(SIZE) ram
     (
         .clk   ( clk     ),
         .a     ( ram_a   ),
         .we    ( ram_we  ),
         .wd    ( ram_wd  ),
-        .rd    ( rd      )
+        .rd    ( ram_rd  )
     );
+
+    `ifdef SIMULATION
+        assign rd = ready & ~ram_we ? ram_rd : 32'bx;
+    `else
+        assign rd = ram_rd
+    `endif
 
 endmodule
 
