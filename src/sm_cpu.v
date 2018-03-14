@@ -179,7 +179,14 @@ module sm_cpu
                  /* pcExc == `PC_FLOW */ pc_flow;
 
     // hazard
-    assign hz_stall = ~dmReady;
+    wire memAccessProgress;
+    sm_register_c r_memAccessOld(clk ,rst_n, memAccess, memAccessProgress);
+
+    // stall for memory access
+    // - 1st cycle of memory access and no info about ready signal on 2nd cycle
+    // - 2nd and other cycles waiting for ready signal
+    assign hz_stall = (~memAccessProgress & memAccess) 
+                    | ( memAccessProgress & ~dmReady);
 
 endmodule
 
