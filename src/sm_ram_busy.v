@@ -1,16 +1,12 @@
 
 
 //TODO: 
-// - move one part of data memory to W stage
-// - add hazard unit to single cycle version
-// - simplify sm_delay module
-// - add X state to memory output in simulation mode
 // - add irq & memory access test programm
 
 module sm_ram_busy
 #(
     parameter SIZE = 64, // memory size, in words
-    parameter DELAY = 4  // busy delay, from 2 to 255
+    parameter DELAY = 2  // busy delay, from 2 to 255
 )
 (
     input             clk,
@@ -62,55 +58,29 @@ endmodule
 
 module sm_delay
 #(
-    parameter DELAY = 2 // busy delay, from 2 to 255
+    parameter DELAY = 2
 )
 (
     input       clk,
     input       rst_n,
     input       valid,  // read/write request
-    output reg  ready,  // read/write done
-    output reg  start   // work started strobe
+    output      ready,  // read/write done
+    output      start   // work started strobe
 );
-    localparam EFFECTIVE_DELAY = (DELAY < 2  ) ? 0   :
-                                 (DELAY > 257) ? 255 : DELAY-2;
-    // FSM States
-    localparam  S_IDLE  = 2'h0, // waiting for request
-                S_BUSY  = 2'h1, // waiting for delay
-                S_READY = 2'h2; // delay finished
-
-    // FSM State vars
-    wire [1:0] state;
-    reg  [1:0] state_next;
-    sm_register_c #(2) r_state (clk, rst_n, state_next, state);
+    localparam EFFECTIVE_DELAY = (DELAY > 255) ? 255 : DELAY;
 
     wire [7:0] delay;
-    wire [7:0] delay_next;
-    sm_register #(8) r_delay (clk, delay_next, delay);
+    wire delay_min = (delay == 0);
+    wire delay_max = (delay == EFFECTIVE_DELAY);
 
-    // Next State value
-    wire delay_finished = (delay == EFFECTIVE_DELAY);
-    assign delay_next = (state == S_BUSY) ? delay + 1 : 0;
+    wire [7:0] delay_next = delay_max ? 0 : 
+                            delay_min & ~valid ? 0 :
+                            delay + 1;
 
-    always @(*) begin
-        state_next = state;
-        case(state)
-            S_IDLE  : state_next = valid ? S_BUSY : S_IDLE;
-            S_BUSY  : state_next = delay_finished ? S_READY : S_BUSY;
-            S_READY : state_next = S_IDLE;
-        endcase
-    end
+    sm_register_c #(8)  r_delay (clk, rst_n, delay_next, delay);
 
-    // FSM Output
-    always @(*) begin
-        ready = 1'b0;
-        start = 1'b0;
-        case(state)
-            S_IDLE  : begin ready = 1'b1; 
-                            start =  valid; end
-            S_BUSY  : ready = 1'b0;
-            S_READY : ready = 1'b1;
-        endcase
-    end
+    assign ready = delay_min | delay_max;
+    assign start = delay_min & valid;
 
 endmodule
 
