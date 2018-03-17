@@ -79,7 +79,7 @@ module sm_delay
 
     sm_register_c #(8)  r_delay (clk, rst_n, delay_next, delay);
 
-    assign ready = delay_min | delay_max;
+    assign ready = delay_min;
     assign start = delay_min & valid;
 
 endmodule
@@ -87,9 +87,7 @@ endmodule
 // Memory wout delay
 module sm_ram_fast
 #(
-    parameter SIZE = 64,
-    parameter DELAY = 2
-)
+    parameter SIZE = 64)
 (
     input         clk,
     input         rst_n,
