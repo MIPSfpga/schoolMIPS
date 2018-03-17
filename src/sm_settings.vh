@@ -13,7 +13,9 @@
 
 `define SM_CONFIG_PIPELINE
 
-`define SM_CONFIG_BUSY_RAM
+`define SM_CONFIG_AHB_LITE
+
+//`define SM_CONFIG_BUSY_RAM
 `define SM_CONFIG_BUSY_RAM_DELAY 4
 
 `ifdef SM_CONFIG_PIPELINE
@@ -25,6 +27,8 @@
 
 `ifdef SM_CONFIG_BUSY_RAM
     `define SM_RAM sm_ram_busy
+`elsif SM_CONFIG_AHB_LITE
+    `define SM_RAM sm_matrix
 `else
     `define SM_RAM sm_ram_fast
 `endif

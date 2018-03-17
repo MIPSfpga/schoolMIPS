@@ -46,7 +46,7 @@ module sm_top
     wire    [31:0]  imData;
     sm_rom #(`SM_CONFIG_ROM_SIZE) reset_rom(imAddr, imData);
 
-    //data memory
+    // data memory & peripheral devices
     wire    [31:0]  dmAddr;
     wire            dmWe;
     wire    [31:0]  dmWData;
@@ -54,10 +54,37 @@ module sm_top
     wire            dmValid;
     wire            dmReady;
 
+    // AHB-Lite signals for peripheral devices
+    wire        HCLK;
+    wire        HRESETn;
+    wire        HSEL;
+    wire        HWRITE;
+    wire [ 1:0] HTRANS;
+    wire [31:0] HADDR;
+    wire [31:0] HRDATA;
+    wire [31:0] HWDATA;
+    wire        HREADY;
+    wire        HRESP;
+
+    // scratchpad and AHB-Lite host side
     `SM_RAM data_ram
     (
         .clk    ( clk     ),
         .rst_n  ( rst_n   ),
+
+        `ifdef SM_CONFIG_AHB_LITE
+        .HCLK    (HCLK    ),
+        .HRESETn (HRESETn ),
+        .HSEL    (HSEL    ),
+        .HWRITE  (HWRITE  ),
+        .HTRANS  (HTRANS  ),
+        .HADDR   (HADDR   ),
+        .HRDATA  (HRDATA  ),
+        .HWDATA  (HWDATA  ),
+        .HREADY  (HREADY  ),
+        .HRESP   (HRESP   ),
+        `endif
+
         .a      ( dmAddr  ),    
         .we     ( dmWe    ),   
         .wd     ( dmWData ),   
@@ -81,6 +108,21 @@ module sm_top
         .dmValid    ( dmValid   ),
         .dmReady    ( dmReady   ),
         .dmRData    ( dmRData   )
+    );
+
+    // peripheral devices
+    ahb_matrix ahb_matrix
+    (
+        .HCLK    ( HCLK    ),
+        .HRESETn ( HRESETn ),
+        .HSEL    ( HSEL    ),
+        .HWRITE  ( HWRITE  ),
+        .HTRANS  ( HTRANS  ),
+        .HADDR   ( HADDR   ),
+        .HRDATA  ( HRDATA  ),
+        .HWDATA  ( HWDATA  ),
+        .HREADY  ( HREADY  ),
+        .HRESP   ( HRESP   ) 
     );
 
 endmodule
