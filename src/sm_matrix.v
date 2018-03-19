@@ -48,7 +48,7 @@ module sm_matrix
         .a      ( a              ),    
         .we     ( we             ),   
         .wd     ( wd             ),   
-        .valid  ( ready & sel[0] ),
+        .valid  ( valid & sel[0] ),
         .ready  ( readyout   [0] ),
         .rd     ( rdata0         )
     );
@@ -56,9 +56,9 @@ module sm_matrix
     // AHB-Lite bus : external (slow) RAM and peripheral devices
     assign HCLK     = clk;
     assign HRESETn  = rst_n;
-    assign HSEL     = ready & sel[1];
+    assign HSEL     = sel[1];
     assign HWRITE   = we;
-    assign HTRANS   = `HTRANS_NONSEQ; //AHB single transfer only
+    assign HTRANS   = valid ? `HTRANS_NONSEQ : `HTRANS_IDLE; //AHB single transfer only
     assign HADDR    = a;
     assign HWDATA   = wd;
 
@@ -76,8 +76,8 @@ module sm_matrix
     sm_response_mux response_mux
     (
         .sel      ( sel_r    ),
-        .rdata0   ( rdata[0] ),
-        .rdata1   ( rdata[1] ),
+        .rdata0   ( rdata0   ),
+        .rdata1   ( rdata1   ),
         .readyout ( readyout ),
         .rdata    ( rd       ),
         .ready    ( ready    )

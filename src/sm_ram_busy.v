@@ -98,14 +98,18 @@ module sm_ram_fast
     output        ready,    // read/write done
     output [31:0] rd        // read data
 );
+    wire [31:0] ram_rd;
+
     sm_ram #(SIZE) ram
     (
-        .clk ( clk  ),
-        .a   ( a    ),
-        .we  ( we   ),
-        .wd  ( wd   ),
-        .rd  ( rd   )
+        .clk ( clk    ),
+        .a   ( a      ),
+        .we  ( we     ),
+        .wd  ( wd     ),
+        .rd  ( ram_rd )
     );
     assign ready = 1'b1;
+
+    sm_register_we #(32) r_ram_rd (clk, rst_n, valid, ram_rd, rd);
 
 endmodule
