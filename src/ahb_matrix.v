@@ -4,7 +4,6 @@ module ahb_matrix
 (
     input            HCLK,
     input            HRESETn,
-    input            HSEL,
     input            HWRITE,
     input     [ 1:0] HTRANS,
     input     [31:0] HADDR,
@@ -20,7 +19,7 @@ module ahb_matrix
     (
         .HCLK      ( HCLK    ),
         .HRESETn   ( HRESETn ),
-        .HSEL      ( HSEL    ),
+        .HSEL      ( 1'b1    ),
         .HWRITE    ( HWRITE  ),
         .HREADY    ( HREADY  ),
         .HTRANS    ( HTRANS  ),

@@ -38,6 +38,7 @@ module sm_cpu
     wire        memWrite;
     wire        memAccess;
     wire        hz_stall;
+    wire        hz_mem_en;
 
     //program counter
     wire [31:0] pc;
@@ -97,7 +98,7 @@ module sm_cpu
     assign dmWe = memWrite;
     assign dmAddr = aluResult;
     assign dmWData = rd2;
-    assign dmValid = memAccess;
+    assign dmValid = hz_mem_en;
 
     //control
     wire        cw_cpzToReg;
@@ -178,15 +179,20 @@ module sm_cpu
                     pcExc == `PC_ERET ?  cp0_EPC        :
                  /* pcExc == `PC_FLOW */ pc_flow;
 
-    // hazard
-    wire memAccessProgress;
-    sm_register_c r_memAccessOld(clk ,rst_n, memAccess, memAccessProgress);
+    // hazards
+    wire dmReady_old;
+    sm_register_c r_dmReady_old(clk ,rst_n, dmReady, dmReady_old);
 
     // stall for memory access
     // - 1st cycle of memory access and no info about ready signal on 2nd cycle
     // - 2nd and other cycles waiting for ready signal
-    assign hz_stall = (~memAccessProgress & memAccess) 
-                    | ( memAccessProgress & ~dmReady);
+    assign hz_stall  = memAccess & (             // memory access instruction
+                       ( dmReady &  dmReady_old) // 1st cycle
+                          || ~dmReady);          // 2nd and others
+
+    // memory request allowed:
+    // - should be requested only on 1st cycle of mem access
+    assign hz_mem_en = memAccess & dmReady & dmReady_old;
 
 endmodule
 

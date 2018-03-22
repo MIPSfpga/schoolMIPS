@@ -23,7 +23,6 @@ module sm_matrix
 
     output            HCLK,
     output            HRESETn,
-    output            HSEL,
     output            HWRITE,
     output     [ 1:0] HTRANS,
     output     [31:0] HADDR,
@@ -54,16 +53,29 @@ module sm_matrix
     );
 
     // AHB-Lite bus : external (slow) RAM and peripheral devices
-    assign HCLK     = clk;
-    assign HRESETn  = rst_n;
-    assign HSEL     = sel[1];
-    assign HWRITE   = we;
-    assign HTRANS   = valid ? `HTRANS_NONSEQ : `HTRANS_IDLE; //AHB single transfer only
-    assign HADDR    = a;
-    assign HWDATA   = wd;
+    sm_ahb_master ahb_master
+    (
+        .clk      ( clk         ),
+        .rst_n    ( rst_n       ),
+   
+        .a        ( a           ),        
+        .we       ( we          ),       
+        .wd       ( wd          ),       
+        .valid    ( valid       ),    
+        .sel      ( sel     [1] ),      
+        .ready    ( readyout[1] ),    
+        .rd       ( rdata1      ),       
 
-    assign readyout[1] = HREADY & ~HRESP; // AHB Ready and NoError
-    assign rdata1      = HRDATA;
+        .HCLK     ( HCLK        ),
+        .HRESETn  ( HRESETn     ),
+        .HWRITE   ( HWRITE      ),
+        .HTRANS   ( HTRANS      ),
+        .HADDR    ( HADDR       ),
+        .HRDATA   ( HRDATA      ),
+        .HWDATA   ( HWDATA      ),
+        .HREADY   ( HREADY      ),
+        .HRESP    ( HRESP       )          
+    );
 
     // interconnect part:
     //  address decoder

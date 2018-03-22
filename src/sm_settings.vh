@@ -11,12 +11,17 @@
 
 `define SM_CONFIG_EXCEPTION_HANDLER_ADDR    32'h100
 
-`define SM_CONFIG_PIPELINE
+//`define SM_CONFIG_PIPELINE
+
+//`define SM_CONFIG_BUSY_RAM
+`define SM_CONFIG_BUSY_RAM_DELAY 2
 
 `define SM_CONFIG_AHB_LITE
 
-//`define SM_CONFIG_BUSY_RAM
-`define SM_CONFIG_BUSY_RAM_DELAY 4
+//`define SM_CONFIG_SCRATCHPAD
+
+//`define SM_CONFIG_AHB_GPIO
+//`define SM_CONFIG_AHB_GPIO_WIDTH 8
 
 `ifdef SM_CONFIG_PIPELINE
     `define SM_CPU sm_pcpu
@@ -28,7 +33,11 @@
 `ifdef SM_CONFIG_BUSY_RAM
     `define SM_RAM sm_ram_busy
 `elsif SM_CONFIG_AHB_LITE
-    `define SM_RAM sm_matrix
+    `ifdef SM_CONFIG_SCRATCHPAD
+        `define SM_RAM sm_matrix
+    `else
+        `define SM_RAM sm_ahb_master
+    `endif
 `else
     `define SM_RAM sm_ram_fast
 `endif
