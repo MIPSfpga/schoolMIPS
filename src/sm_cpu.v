@@ -180,19 +180,24 @@ module sm_cpu
                  /* pcExc == `PC_FLOW */ pc_flow;
 
     // hazards
-    wire dmReady_old;
-    sm_register_c r_dmReady_old(clk ,rst_n, dmReady, dmReady_old);
+    wire memWait;
+    wire memAccessStart    = ~memWait &  memAccess;
+    wire memAccessDone     =  memWait &  dmReady;
+    wire memAccessProgress =  memWait & ~dmReady;
+
+    wire memWait_new = memAccessStart ? 1 : // set when memory access start
+                       memAccessDone  ? 0 : // unset when memory ready
+                       memWait;
+    sm_register_c r_memWait(clk ,rst_n, memWait_new, memWait);
 
     // stall for memory access
     // - 1st cycle of memory access and no info about ready signal on 2nd cycle
     // - 2nd and other cycles waiting for ready signal
-    assign hz_stall  = memAccess & (             // memory access instruction
-                       ( dmReady &  dmReady_old) // 1st cycle
-                          || ~dmReady);          // 2nd and others
+    assign hz_stall  = memAccessStart | memAccessProgress;
 
     // memory request allowed:
     // - should be requested only on 1st cycle of mem access
-    assign hz_mem_en = memAccess & dmReady & dmReady_old;
+    assign hz_mem_en = memAccessStart;
 
 endmodule
 
