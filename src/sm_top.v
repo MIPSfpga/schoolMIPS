@@ -13,13 +13,19 @@
 //hardware top level module
 module sm_top
 (
-    input           clkIn,
-    input           rst_n,
     input   [ 3:0 ] clkDevide,
     input           clkEnable,
     output          clk,
     input   [ 4:0 ] regAddr,
-    output  [31:0 ] regData
+    output  [31:0 ] regData,
+
+    `ifdef SM_CONFIG_AHB_GPIO
+    input  [`SM_GPIO_WIDTH - 1:0] port_gpioIn,
+    output [`SM_GPIO_WIDTH - 1:0] port_gpioOut,
+    `endif
+
+    input           clkIn,
+    input           rst_n
 );
     //metastability input filters
     wire    [ 3:0 ] devide;
@@ -70,15 +76,21 @@ module sm_top
     // peripheral devices
     ahb_matrix ahb_matrix
     (
-        .HCLK    ( HCLK    ),
-        .HRESETn ( HRESETn ),
         .HWRITE  ( HWRITE  ),
         .HTRANS  ( HTRANS  ),
         .HADDR   ( HADDR   ),
         .HRDATA  ( HRDATA  ),
         .HWDATA  ( HWDATA  ),
         .HREADY  ( HREADY  ),
-        .HRESP   ( HRESP   ) 
+        .HRESP   ( HRESP   ),
+
+        `ifdef SM_CONFIG_AHB_GPIO
+        .port_gpioIn  ( port_gpioIn  ),
+        .port_gpioOut ( port_gpioOut ),
+        `endif
+
+        .HCLK    ( HCLK    ),
+        .HRESETn ( HRESETn )
     );
 
     `endif

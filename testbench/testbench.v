@@ -19,17 +19,29 @@ module sm_testbench;
     wire [31:0] regData;
     wire        cpuClk;
 
+    // peripheral wires
+    `ifdef SM_CONFIG_AHB_GPIO
+    wire [`SM_GPIO_WIDTH - 1:0] port_gpioIn  = 32'h2;
+    wire [`SM_GPIO_WIDTH - 1:0] port_gpioOut;
+    `endif
+
     // ***** DUT start ************************
 
     sm_top sm_top
     (
-        .clkIn     ( clk     ),
-        .rst_n     ( rst_n   ),
         .clkDevide ( 4'b0    ),
         .clkEnable ( 1'b1    ),
         .clk       ( cpuClk  ),
         .regAddr   ( regAddr ),
-        .regData   ( regData )
+        .regData   ( regData ),
+
+        `ifdef SM_CONFIG_AHB_GPIO
+        .port_gpioIn  ( port_gpioIn  ),
+        .port_gpioOut ( port_gpioOut ),
+        `endif
+
+        .clkIn     ( clk     ),
+        .rst_n     ( rst_n   )
     );
 
     defparam sm_top.sm_clk_divider.bypass = 1;
@@ -97,6 +109,7 @@ module sm_testbench;
                 { `C_SPEC,  `F_ADDU, `S_ANY }   : $write ("addu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
                 { `C_SPEC,  `F_OR  , `S_ANY }   : $write ("or    $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
                 { `C_SPEC,  `F_SRL , `S_ANY }   : $write ("srl   $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                { `C_SPEC,  `F_SLL , `S_ANY }   : $write ("sll   $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
                 { `C_SPEC,  `F_SLTU, `S_ANY }   : $write ("sltu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
                 { `C_SPEC,  `F_SUBU, `S_ANY }   : $write ("subu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
                  

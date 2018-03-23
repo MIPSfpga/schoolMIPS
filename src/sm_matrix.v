@@ -108,7 +108,7 @@ module sm_matrix_decoder
     // Decode based on most significant bits of the address
     // Scratchpad RAM   : 0x00000000 - 0x1fffffff   
     // AHB-Lite devices : 0x20000000 - 0xffffffff
-    assign sel = ( addr [31:29] == 3'b000 ) ? SEL_SCR : SEL_AHB;
+    assign sel = `SM_MEM_SCRATCHPAD ? SEL_SCR : SEL_AHB;
 
 endmodule
 
