@@ -6,7 +6,7 @@
 
 module sm_ram_busy
 #(
-    parameter SIZE = 64 // memory size, in words
+    parameter WIDTH = 6 // memory internal bus width (determines RAM size)
 )
 (
     input             clk,
@@ -39,7 +39,7 @@ module sm_ram_busy
 
     // Requested Memory
     wire [31:0] ram_rd;
-    sm_ram #(SIZE) ram
+    sm_ram #(WIDTH) ram
     (
         .clk   ( clk     ),
         .a     ( ram_a   ),
@@ -87,7 +87,8 @@ endmodule
 // Memory wout delay
 module sm_ram_fast
 #(
-    parameter SIZE = 64)
+    parameter WIDTH = 6 // memory internal bus width (determines RAM size)
+)
 (
     input         clk,
     input         rst_n,
@@ -100,7 +101,7 @@ module sm_ram_fast
 );
     wire [31:0] ram_rd;
 
-    sm_ram #(SIZE) ram
+    sm_ram #(WIDTH) ram
     (
         .clk ( clk    ),
         .a   ( a      ),

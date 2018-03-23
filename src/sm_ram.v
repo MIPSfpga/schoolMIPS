@@ -2,7 +2,7 @@
 
 module sm_ram
 #(
-    parameter SIZE = 64
+    parameter WIDTH = 6
 )
 (
     input         clk,
@@ -11,15 +11,16 @@ module sm_ram
     input  [31:0] wd,
     output [31:0] rd
 );
-    //TODO: fix width
+    localparam RAM32_WIDTH = WIDTH - 2;
+    localparam RAM32_SIZE  = 2**(RAM32_WIDTH);
 
-    reg [31:0] ram [SIZE - 1:0];
-    //assign rd = ram [a[31:2]];
-    assign rd = ram [a[7:2]];
+    wire [WIDTH-1:2] addr = a[WIDTH-1:2];
+
+    reg  [31:0] ram [RAM32_SIZE - 1:0];
+    assign rd = ram [addr];
 
     always @(posedge clk)
         if (we)
-            //ram[a[31:2]] <= wd;
-            ram[a[7:2]] <= wd;
+            ram[addr] <= wd;
 
 endmodule

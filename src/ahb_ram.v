@@ -3,7 +3,7 @@
 
 module ahb_ram
 #(
-    parameter SIZE = 64 // memory size, in words
+    parameter WIDTH = 6 // memory internal bus width (determines RAM size)
 )
 (
     input            HCLK,
@@ -38,7 +38,7 @@ module ahb_ram
     wire        mem_ready;
     wire [31:0] mem_rd;
 
-    sm_ram_busy #(SIZE) ram
+    sm_ram_busy #(WIDTH) ram
     (
         .clk   ( HCLK      ),
         .rst_n ( HRESETn   ),
