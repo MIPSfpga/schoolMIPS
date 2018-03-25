@@ -59,7 +59,7 @@ module sm_ram_busy
     `ifdef SIMULATION
         assign rd = ready & ~ram_we ? ram_rd : 32'bx;
     `else
-        assign rd = ram_rd
+        assign rd = ram_rd;
     `endif
 
 endmodule
