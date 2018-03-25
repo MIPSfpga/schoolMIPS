@@ -8,6 +8,7 @@ The CPU have several versions (from simple to complex). Each of them is placed i
 - **02_irq** - data memory, system timer, interrupts and exceptions (CP0 coprocessor);
 - **03_pipeline** - the pipelined version of the simplest core with data memory 
 - **04_pipeline_irq** - the pipelined version of 02_irq
+- **05_pipeline_ahb** - 04_pipeline_irq with AHB-Lite bus support and Scratchpad RAM
 
 For docs and CPU diagrams please visit the project [wiki](https://github.com/MIPSfpga/schoolMIPS/wiki)
 
