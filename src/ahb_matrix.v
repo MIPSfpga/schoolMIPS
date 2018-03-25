@@ -130,6 +130,6 @@ module ahb_response_mux
             3'b??1  : begin HRDATA = RDATA_0; HRESP = RESP[0]; HREADY = HREADYOUT[0]; end
             3'b?10  : begin HRDATA = RDATA_1; HRESP = RESP[1]; HREADY = HREADYOUT[1]; end
             3'b100  : begin HRDATA = RDATA_2; HRESP = RESP[2]; HREADY = HREADYOUT[2]; end
-            default : begin HRDATA = 32'b0;   HRESP = 1'b1;    HREADY = 1'b1; end
+            default : begin HRDATA = 32'b0;   HRESP = 1'b1;    HREADY = 1'b1; end //error
         endcase
 endmodule

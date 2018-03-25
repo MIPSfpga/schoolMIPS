@@ -34,6 +34,9 @@ module sm_matrix
 
     wire [ 1:0] sel;      // device selector (request stage)
     wire [ 1:0] sel_r;    // device selector (response stage)
+    wire [ 1:0] sel_a;    // addr decoder output
+    assign sel = valid ? sel_a : 2'b0;
+    
     wire [ 1:0] readyout; // device ready
     wire [31:0] rdata;    // data from devices
     wire [31:0] rdata0;
@@ -47,7 +50,7 @@ module sm_matrix
         .a      ( a              ),    
         .we     ( we             ),   
         .wd     ( wd             ),   
-        .valid  ( valid & sel[0] ),
+        .valid  ( sel        [0] ),
         .ready  ( readyout   [0] ),
         .rd     ( rdata0         )
     );
@@ -61,8 +64,7 @@ module sm_matrix
         .a        ( a           ),        
         .we       ( we          ),       
         .wd       ( wd          ),       
-        .valid    ( valid       ),    
-        .sel      ( sel     [1] ),      
+        .valid    ( sel     [1] ),    
         .ready    ( readyout[1] ),    
         .rd       ( rdata1      ),       
 
@@ -79,7 +81,7 @@ module sm_matrix
 
     // interconnect part:
     //  address decoder
-    sm_matrix_decoder decoder ( a, sel);
+    sm_matrix_decoder decoder ( a, sel_a);
 
     //  request -> response stage selector
     sm_register_we #(2) r_sel ( clk, rst_n, ready, sel, sel_r );

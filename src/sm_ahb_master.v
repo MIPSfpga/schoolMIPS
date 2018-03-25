@@ -10,7 +10,6 @@ module sm_ahb_master
     input             we,       // write enable
     input      [31:0] wd,       // write data
     input             valid,    // read/write request
-    input             sel,      // select by address selector
     output            ready,    // read/write done
     output     [31:0] rd,       // read data
 
@@ -30,7 +29,18 @@ module sm_ahb_master
     assign HTRANS   = valid ? `HTRANS_NONSEQ : `HTRANS_IDLE; //AHB single transfer only
     assign HADDR    = a;
 
-    assign ready    = HREADY & ~HRESP; // AHB Ready and NoError
+    wire ahbReady = HREADY & ~HRESP; // AHB peripheral Ready and NoError
+    wire memStart =  valid;
+    wire memEnd   = ~valid & ahbReady;
+
+    // memory request is pending
+    wire memWait;
+    wire memWait_next = memStart ? 1 :
+                        memEnd   ? 0 : memWait;
+    sm_register_c r_memWait(clk, rst_n, memWait_next, memWait);
+
+    // AHB Ready and Error status have meaning only when there was a request before
+    assign ready    = memWait ? ahbReady : 1'b1; 
     assign rd       = HRDATA;
 
     sm_register_we #(32) r_hwdata (clk, rst_n, valid, wd, HWDATA);
