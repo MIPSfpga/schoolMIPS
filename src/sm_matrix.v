@@ -99,7 +99,7 @@ module sm_matrix
 
 endmodule
 
-`define SM_RAM_ADDR_MATCH   3'b001
+`define SM_RAM_ADDR_MATCH   2'b00
 `define SM_GPIO_ADDR_MATCH 12'h7f0
 `define SM_PWM_ADDR_MATCH  12'h7f1
 `define SM_ALS_ADDR_MATCH  12'h7f2
@@ -110,8 +110,8 @@ module sm_matrix_decoder
     output [ 5:0] bSel
 );
     // Decode based on most significant bits of the address
-    // RAM   0x00002000 - 0x00003fff
-    assign bSel[0] = ( bAddr [ 15:13 ] == `SM_RAM_ADDR_MATCH);
+    // RAM   0x00000000 - 0x00003fff
+    assign bSel[0] = ( bAddr [ 15:14 ] == `SM_RAM_ADDR_MATCH);
 
     // GPIO  0x00007f00 - 0x00007f0f
     assign bSel[1] = ( bAddr [ 15:4  ] == `SM_GPIO_ADDR_MATCH);
