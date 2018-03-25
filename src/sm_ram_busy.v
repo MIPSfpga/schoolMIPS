@@ -84,8 +84,8 @@ module sm_delay
 
 endmodule
 
-// Memory wout delay
-module sm_ram_fast
+// Memory with output buffer
+module sm_ram_outbuf
 #(
     parameter WIDTH = 6 // memory internal bus width (determines RAM size)
 )

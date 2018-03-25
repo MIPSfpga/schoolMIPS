@@ -43,7 +43,7 @@ module sm_matrix
     wire [31:0] rdata1;
     
     // fast onchip RAM
-    sm_ram_fast scratchpad_ram
+    sm_ram_outbuf scratchpad_ram
     (
         .clk    ( clk            ),
         .rst_n  ( rst_n          ),

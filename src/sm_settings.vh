@@ -10,21 +10,27 @@
 //**************************************************************
 // settings START
 
+// instruction memory size (in words)
 `define SM_CONFIG_ROM_SIZE  128
 
+// default exception handler addr
 `define SM_CONFIG_EXCEPTION_HANDLER_ADDR    32'h100
 
+// CPU version: -single cycle
+//              -pipelined
+// (comment for single cycle)
 `define SM_CONFIG_PIPELINE
 
-//`define SM_CONFIG_BUSY_RAM
-`define SM_CONFIG_BUSY_RAM_DELAY 2
-
-`define SM_CONFIG_AHB_LITE
-
-`define SM_CONFIG_SCRATCHPAD
-
-`define SM_CONFIG_AHB_GPIO
-//`define SM_CONFIG_AHB_GPIO_WIDTH 8
+// Memory options
+// uncomment one of the allowed configurations:
+// A. default block RAM
+//`define SM_CONFIG_RAM_BLOCK
+// B. block RAM with delayed READY signal
+//`define SM_CONFIG_RAM_BUSY
+// C. AHB devices (delayed block ram. gpio, etc) 
+//`define SM_CONFIG_RAM_AHB
+// D. the same but with a Scratchpad RAM
+`define SM_CONFIG_RAM_AHB_AND_SCRATCH
 
 // -------------------------------------------------------------
 // Memory map
@@ -44,6 +50,7 @@
 // settings END
 //**************************************************************
 
+// mode dependent values
 `ifdef SM_CONFIG_PIPELINE
     `define SM_CPU sm_pcpu
     `define SM_FORCE_RF_RDW
@@ -51,20 +58,46 @@
     `define SM_CPU sm_cpu
 `endif
 
-`ifdef SM_CONFIG_BUSY_RAM
-    `define SM_RAM sm_ram_busy
-`elsif SM_CONFIG_AHB_LITE
-    `ifdef SM_CONFIG_SCRATCHPAD
-        `define SM_RAM sm_matrix
-    `else
-        `define SM_RAM sm_ahb_master
-    `endif
-`else
-    `define SM_RAM sm_ram_fast
+`ifdef SM_CONFIG_RAM_BLOCK
+    `undef  SM_CONFIG_BUSY_RAM
+    `undef  SM_CONFIG_AHB_LITE
+    `undef  SM_CONFIG_SCRATCHPAD
+
+    `define SM_RAM sm_ram_outbuf
 `endif
 
-`ifdef SM_CONFIG_AHB_GPIO_WIDTH
-    `define SM_GPIO_WIDTH SM_CONFIG_AHB_GPIO_WIDTH
-`else
-    `define SM_GPIO_WIDTH 8
+`ifdef SM_CONFIG_RAM_BUSY
+    `define SM_CONFIG_BUSY_RAM
+    `undef  SM_CONFIG_AHB_LITE
+    `undef  SM_CONFIG_SCRATCHPAD
+
+    `define SM_RAM sm_ram_busy
 `endif
+
+`ifdef SM_CONFIG_RAM_AHB
+    `undef  SM_CONFIG_BUSY_RAM
+    `define SM_CONFIG_AHB_LITE
+    `undef  SM_CONFIG_SCRATCHPAD
+
+    `define SM_RAM sm_ahb_master
+    `define SM_CONFIG_AHB_GPIO
+`endif
+
+`ifdef SM_CONFIG_RAM_AHB_AND_SCRATCH
+    `undef  SM_CONFIG_BUSY_RAM
+    `define SM_CONFIG_AHB_LITE
+    `define SM_CONFIG_SCRATCHPAD
+
+    `define SM_RAM sm_matrix
+    `define SM_CONFIG_AHB_GPIO
+`endif
+
+// default values
+`ifndef SM_CONFIG_BUSY_RAM_DELAY
+    `define SM_CONFIG_BUSY_RAM_DELAY 3
+`endif
+
+`ifndef SM_GPIO_WIDTH
+    `define SM_GPIO_WIDTH            8
+`endif
+
