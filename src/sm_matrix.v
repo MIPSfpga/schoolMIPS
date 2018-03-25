@@ -1,10 +1,16 @@
+/*
+ * schoolMIPS - small MIPS CPU for "Young Russian Chip Architects" 
+ *              summer school ( yrca@googlegroups.com )
+ *
+ * Memory matrix for onchip fast devices:
+ * - scratchpad RAM
+ * - caches
+ * - AHB-Lite host side adapter
+ * 
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
+ */
 
 `include "ahb_lite.vh"
-
-// onchip fast devices:
-//  - scratchpad RAM
-//  - caches
-//  - AHB-Lite host side adapter
 
 module sm_matrix
 #(

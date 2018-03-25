@@ -4,8 +4,8 @@
  *
  * originally based on Sarah L. Harris MIPS CPU
  *
- * Copyright(c) 2017 Stanislav Zhelnio
- *                   Alexander Romanov
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
+ *                        Alexander Romanov
  */
 
 `include "sm_cpu.vh"

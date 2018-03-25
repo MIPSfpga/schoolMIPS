@@ -4,7 +4,9 @@
  *
  * the pipeline version of Sarah L. Harris MIPS CPU 
  * 
- * Copyright(c) 2017 Stanislav Zhelnio
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
+ *                        Anton Kulichkov
+ *                        Dmitriy Vlasov
  */
 
  `include "sm_cpu.vh"

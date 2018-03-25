@@ -1,3 +1,11 @@
+/*
+ * schoolMIPS - small MIPS CPU for "Young Russian Chip Architects" 
+ *              summer school ( yrca@googlegroups.com )
+ *
+ * AHB-Lite gpio 
+ * 
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
+ */
 
 `include "ahb_lite.vh"
 `include "sm_settings.vh"

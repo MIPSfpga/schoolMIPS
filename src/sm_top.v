@@ -3,14 +3,15 @@
  *              summer school ( yrca@googlegroups.com )
  *
  * originally based on Sarah L. Harris MIPS CPU
+ *
+ * Hardware top level module
  * 
- * Copyright(c) 2017 Stanislav Zhelnio
- *                   Alexander Romanov
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
+ *                        Alexander Romanov
  */
 
 `include "sm_settings.vh"
 
-//hardware top level module
 module sm_top
 (
     input   [ 3:0 ] clkDevide,

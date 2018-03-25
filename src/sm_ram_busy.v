@@ -1,3 +1,11 @@
+/*
+ * schoolMIPS - small MIPS CPU for "Young Russian Chip Architects" 
+ *              summer school ( yrca@googlegroups.com )
+ *
+ * RAM with ready delay
+ * 
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
+ */ 
 
 `include "sm_settings.vh"
 

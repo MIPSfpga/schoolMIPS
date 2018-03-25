@@ -1,3 +1,11 @@
+/*
+ * schoolMIPS - small MIPS CPU for "Young Russian Chip Architects" 
+ *              summer school ( yrca@googlegroups.com )
+ *
+ * AHB-Lite header
+ * 
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
+ */
 
 // AHB-Lite values used by schoolMIPS core
 
