@@ -1,3 +1,9 @@
+/*
+ * schoolMIPS - small MIPS CPU for "Young Russian Chip Architects" 
+ *              summer school ( yrca@googlegroups.com )
+ *
+ * Copyright(c) 2017-2018 Yuri Panchul 
+ */
 
 module sm_hex_display
 (

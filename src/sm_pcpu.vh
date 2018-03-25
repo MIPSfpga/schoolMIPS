@@ -4,7 +4,7 @@
  *
  * the pipeline version of Sarah L. Harris MIPS CPU 
  * 
- * Copyright(c) 2017 Stanislav Zhelnio
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
  */ 
 
 `define HZ_FW_ME    2'b10   // forward from M to E stage

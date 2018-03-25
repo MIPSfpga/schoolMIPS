@@ -4,7 +4,9 @@
  *
  * the pipeline version of Sarah L. Harris MIPS CPU 
  * 
- * Copyright(c) 2017 Stanislav Zhelnio
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
+ *                        Anton Kulichkov
+ *                        Dmitriy Vlasov
  */
 
  `include "sm_cpu.vh"
@@ -21,6 +23,8 @@ module sm_pcpu
     output  [31:0]  dmAddr,     // data memory address
     output          dmWe,       // data memory write enable
     output  [31:0]  dmWData,    // data memory write data
+    output          dmValid,    // data memory read/write request
+    input           dmReady,    // data memory read/write done
     input   [31:0]  dmRData     // data memory read data
 );
     // **********************************************************
@@ -88,6 +92,7 @@ module sm_pcpu
     wire hz_forwardB_D;  //forward srcB
     wire hz_irq_disable_D;
     wire hz_flush_n_E;
+    wire hz_stall_n_E;
 
     // instaturction fields
     wire [ 5:0] instrOp_D  = instr_D[31:26];
@@ -139,6 +144,7 @@ module sm_pcpu
     wire [ 2:0] cw_aluCtrl_D;
     wire        cw_memWrite_D;
     wire        cw_memToReg_D;
+    wire        cw_memAccess_D;
     wire        cw_cpzToReg_D;
     wire        cw_cpzRegWrite_D;
     wire        cw_cpzExcEret_D;
@@ -165,6 +171,7 @@ module sm_pcpu
         .aluControl ( cw_aluCtrl_D    ),
         .memWrite   ( cw_memWrite_D   ),
         .memToReg   ( cw_memToReg_D   ),
+        .memAccess  ( cw_memAccess_D  ),
         .branch     ( cw_branch_D     ),
         .cw_cpzToReg    ( cw_cpzToReg_D    ),
         .cw_cpzRegWrite ( cw_cpzRegWrite_D ),
@@ -187,17 +194,17 @@ module sm_pcpu
     wire [ 2:0] instrSel_E;
     wire        excRiFound_E;
     wire        irqRequest_E;
-    sm_register_cs #(32) r_epcNext_E (clk, rst_n, hz_flush_n_E, epcNext_D,   epcNext_E);
-    sm_register_cs #(32) r_regData1_E(clk, rst_n, hz_flush_n_E, regData1_D,  regData1_E);
-    sm_register_cs #(32) r_regData2_E(clk, rst_n, hz_flush_n_E, regData2_D,  regData2_E);
-    sm_register_cs #(32) r_signImm_E (clk, rst_n, hz_flush_n_E, signImm_D,   signImm_E);
-    sm_register_cs #( 5) r_instrRs_E (clk, rst_n, hz_flush_n_E, instrRs_D,   instrRs_E);
-    sm_register_cs #( 5) r_instrRt_E (clk, rst_n, hz_flush_n_E, instrRt_D,   instrRt_E);
-    sm_register_cs #( 5) r_instrRd_E (clk, rst_n, hz_flush_n_E, instrRd_D,   instrRd_E);
-    sm_register_cs #( 5) r_instrSa_E (clk, rst_n, hz_flush_n_E, instrSa_D,   instrSa_E);
-    sm_register_cs #( 3) r_instrSel_E(clk, rst_n, hz_flush_n_E, instrSel_D,  instrSel_E);
-    sm_register_cs       r_excRiFound_E (clk, rst_n, hz_flush_n_E, excRiFound_D, excRiFound_E);
-    sm_register_cs       r_irqRequest_E  (clk, rst_n, hz_flush_n_E, irqRequest_D,  irqRequest_E);
+    sm_register_wes #(32) r_epcNext_E    (clk, rst_n, hz_flush_n_E, hz_stall_n_E, epcNext_D,    epcNext_E);
+    sm_register_wes #(32) r_regData1_E   (clk, rst_n, hz_flush_n_E, hz_stall_n_E, regData1_D,   regData1_E);
+    sm_register_wes #(32) r_regData2_E   (clk, rst_n, hz_flush_n_E, hz_stall_n_E, regData2_D,   regData2_E);
+    sm_register_wes #(32) r_signImm_E    (clk, rst_n, hz_flush_n_E, hz_stall_n_E, signImm_D,    signImm_E);
+    sm_register_wes #( 5) r_instrRs_E    (clk, rst_n, hz_flush_n_E, hz_stall_n_E, instrRs_D,    instrRs_E);
+    sm_register_wes #( 5) r_instrRt_E    (clk, rst_n, hz_flush_n_E, hz_stall_n_E, instrRt_D,    instrRt_E);
+    sm_register_wes #( 5) r_instrRd_E    (clk, rst_n, hz_flush_n_E, hz_stall_n_E, instrRd_D,    instrRd_E);
+    sm_register_wes #( 5) r_instrSa_E    (clk, rst_n, hz_flush_n_E, hz_stall_n_E, instrSa_D,    instrSa_E);
+    sm_register_wes #( 3) r_instrSel_E   (clk, rst_n, hz_flush_n_E, hz_stall_n_E, instrSel_D,   instrSel_E);
+    sm_register_wes       r_excRiFound_E (clk, rst_n, hz_flush_n_E, hz_stall_n_E, excRiFound_D, excRiFound_E);
+    sm_register_wes       r_irqRequest_E (clk, rst_n, hz_flush_n_E, hz_stall_n_E, irqRequest_D, irqRequest_E);
 
     //stage control border
     wire        cw_regWrite_E;
@@ -206,22 +213,24 @@ module sm_pcpu
     wire [2:0]  cw_aluCtrl_E;
     wire        cw_memWrite_E;
     wire        cw_memToReg_E;
+    wire        cw_memAccess_E;
     wire        cw_cpzRegWrite_E;
     wire        cw_cpzExcEret_E;
     wire        cw_cpzToReg_E;
-    sm_register_cs      r_cw_regWrite_E (clk, rst_n, hz_flush_n_E, cw_regWrite_D, cw_regWrite_E);
-    sm_register_cs      r_cw_regDst_E   (clk, rst_n, hz_flush_n_E, cw_regDst_D,   cw_regDst_E);
-    sm_register_cs      r_cw_aluSrc_E   (clk, rst_n, hz_flush_n_E, cw_aluSrc_D,   cw_aluSrc_E);
-    sm_register_cs #(3) r_cw_aluCtrl_E  (clk, rst_n, hz_flush_n_E, cw_aluCtrl_D,  cw_aluCtrl_E);
-    sm_register_cs      r_cw_memWrite_E (clk, rst_n, hz_flush_n_E, cw_memWrite_D, cw_memWrite_E);
-    sm_register_cs      r_cw_memToReg_E (clk, rst_n, hz_flush_n_E, cw_memToReg_D, cw_memToReg_E);
-    sm_register_cs      r_cw_cpzRegWrite_E (clk, rst_n, hz_flush_n_E, cw_cpzRegWrite_D, cw_cpzRegWrite_E);
-    sm_register_cs      r_cw_cpzExcEret_E  (clk, rst_n, hz_flush_n_E, cw_cpzExcEret_D,  cw_cpzExcEret_E);
-    sm_register_cs      r_cw_cpzToReg_E    (clk, rst_n, hz_flush_n_E, cw_cpzToReg_D,    cw_cpzToReg_E);
+    sm_register_wes      r_cw_regWrite_E    (clk, rst_n, hz_flush_n_E, hz_stall_n_E, cw_regWrite_D, cw_regWrite_E);
+    sm_register_wes      r_cw_regDst_E      (clk, rst_n, hz_flush_n_E, hz_stall_n_E, cw_regDst_D,   cw_regDst_E);
+    sm_register_wes      r_cw_aluSrc_E      (clk, rst_n, hz_flush_n_E, hz_stall_n_E, cw_aluSrc_D,   cw_aluSrc_E);
+    sm_register_wes #(3) r_cw_aluCtrl_E     (clk, rst_n, hz_flush_n_E, hz_stall_n_E, cw_aluCtrl_D,  cw_aluCtrl_E);
+    sm_register_wes      r_cw_memWrite_E    (clk, rst_n, hz_flush_n_E, hz_stall_n_E, cw_memWrite_D, cw_memWrite_E);
+    sm_register_wes      r_cw_memToReg_E    (clk, rst_n, hz_flush_n_E, hz_stall_n_E, cw_memToReg_D, cw_memToReg_E);
+    sm_register_wes      r_cw_memAccess_E   (clk, rst_n, hz_flush_n_E, hz_stall_n_E, cw_memAccess_D,   cw_memAccess_E);
+    sm_register_wes      r_cw_cpzRegWrite_E (clk, rst_n, hz_flush_n_E, hz_stall_n_E, cw_cpzRegWrite_D, cw_cpzRegWrite_E);
+    sm_register_wes      r_cw_cpzExcEret_E  (clk, rst_n, hz_flush_n_E, hz_stall_n_E, cw_cpzExcEret_D,  cw_cpzExcEret_E);
+    sm_register_wes      r_cw_cpzToReg_E    (clk, rst_n, hz_flush_n_E, hz_stall_n_E, cw_cpzToReg_D,    cw_cpzToReg_E);
 
     //instruction code for debug
     wire [31:0] instr_E;
-    sm_register_cs #(32) r_instr_E  (clk, rst_n, hz_flush_n_E, instr_D, instr_E);
+    sm_register_wes #(32) r_instr_E  (clk, rst_n, hz_flush_n_E, hz_stall_n_E, instr_D, instr_E);
 
     // **********************************************************
     // E - Execution
@@ -231,6 +240,7 @@ module sm_pcpu
     wire [ 1:0] hz_forwardA_E;  //forward srcA
     wire [ 1:0] hz_forwardB_E;  //forward srcB
     wire        hz_forwardEPC_E;
+    wire        hz_stall_n_M;
 
     wire [31:0] aluSrcA_E = ( hz_forwardA_E == `HZ_FW_WE ) ? writeData_W : (
                             ( hz_forwardA_E == `HZ_FW_ME ) ? aluResult_M : regData1_E );
@@ -268,42 +278,47 @@ module sm_pcpu
     wire [ 2:0] instrSel_M;
     wire        excRiFound_M;
     wire        irqRequest_M;
-    sm_register #(32) r_epcNext_M   (clk, epcNext_f_E,   epcNext_M);
-    sm_register #(32) r_aluResult_M (clk, aluResult_E, aluResult_M);
-    sm_register #(32) r_writeData_M (clk, writeData_E, writeData_M);
-    sm_register #( 5) r_writeReg_M  (clk, writeReg_E,  writeReg_M);
-    sm_register #( 5) r_instrRd_M   (clk, instrRd_E,   instrRd_M);
-    sm_register #( 3) r_instrSel_M  (clk, instrSel_E,  instrSel_M);
-    sm_register       r_excRiFound_M(clk, excRiFound_E, excRiFound_M);
-    sm_register_c     r_irqRequest_M (clk, rst_n, irqRequest_E,  irqRequest_M);
+    sm_register_we #(32) r_epcNext_M    (clk, rst_n, hz_stall_n_M, epcNext_f_E,   epcNext_M);
+    sm_register_we #(32) r_aluResult_M  (clk, rst_n, hz_stall_n_M, aluResult_E, aluResult_M);
+    sm_register_we #(32) r_writeData_M  (clk, rst_n, hz_stall_n_M, writeData_E, writeData_M);
+    sm_register_we #( 5) r_writeReg_M   (clk, rst_n, hz_stall_n_M, writeReg_E,  writeReg_M);
+    sm_register_we #( 5) r_instrRd_M    (clk, rst_n, hz_stall_n_M, instrRd_E,   instrRd_M);
+    sm_register_we #( 3) r_instrSel_M   (clk, rst_n, hz_stall_n_M, instrSel_E,  instrSel_M);
+    sm_register_we       r_excRiFound_M (clk, rst_n, hz_stall_n_M, excRiFound_E, excRiFound_M);
+    sm_register_we       r_irqRequest_M (clk, rst_n, hz_stall_n_M, irqRequest_E,  irqRequest_M);
 
     //stage control border
     wire          cw_regWrite_M;
     wire          cw_memWrite_M;
     wire          cw_memToReg_M;
+    wire          cw_memAccess_M;
     wire          cw_cpzRegWrite_M;
     wire          cw_cpzExcEret_M;
     wire          cw_cpzToReg_M;
-    sm_register_c r_cw_regWrite_M (clk, rst_n, cw_regWrite_E, cw_regWrite_M);
-    sm_register_c r_cw_memWrite_M (clk, rst_n, cw_memWrite_E, cw_memWrite_M);
-    sm_register_c r_cw_memToReg_M (clk, rst_n, cw_memToReg_E, cw_memToReg_M);
-    sm_register_c r_cw_cpzRegWrite_M (clk, rst_n, cw_cpzRegWrite_E, cw_cpzRegWrite_M);
-    sm_register_c r_cw_cpzExcEret_M  (clk, rst_n, cw_cpzExcEret_E,  cw_cpzExcEret_M);
-    sm_register_c r_cw_cpzToReg_M    (clk, rst_n, cw_cpzToReg_E,    cw_cpzToReg_M);
+    sm_register_we r_cw_regWrite_M    (clk, rst_n, hz_stall_n_M, cw_regWrite_E, cw_regWrite_M);
+    sm_register_we r_cw_memWrite_M    (clk, rst_n, hz_stall_n_M, cw_memWrite_E, cw_memWrite_M);
+    sm_register_we r_cw_memToReg_M    (clk, rst_n, hz_stall_n_M, cw_memToReg_E, cw_memToReg_M);
+    sm_register_we r_cw_memAccess_M   (clk, rst_n, hz_stall_n_M, cw_memAccess_E,   cw_memAccess_M);
+    sm_register_we r_cw_cpzRegWrite_M (clk, rst_n, hz_stall_n_M, cw_cpzRegWrite_E, cw_cpzRegWrite_M);
+    sm_register_we r_cw_cpzExcEret_M  (clk, rst_n, hz_stall_n_M, cw_cpzExcEret_E,  cw_cpzExcEret_M);
+    sm_register_we r_cw_cpzToReg_M    (clk, rst_n, hz_stall_n_M, cw_cpzToReg_E,    cw_cpzToReg_M);
 
     //instruction code for debug
     wire [31:0] instr_M;
-    sm_register #(32) r_instr_M  (clk, instr_E, instr_M);
+    sm_register_we #(32) r_instr_M  (clk, rst_n, hz_stall_n_M, instr_E, instr_M);
 
     // **********************************************************
     // M - Memory
     // **********************************************************
 
+    //hazard wires
+    wire hz_stall_n_W;
+
     // memory
-    wire [31:0] readData_M = dmRData;
     assign dmWe    = cw_memWrite_M;
     assign dmAddr  = aluResult_M;
     assign dmWData = writeData_M;
+    assign dmValid = cw_memAccess_M;
 
     //coprocessor 0
     wire cp0_ExcSync_M;         //not used, branch processed on D stage
@@ -339,27 +354,29 @@ module sm_pcpu
 
     //stage data border
     wire [31:0] aluResult_W;
-    wire [31:0] readData_W;
     wire [31:0] cp0_Data_W;
-    sm_register #(32) r_aluResult_W (clk, aluResult_M, aluResult_W);
-    sm_register #(32) r_readData_W  (clk, readData_M, readData_W);
-    sm_register #(32) r_cp0_Data_W  (clk, cp0_Data_M, cp0_Data_W);
-    sm_register #(5)  r_writeReg_W (clk, writeReg_M,  writeReg_W);
+    sm_register_we #(32) r_aluResult_W (clk, rst_n, hz_stall_n_W, aluResult_M, aluResult_W);
+    sm_register_we #(32) r_cp0_Data_W  (clk, rst_n, hz_stall_n_W, cp0_Data_M,  cp0_Data_W);
+    sm_register_we #(5)  r_writeReg_W  (clk, rst_n, hz_stall_n_W, writeReg_M,  writeReg_W);
 
     //stage control border
     wire          cw_memToReg_W;
     wire          cw_cpzToReg_W;
-    sm_register_c r_cw_memToReg_W (clk, rst_n, cw_memToReg_M, cw_memToReg_W);
-    sm_register_c r_cw_cpzToReg_W (clk, rst_n, cw_cpzToReg_M, cw_cpzToReg_W);
-    sm_register_c r_cw_regWrite_W (clk, rst_n, cw_regWrite_M, cw_regWrite_W);
+    sm_register_we r_cw_memToReg_W (clk, rst_n, hz_stall_n_W, cw_memToReg_M, cw_memToReg_W);
+    sm_register_we r_cw_cpzToReg_W (clk, rst_n, hz_stall_n_W, cw_cpzToReg_M, cw_cpzToReg_W);
+    sm_register_we r_cw_regWrite_W (clk, rst_n, hz_stall_n_W, cw_regWrite_M, cw_regWrite_W);
 
     //instruction code for debug
     wire [31:0] instr_W;
-    sm_register #(32) r_instr_W (clk, instr_M, instr_W);
+    sm_register_we #(32) r_instr_W (clk, rst_n, hz_stall_n_W, instr_M, instr_W);
 
     // **********************************************************
     // W - Writeback
     // **********************************************************
+
+    // memory
+    wire [31:0] readData_W =  dmRData;
+    wire         memBusy_W = ~dmReady;
 
     //data to write from Mem to RF
     assign writeData_W = cw_memToReg_W ? readData_W : 
@@ -387,6 +404,12 @@ module sm_pcpu
         .hz_stall_n_F   ( hz_stall_n_F  ),
         .hz_stall_n_D   ( hz_stall_n_D  ),
         .hz_flush_n_E   ( hz_flush_n_E  ),
+
+        .memBusy_W      ( memBusy_W     ),
+        .cw_memWrite_M  ( cw_memWrite_M ),
+        .hz_stall_n_E   ( hz_stall_n_E  ),
+        .hz_stall_n_M   ( hz_stall_n_M  ),
+        .hz_stall_n_W   ( hz_stall_n_W  ),
 
         .cw_branch_D    ( cw_branch_D   ),
         .cw_regWrite_E  ( cw_regWrite_E ),
@@ -435,6 +458,12 @@ module sm_hazard_unit
     output          hz_stall_n_D,   //stall D stage
     output          hz_flush_n_E,   //flush_n E stage
 
+    input           memBusy_W,
+    input           cw_memWrite_M,
+    output          hz_stall_n_E,
+    output          hz_stall_n_M,
+    output          hz_stall_n_W,
+
     input           cw_branch_D,
     input           cw_regWrite_E,
     input           cw_memToReg_M,
@@ -480,7 +509,7 @@ module sm_hazard_unit
                           || ( cw_memToReg_M && ( instrRs_D == writeReg_M || instrRt_D == writeReg_M ))
                             );
 
-    wire hz_stall = hz_mem_stall || hz_branch_stall;
+    wire hz_stall_prior_to_E = hz_mem_stall || hz_branch_stall;
 
     //exceptions branch hazards
     wire   hz_branch_after_irq = cw_pcSrc_D & irqRequest_E;     // when branch was fetched after async exception request
@@ -504,9 +533,15 @@ module sm_hazard_unit
                                instrRd_M  == `CP0_REG_NUM_EPC && 
                                instrSel_M == `CP0_REG_SEL_EPC ) ? `HZ_FW_MF : `HZ_FW_NONE;
 
+    // stalling for data memory long fetch
+    wire hz_stall_prior_to_W = memBusy_W;
+
     //stalling
-    assign hz_stall_n_F = ~hz_stall;
-    assign hz_stall_n_D = ~hz_stall;
-    assign hz_flush_n_E = ~hz_stall;
+    assign hz_stall_n_F = ~hz_stall_prior_to_E & ~hz_stall_prior_to_W;
+    assign hz_stall_n_D = ~hz_stall_prior_to_E & ~hz_stall_prior_to_W;
+    assign hz_flush_n_E = ~hz_stall_prior_to_E;
+    assign hz_stall_n_E = ~hz_stall_prior_to_W;
+    assign hz_stall_n_M = ~hz_stall_prior_to_W;
+    assign hz_stall_n_W = ~hz_stall_prior_to_W;
 
 endmodule

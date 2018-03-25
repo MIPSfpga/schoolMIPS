@@ -1,0 +1,29 @@
+
+program.elf:     file format elf32-tradlittlemips
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	24080000 	addiu	t0,zero,0
+   4:	00001025 	or	v0,zero,zero
+   8:	25090020 	addiu	t1,t0,32
+
+0000000c <write>:
+   c:	ad020000 	sw	v0,0(t0)
+  10:	8d030000 	lw	v1,0(t0)
+  14:	25080004 	addiu	t0,t0,4
+  18:	24420001 	addiu	v0,v0,1
+  1c:	1509fffb 	bne	t0,t1,c <write>
+  20:	00000000 	sll	zero,zero,0x0
+  24:	24080000 	addiu	t0,zero,0
+
+00000028 <read>:
+  28:	8d020000 	lw	v0,0(t0)
+  2c:	25080004 	addiu	t0,t0,4
+  30:	1509fffd 	bne	t0,t1,28 <read>
+  34:	00000000 	sll	zero,zero,0x0
+
+00000038 <end>:
+  38:	1000ffff 	beqz	zero,38 <end>
+  3c:	00000000 	sll	zero,zero,0x0

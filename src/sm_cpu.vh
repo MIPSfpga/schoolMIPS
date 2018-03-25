@@ -4,8 +4,8 @@
  *
  * originally based on Sarah L. Harris MIPS CPU 
  * 
- * Copyright(c) 2017 Stanislav Zhelnio 
- *                   Alexander Romanov 
+ * Copyright(c) 2017-2018 Stanislav Zhelnio 
+ *                        Alexander Romanov 
  */ 
 
 //ALU commands
@@ -15,6 +15,7 @@
 `define ALU_SRL     3'b011
 `define ALU_SLTU    3'b100
 `define ALU_SUBU    3'b101
+`define ALU_SLL     3'b110
 
 //instruction operation code
 `define C_SPEC      6'b000000 // Special instructions (depends on function field)
@@ -39,6 +40,8 @@
                               //         Rd = Rs | Rt
 `define F_SRL       6'b000010 // R-type, Shift Right Logical
                               //         Rd = Rs∅ >> shift
+`define F_SLL       6'b000000 // R-type, Shift Left Logical
+                              //         Rd = Rs∅ << shift
 `define F_SLTU      6'b101011 // R-type, Set on Less Than Unsigned
                               //         Rd = (Rs∅ < Rt∅) ? 1 : 0
 `define F_SUBU      6'b100011 // R-type, Unsigned Subtract

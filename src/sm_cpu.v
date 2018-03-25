@@ -4,8 +4,8 @@
  *
  * originally based on Sarah L. Harris MIPS CPU
  *
- * Copyright(c) 2017 Stanislav Zhelnio
- *                   Alexander Romanov
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
+ *                        Alexander Romanov
  */
 
 `include "sm_cpu.vh"
@@ -22,6 +22,8 @@ module sm_cpu
     output  [31:0]  dmAddr,     // data memory address
     output          dmWe,       // data memory write enable
     output  [31:0]  dmWData,    // data memory write data
+    output          dmValid,    // data memory read/write request
+    input           dmReady,    // data memory read/write done
     input   [31:0]  dmRData     // data memory read data
 );
     //control wires
@@ -34,6 +36,9 @@ module sm_cpu
     wire [ 2:0] aluControl;
     wire        memToReg;
     wire        memWrite;
+    wire        memAccess;
+    wire        hz_stall;
+    wire        hz_mem_en;
 
     //program counter
     wire [31:0] pc;
@@ -41,7 +46,7 @@ module sm_cpu
     wire [31:0] pcNext  = pc + 4;
     wire [31:0] pc_new;
     wire [31:0] pc_flow = ~pcSrc ? pcNext : pcBranch;
-    sm_register_c #(32) r_pc(clk ,rst_n, pc_new, pc);
+    sm_register_we #(32) r_pc(clk ,rst_n, ~hz_stall, pc_new, pc);
 
     //program memory access
     assign imAddr = pc >> 2;  //schoolMIPS instruction memory is word addressable
@@ -93,6 +98,7 @@ module sm_cpu
     assign dmWe = memWrite;
     assign dmAddr = aluResult;
     assign dmWData = rd2;
+    assign dmValid = hz_mem_en;
 
     //control
     wire        cw_cpzToReg;
@@ -118,6 +124,7 @@ module sm_cpu
         .aluControl ( aluControl   ),
         .memWrite   ( memWrite     ),
         .memToReg   ( memToReg     ),
+        .memAccess  ( memAccess    ),
         .branch     ( cw_branch    ),
         .cw_cpzToReg    ( cw_cpzToReg    ),
         .cw_cpzRegWrite ( cw_cpzRegWrite ),
@@ -172,6 +179,26 @@ module sm_cpu
                     pcExc == `PC_ERET ?  cp0_EPC        :
                  /* pcExc == `PC_FLOW */ pc_flow;
 
+    // hazards
+    wire memWait;
+    wire memAccessStart    = ~memWait &  memAccess;
+    wire memAccessDone     =  memWait &  dmReady;
+    wire memAccessProgress =  memWait & ~dmReady;
+
+    wire memWait_new = memAccessStart ? 1 : // set when memory access start
+                       memAccessDone  ? 0 : // unset when memory ready
+                       memWait;
+    sm_register_c r_memWait(clk ,rst_n, memWait_new, memWait);
+
+    // stall for memory access
+    // - 1st cycle of memory access and no info about ready signal on 2nd cycle
+    // - 2nd and other cycles waiting for ready signal
+    assign hz_stall  = memAccessStart | memAccessProgress;
+
+    // memory request allowed:
+    // - should be requested only on 1st cycle of mem access
+    assign hz_mem_en = memAccessStart;
+
 endmodule
 
 module sm_control
@@ -188,6 +215,7 @@ module sm_control
     output reg [2:0] aluControl,
     output reg       memWrite,
     output reg       memToReg,
+    output reg       memAccess,
     output reg       branch,
     output reg       cw_cpzToReg,
     output reg       cw_cpzRegWrite,
@@ -216,6 +244,7 @@ module sm_control
         aluControl  = `ALU_ADD;
         memWrite    = 1'b0;
         memToReg    = 1'b0;
+        memAccess   = 1'b0;
         cw_cpzToReg    = 1'b0;
         cw_cpzRegWrite = 1'b0;
         cw_cpzExcEret  = 1'b0;
@@ -227,13 +256,16 @@ module sm_control
             { `C_SPEC,  `F_ADDU, `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_ADD;  end
             { `C_SPEC,  `F_OR,   `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_OR;   end
             { `C_SPEC,  `F_SRL,  `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SRL;  end
+            { `C_SPEC,  `F_SLL,  `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SLL;  end
             { `C_SPEC,  `F_SLTU, `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SLTU; end
             { `C_SPEC,  `F_SUBU, `S_ANY } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SUBU; end
 
             { `C_ADDIU, `F_ANY,  `S_ANY } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD;  end
             { `C_LUI,   `F_ANY,  `S_ANY } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_LUI;  end
-            { `C_LW,    `F_ANY,  `S_ANY } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD; memToReg = 1'b1; end
-            { `C_SW,    `F_ANY,  `S_ANY } : begin memWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD;  end
+            { `C_LW,    `F_ANY,  `S_ANY } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD; 
+                                                  memToReg = 1'b1; memAccess = 1'b1; end
+            { `C_SW,    `F_ANY,  `S_ANY } : begin memWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD; 
+                                                  memAccess = 1'b1; end
 
             { `C_BEQ,   `F_ANY,  `S_ANY } : begin branch = 1'b1; condZero = 1'b1; aluControl = `ALU_SUBU; end
             { `C_BNE,   `F_ANY,  `S_ANY } : begin branch = 1'b1; aluControl = `ALU_SUBU; end
@@ -263,6 +295,7 @@ module sm_alu
             `ALU_OR   : result = srcA | srcB;
             `ALU_LUI  : result = (srcB << 16);
             `ALU_SRL  : result = srcB >> shift;
+            `ALU_SLL  : result = srcB << shift;
             `ALU_SLTU : result = (srcA < srcB) ? 1 : 0;
             `ALU_SUBU : result = srcA - srcB;
         endcase

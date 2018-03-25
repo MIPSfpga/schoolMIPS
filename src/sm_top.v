@@ -3,23 +3,30 @@
  *              summer school ( yrca@googlegroups.com )
  *
  * originally based on Sarah L. Harris MIPS CPU
+ *
+ * Hardware top level module
  * 
- * Copyright(c) 2017 Stanislav Zhelnio
- *                   Alexander Romanov
+ * Copyright(c) 2017-2018 Stanislav Zhelnio
+ *                        Alexander Romanov
  */
 
 `include "sm_settings.vh"
 
-//hardware top level module
 module sm_top
 (
-    input           clkIn,
-    input           rst_n,
     input   [ 3:0 ] clkDevide,
     input           clkEnable,
     output          clk,
     input   [ 4:0 ] regAddr,
-    output  [31:0 ] regData
+    output  [31:0 ] regData,
+
+    `ifdef SM_CONFIG_AHB_GPIO
+    input  [`SM_GPIO_WIDTH - 1:0] port_gpioIn,
+    output [`SM_GPIO_WIDTH - 1:0] port_gpioOut,
+    `endif
+
+    input           clkIn,
+    input           rst_n
 );
     //metastability input filters
     wire    [ 3:0 ] devide;
@@ -46,18 +53,73 @@ module sm_top
     wire    [31:0]  imData;
     sm_rom #(`SM_CONFIG_ROM_SIZE) reset_rom(imAddr, imData);
 
-    //data memory
+    // data memory & peripheral devices
     wire    [31:0]  dmAddr;
     wire            dmWe;
     wire    [31:0]  dmWData;
     wire    [31:0]  dmRData;
-    sm_ram data_ram
+    wire            dmValid;
+    wire            dmReady;
+
+    // AHB-Lite signals for peripheral devices
+    `ifdef SM_CONFIG_AHB_LITE
+
+    wire        HCLK;
+    wire        HRESETn;
+    wire        HWRITE;
+    wire [ 1:0] HTRANS;
+    wire [31:0] HADDR;
+    wire [31:0] HRDATA;
+    wire [31:0] HWDATA;
+    wire        HREADY;
+    wire        HRESP;
+
+    // peripheral devices
+    ahb_matrix ahb_matrix
     (
-        .clk ( clk      ),
-        .a   ( dmAddr   ),
-        .we  ( dmWe     ),
-        .wd  ( dmWData  ),
-        .rd  ( dmRData  )
+        .HWRITE  ( HWRITE  ),
+        .HTRANS  ( HTRANS  ),
+        .HADDR   ( HADDR   ),
+        .HRDATA  ( HRDATA  ),
+        .HWDATA  ( HWDATA  ),
+        .HREADY  ( HREADY  ),
+        .HRESP   ( HRESP   ),
+
+        `ifdef SM_CONFIG_AHB_GPIO
+        .port_gpioIn  ( port_gpioIn  ),
+        .port_gpioOut ( port_gpioOut ),
+        `endif
+
+        .HCLK    ( HCLK    ),
+        .HRESETn ( HRESETn )
+    );
+
+    `endif
+
+    // scratchpad and AHB-Lite host side
+    `SM_RAM data_ram
+    (
+        .clk    ( clk     ),
+        .rst_n  ( rst_n   ),
+
+        `ifdef SM_CONFIG_AHB_LITE
+        .HCLK    (HCLK    ),
+        .HRESETn (HRESETn ),
+        .HWRITE  (HWRITE  ),
+        .HTRANS  (HTRANS  ),
+        .HADDR   (HADDR   ),
+        .HRDATA  (HRDATA  ),
+        .HWDATA  (HWDATA  ),
+        .HREADY  (HREADY  ),
+        .HRESP   (HRESP   ),
+        `endif
+
+        .a      ( dmAddr  ),    
+        .we     ( dmWe    ),   
+        .wd     ( dmWData ),   
+        .valid  ( dmValid ),
+        .ready  ( dmReady ),
+        .rd     ( dmRData )
     );
 
     //cpu core
@@ -72,6 +134,8 @@ module sm_top
         .dmAddr     ( dmAddr    ),
         .dmWe       ( dmWe      ),
         .dmWData    ( dmWData   ),
+        .dmValid    ( dmValid   ),
+        .dmReady    ( dmReady   ),
         .dmRData    ( dmRData   )
     );
 
