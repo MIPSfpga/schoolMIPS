@@ -1,4 +1,5 @@
 
+`include "sm_settings.vh"
 
 module de10_lite(
 
@@ -27,15 +28,24 @@ module de10_lite(
     wire          clkIn     =  MAX10_CLK1_50;
     wire          rst_n     =  KEY[0];
     wire          clkEnable =  SW [9] | ~KEY[1];
-    wire [  3:0 ] clkDevide =  SW [8:5];
+    wire [  3:0 ] clkDevide = { 2'b01, SW [8:7] };
     wire [  4:0 ] regAddr   =  SW [4:0];
     wire [ 31:0 ] regData;
+
+    wire [  7:0 ] gpioKeys  = { 6'b0,  SW [6:5] };
+    wire [  7:0 ] gpioLeds;
 
     //cores
     sm_top sm_top
     (
         .clkIn      ( clkIn     ),
         .rst_n      ( rst_n     ),
+
+        `ifdef SM_CONFIG_AHB_GPIO
+        .port_gpioIn  ( gpioKeys ),
+        .port_gpioOut ( gpioLeds ),
+        `endif
+
         .clkDevide  ( clkDevide ),
         .clkEnable  ( clkEnable ),
         .clk        ( clk       ),
@@ -45,7 +55,8 @@ module de10_lite(
 
     //outputs
     assign LEDR[0]   = clk;
-    assign LEDR[9:1] = regData[8:0];
+    assign LEDR[8:1] = gpioLeds;
+    assign LEDR[9]   = ~rst_n;
 
     wire [ 31:0 ] h7segment = regData;
 
