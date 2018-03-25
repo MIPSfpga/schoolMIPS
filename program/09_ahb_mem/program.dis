@@ -5,7 +5,7 @@ program.elf:     file format elf32-tradlittlemips
 Disassembly of section .text:
 
 00000000 <.text>:
-   0:	3c082000 	lui	t0,0x2000
+   0:	24080000 	addiu	t0,zero,0
    4:	00001025 	or	v0,zero,zero
    8:	25090020 	addiu	t1,t0,32
 
@@ -16,7 +16,7 @@ Disassembly of section .text:
   18:	24420001 	addiu	v0,v0,1
   1c:	1509fffb 	bne	t0,t1,c <write>
   20:	00000000 	sll	zero,zero,0x0
-  24:	3c082000 	lui	t0,0x2000
+  24:	24080000 	addiu	t0,zero,0
 
 00000028 <read>:
   28:	8d020000 	lw	v0,0(t0)

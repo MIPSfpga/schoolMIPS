@@ -1,5 +1,7 @@
 
-#define TEXT_COUNT      0x20
+#define MAX_ADDR_OFFSET      0x20
+
+## comment for block or scratchpad ram
 #define AHB_MEM_TEST
 
 #ifdef AHB_MEM_TEST
@@ -12,7 +14,7 @@
 
 init:       li      $t0, MEM_START       # int i = 0;
             move    $v0, $0              # int a = 0;
-            addiu   $t1, $t0, TEXT_COUNT # int maxAddr = MEM_START + TEXT_COUNT;
+            addiu   $t1, $t0, MAX_ADDR_OFFSET # int maxAddr = MEM_START + MAX_ADDR_OFFSET;
 
 write:      sw      $v0, 0x0 ($t0)      # mem[i] = a;
             lw      $v1, 0x0 ($t0)      #   read after write hazard
