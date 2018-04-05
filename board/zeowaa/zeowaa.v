@@ -1,17 +1,17 @@
 
 module zeowaa
 (
-    input         clk,
+    input         clk_50,
     input  [ 5:2] key,
     input  [ 7:0] sw,
     output [11:0] led,
-    output [ 8:0] hex,
+    output [ 7:0] hex,
     output [ 7:0] digit,
     output        buzzer
 );
     // wires & inputs
     wire          clkCpu;
-    wire          clkIn     =  clk;
+    wire          clkIn     =  clk_50;
     wire          rst_n     =  key[4];
     wire          clkEnable =   ~sw[  7] | ~key[5];
     wire [  3:0 ] clkDevide = { ~sw[6:5], 2'b00 };

@@ -1,4 +1,7 @@
-  set_global_assignment -name DEVICE                    EP4CE6E22C8
+
+set_global_assignment   -name FAMILY "Cyclone IV E"
+
+set_global_assignment   -name DEVICE                    EP4CE6E22C8
 # set_global_assignment -name DEVICE                    EP4CE10E22C8
 
 set_global_assignment   -name NUM_PARALLEL_PROCESSORS   4
@@ -26,7 +29,7 @@ set_global_assignment -name INTERNAL_FLASH_UPDATE_MODE "SINGLE IMAGE WITH ERAM"
 
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to *
 
-set_location_assignment PIN_23  -to clk
+set_location_assignment PIN_23  -to clk_50
 
 set_location_assignment PIN_90  -to key[2]
 set_location_assignment PIN_91  -to key[3]
