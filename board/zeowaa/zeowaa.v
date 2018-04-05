@@ -5,7 +5,7 @@ module zeowaa
     input  [ 3:0] key,
     input  [ 7:0] sw,
     output [11:0] led,
-    output [ 7:0] abcdefgh,
+    output [ 8:0] hex,
     output [ 7:0] digit,
     output        buzzer
 );
@@ -42,7 +42,7 @@ module zeowaa
     (
         .clkIn   ( clkIn  ),
         .rst_n   ( rst_n  ),
-        .devide  ( 4'b1   ),
+        .devide  ( 4'b0   ),
         .enable  ( 1'b1   ),
         .clkOut  ( clkHex )
     );
@@ -52,10 +52,11 @@ module zeowaa
         .clock          ( clkHex    ),
         .resetn         ( rst_n     ),
         .number         ( h7segment ),
-
-        .seven_segments ( digit     ),
-        .dot            (           ),
-        .anodes         ( abcdefgh  )
+        .seven_segments ( hex[6:0]  ),
+        .dot            ( hex[7]    ),
+        .anodes         ( digit     )
     );
+
+    assign buzzer = 1'b1;
 
 endmodule
