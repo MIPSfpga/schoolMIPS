@@ -13,9 +13,9 @@ module zeowaa
     wire          clkCpu;
     wire          clkIn     =  clk;
     wire          rst_n     =  key[0];
-    wire          clkEnable =  sw [7] | ~key[1];
-    wire [  3:0 ] clkDevide = { sw[6:5], 2'b00 };
-    wire [  4:0 ] regAddr   =  sw [4:0];
+    wire          clkEnable =   ~sw[  7] | ~key[1];
+    wire [  3:0 ] clkDevide = { ~sw[6:5], 2'b00 };
+    wire [  4:0 ] regAddr   =   ~sw[4:0];
     wire [ 31:0 ] regData;
 
     //cores
@@ -31,8 +31,8 @@ module zeowaa
     );
 
     //outputs
-    assign led[0]    = clkCpu;
-    assign led[11:1] = regData[11:0];
+    assign led[0]    = ~clkCpu;
+    assign led[11:1] = ~regData[11:0];
 
     //hex out
     wire [ 31:0 ] h7segment = regData;
