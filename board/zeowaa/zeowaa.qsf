@@ -28,10 +28,10 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to *
 
 set_location_assignment PIN_23  -to clk
 
-set_location_assignment PIN_90  -to key[3]
-set_location_assignment PIN_91  -to key[2]
-set_location_assignment PIN_87  -to key[1]
-set_location_assignment PIN_86  -to key[0]
+set_location_assignment PIN_90  -to key[2]
+set_location_assignment PIN_91  -to key[3]
+set_location_assignment PIN_87  -to key[4]
+set_location_assignment PIN_86  -to key[5]
 
 set_location_assignment PIN_58  -to sw[7]
 set_location_assignment PIN_59  -to sw[6]
