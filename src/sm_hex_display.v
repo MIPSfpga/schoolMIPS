@@ -7,7 +7,7 @@ module sm_hex_display
 
     always @*
         case (digit)
-        'h0: seven_segments = 'b1000000;  // a b c d e f g
+        'h0: seven_segments = 'b1000000;  // g f e d c b a
         'h1: seven_segments = 'b1111001;
         'h2: seven_segments = 'b0100100;  //   --a--
         'h3: seven_segments = 'b0110000;  //  |     |
@@ -43,7 +43,7 @@ module sm_hex_display_8
     function [6:0] bcd_to_seg (input [3:0] bcd);
 
         case (bcd)
-        'h0: bcd_to_seg = 'b1000000;  // a b c d e f g
+        'h0: bcd_to_seg = 'b1000000;  // g f e d c b a
         'h1: bcd_to_seg = 'b1111001;
         'h2: bcd_to_seg = 'b0100100;  //   --a--
         'h3: bcd_to_seg = 'b0110000;  //  |     |
