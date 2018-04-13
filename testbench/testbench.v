@@ -4,8 +4,8 @@
 `include "sm_cpu.vh"
 `include "sm_config.vh"
 
-`ifndef NCYCLE
-    `define NCYCLE 120
+`ifndef SIMULATION_CYCLES
+    `define SIMULATION_CYCLES 120
 `endif
 
 module sm_testbench;
@@ -149,7 +149,7 @@ module sm_testbench;
 
         cycle = cycle + 1;
 
-        if (cycle > `NCYCLE)
+        if (cycle > `SIMULATION_CYCLES)
         begin
             $display ("Timeout");
             $stop;
