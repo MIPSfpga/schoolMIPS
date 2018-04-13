@@ -3,7 +3,7 @@ vlib work
 
 set p0 -vlog01compat
 set p1 +define+SIMULATION
-set p2 +define+NCYCLE=12000
+set p2 +define+SIMULATION_CYCLES=12000
 
 set i0 +incdir+../../../src
 set i1 +incdir+../../../testbench

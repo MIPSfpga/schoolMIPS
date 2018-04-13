@@ -11,4 +11,4 @@ delay:      addiu   $t0, $t0, 1         # cur_delay++;
 pwm_step:   lw      $v0, 0x00007f10 ($0) # var = SM_PWM_REG;
             addiu   $v0, $v0, 0x10
 write:      sw      $v0, 0x00007f10 ($0) # SM_PWM_REG = var;
-            b       delay
+            beqz    $0,  delay
