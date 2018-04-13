@@ -10,4 +10,4 @@ delay:      addiu   $t0, $t0, 1         # cur_delay++;
 
 read:       lw      $v0, 0x00007f00 ($0) # var = SM_GPIO_REG_INPUT;
 write:      sw      $v0, 0x00007f04 ($0) # SM_GPIO_REG_OUTPUT = var;
-            b       delay
+            beqz    $0,  delay
