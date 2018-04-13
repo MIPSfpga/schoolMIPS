@@ -10,4 +10,4 @@ fibonacci:  addu    $t0, $t0, $t1
             move    $v0, $t0
             addu    $t1, $t0, $t1
             move    $v0, $t1
-            b       fibonacci
+            beqz    $0,  fibonacci
