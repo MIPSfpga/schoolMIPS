@@ -17,4 +17,4 @@ read:       lw      $v0, 0x0 ($t0)      # a = mem[i];
             addiu   $t0, $t0, 4         # i += 4;
             bne     $t0, $t1, read      # if (i != max) goto write
 
-end:        b       end                 # while(1);
+end:        beqz    $0,  end            # while(1);
