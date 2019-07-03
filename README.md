@@ -9,6 +9,10 @@ The CPU have several versions (from simple to complex). Each of them is placed i
 - **03_pipeline** - the pipelined version of the simplest core with data memory 
 - **04_pipeline_irq** - the pipelined version of 02_irq
 
+Examples of using this kernel as an element of a multiprocessor system:   
+1. A.E. Ryazanova, A.A. Amerikanov, E. V Lezhnev, Development of multiprocessor system-on-chip based on soft processor cores schoolMIPS, J. Phys. Conf. Ser. 1163 (2019) 012026. [doi:10.1088/1742-6596/1163/1/012026](https://iopscience.iop.org/article/10.1088/1742-6596/1163/1/012026).
+2. [Innovate FPGA 2019 project: EM028 » NoC-based multiprocessing system prototype](http://www.innovatefpga.com/cgi-bin/innovate/teams.pl?Id=EM028)
+
 For docs and CPU diagrams please visit the project [wiki](https://github.com/MIPSfpga/schoolMIPS/wiki)
 
 ![CPU diagram](../../wiki/img/schoolMIPS_diagram.gif) 
