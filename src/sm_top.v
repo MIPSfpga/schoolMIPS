@@ -1,4 +1,3 @@
-
 //hardware top level module
 module sm_top
 (
