@@ -1,5 +1,3 @@
-
-
 module sm_register
 #(
     parameter SIZE = 32

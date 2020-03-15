@@ -5,7 +5,9 @@
  * originally based on Sarah L. Harris MIPS CPU 
  * 
  * Copyright(c) 2017 Stanislav Zhelnio 
- *                   Aleksandr Romanov 
+ *                   Aleksandr Romanov
+ *                   Andrey Popov
+ *                   Vladislav Tarasevish
  */ 
 
 
@@ -22,7 +24,7 @@ module sm_cpu
     output  [31:0]  dmWData,    // data memory write data
     input   [31:0]  dmRData     // data memory read data
 );
-    //control wires
+    // control wires
     wire        pcSrc;
     wire        regDst;
     wire        regWrite;
@@ -32,26 +34,27 @@ module sm_cpu
     wire        memToReg;
     wire        memWrite;
 
-    //program counter
+    // program counter
     wire [31:0] pc;
     wire [31:0] pcBranch;
     wire [31:0] pcNext  = pc + 1;
-    wire [31:0] pc_new   = ~pcSrc ? pcNext : pcBranch;
+    wire [31:0] pc_new  = ~pcSrc ? pcNext : pcBranch;
     sm_register r_pc(clk ,rst_n, pc_new, pc);
 
-    //program memory access
+    // program memory access
     assign imAddr = pc;
     wire [31:0] instr = imData;
 
-    //debug register access
+    // debug register access
     wire [31:0] rd0;
     assign regData = (regAddr != 0) ? rd0 : pc;
 
-    //register file
-    wire [ 4:0] a3  = regDst ? instr[15:11] : instr[20:16];
-    wire [31:0] rd1;
-    wire [31:0] rd2;
-    wire [31:0] wd3;
+    // register file
+    wire [31:0] rd1, rd2, wd3;
+    wire [ 4:0] a3;
+    always_comb begin
+        a3 = regDst ? instr[15:11] : instr[20:16];
+    end
 
     sm_register_file rf
     (
@@ -67,13 +70,18 @@ module sm_cpu
         .we3        ( regWrite     )
     );
 
-    //sign extension
-    wire [31:0] signImm = { {16 { instr[15] }}, instr[15:0] };
-    assign pcBranch = pcNext + signImm;
+    // sign extension
+    wire [31:0] signImm;
+    always_comb begin
+        signImm = { {16 { instr[15] }}, instr[15:0] };
+        pcBranch = pcNext + signImm;
+    end
 
-    //alu
-    wire [31:0] aluResult;
-    wire [31:0] srcB = aluSrc ? signImm : rd2;
+    // alu
+    wire [31:0] aluResult, srcB;
+    always_comb begin
+        srcB = aluSrc ? signImm : rd2;
+    end
 
     sm_alu alu
     (
@@ -85,13 +93,15 @@ module sm_cpu
         .result     ( aluResult    ) 
     );
 
-    //data memory access
-    assign wd3 = memToReg ? dmRData : aluResult;
-    assign dmWe = memWrite;
-    assign dmAddr = aluResult;
-    assign dmWData = rd2;
+    // data memory access
+    always_comb begin
+        wd3 = memToReg ? dmRData : aluResult;
+        dmWe = memWrite;
+        dmAddr = aluResult;
+        dmWData = rd2;
+    end
 
-    //control
+    // control
     sm_control sm_control
     (
         .cmd (sm_cpu_config::Command'({instr[31:26], instr[5:0]})),
@@ -105,7 +115,7 @@ module sm_cpu
         .memToReg   ( memToReg     )
     );
 
-endmodule
+endmodule : sm_cpu
 
 
 module sm_control
@@ -175,9 +185,10 @@ module sm_alu
             ALU_SLTU : result = (srcA < srcB) ? 1 : 0;
             ALU_SUBU : result = srcA - srcB;
         endcase
+
+        zero = (result == 0);
     end
 
-    assign zero   = (result == 0);
 endmodule : sm_alu
 
 
@@ -196,10 +207,13 @@ module sm_register_file
 );
     reg [31:0] rf [31:0];
 
-    assign rd0 = (a0 != 0) ? rf [a0] : 32'b0;
-    assign rd1 = (a1 != 0) ? rf [a1] : 32'b0;
-    assign rd2 = (a2 != 0) ? rf [a2] : 32'b0;
+    always_comb begin
+        rd0 = (a0 != 0) ? rf [a0] : 32'b0;
+        rd1 = (a1 != 0) ? rf [a1] : 32'b0;
+        rd2 = (a2 != 0) ? rf [a2] : 32'b0;
+    end
 
     always @ (posedge clk)
         if(we3) rf [a3] <= wd3;
-endmodule
+
+endmodule : sm_register_file

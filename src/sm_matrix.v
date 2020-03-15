@@ -95,33 +95,33 @@ module sm_matrix
 
 endmodule
 
-`define SM_RAM_ADDR_MATCH   2'b00
-`define SM_GPIO_ADDR_MATCH 12'h7f0
-`define SM_PWM_ADDR_MATCH  12'h7f1
-`define SM_ALS_ADDR_MATCH  12'h7f2
 
 module sm_matrix_decoder
 (
     input  [31:0] bAddr,
     output [ 5:0] bSel
 );
-    // Decode based on most significant bits of the address
-    // RAM   0x00000000 - 0x00003fff
-    assign bSel[0] = ( bAddr [ 15:14 ] == `SM_RAM_ADDR_MATCH);
 
-    // GPIO  0x00007f00 - 0x00007f0f
-    assign bSel[1] = ( bAddr [ 15:4  ] == `SM_GPIO_ADDR_MATCH);
+    always_comb begin
+        // Decode based on most significant bits of the address
+        // RAM   0x00000000 - 0x00003fff
+        bSel[0] = ( bAddr [ 15:14 ] == sm_config::RAM_ADDR_MATCH);
 
-    // PWM   0x00007f10 - 0x00007f1f
-    assign bSel[2] = ( bAddr [ 15:4  ] == `SM_PWM_ADDR_MATCH);
+        // GPIO  0x00007f00 - 0x00007f0f
+        bSel[1] = ( bAddr [ 15:4  ] == sm_config::GPIO_ADDR_MATCH);
 
-    // ALS   0x00007f20 - 0x00007f2f
-    assign bSel[3] = ( bAddr [ 15:4  ] == `SM_ALS_ADDR_MATCH);
+        // PWM   0x00007f10 - 0x00007f1f
+        bSel[2] = ( bAddr [ 15:4  ] == sm_config::PWM_ADDR_MATCH);
 
-    assign bSel[4] = 1'b0;  // reserved
-    assign bSel[5] = 1'b0;  // reserved
+        // ALS   0x00007f20 - 0x00007f2f
+        bSel[3] = ( bAddr [ 15:4  ] == sm_config::ALS_ADDR_MATCH);
 
-endmodule
+        bSel[4] = 1'b0;  // reserved
+        bSel[5] = 1'b0;  // reserved
+    end
+
+endmodule : sm_matrix_decoder
+
 
 module sm_matrix_mux
 (
@@ -134,7 +134,7 @@ module sm_matrix_mux
     input  [31:0] in4,
     input  [31:0] in5
 );  
-    always @*
+    always_comb
         casez (bSel)
             default   : out = in0;
             6'b?????1 : out = in0;

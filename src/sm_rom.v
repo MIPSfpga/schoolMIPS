@@ -1,4 +1,3 @@
-
 module sm_rom
 #(
     parameter SIZE = 64

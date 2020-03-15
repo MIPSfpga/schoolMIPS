@@ -5,7 +5,7 @@ module sm_hex_display
     output reg [6:0] seven_segments
 );
 
-    always @*
+    always_comb begin
         case (digit)
         'h0: seven_segments = 'b1000000;  // a b c d e f g
         'h1: seven_segments = 'b1111001;
@@ -24,6 +24,7 @@ module sm_hex_display
         'he: seven_segments = 'b0000110;
         'hf: seven_segments = 'b0001110;
         endcase
+    end
 
 endmodule
 
