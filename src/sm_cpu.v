@@ -8,7 +8,6 @@
  *                   Aleksandr Romanov 
  */ 
 
-`include "sm_cpu.vh"
 
 module sm_cpu
 (
@@ -29,7 +28,7 @@ module sm_cpu
     wire        regWrite;
     wire        aluSrc;
     wire        aluZero;
-    wire [ 2:0] aluControl;
+    sm_cpu_config::ALU_Command aluControl;
     wire        memToReg;
     wire        memWrite;
 
@@ -95,8 +94,7 @@ module sm_cpu
     //control
     sm_control sm_control
     (
-        .cmdOper    ( instr[31:26] ),
-        .cmdFunk    ( instr[ 5:0 ] ),
+        .cmd (sm_cpu_config::Command'({instr[31:26], instr[5:0]})),
         .aluZero    ( aluZero      ),
         .pcSrc      ( pcSrc        ), 
         .regDst     ( regDst       ), 
@@ -109,77 +107,79 @@ module sm_cpu
 
 endmodule
 
+
 module sm_control
 (
-    input      [5:0] cmdOper,
-    input      [5:0] cmdFunk,
+    input sm_cpu_config::Command cmd,
     input            aluZero,
     output           pcSrc, 
     output reg       regDst, 
     output reg       regWrite, 
     output reg       aluSrc,
-    output reg [2:0] aluControl,
+    output sm_cpu_config::ALU_Command aluControl,
     output reg       memWrite,
     output reg       memToReg
 );
+    import sm_cpu_config::*;
+
     reg          branch;
     reg          condZero;
-    assign pcSrc = branch & (aluZero == condZero);
 
-    always @ (*) begin
+    always_comb begin
         branch      = 1'b0;
         condZero    = 1'b0;
         regDst      = 1'b0;
         regWrite    = 1'b0;
         aluSrc      = 1'b0;
-        aluControl  = `ALU_ADD;
+        aluControl  = ALU_ADD;
         memWrite    = 1'b0;
         memToReg    = 1'b0;
 
-        casez( {cmdOper,cmdFunk} )
-            default               : ;
+        casez (cmd)
+            ADDU: begin regDst = 1'b1; regWrite = 1'b1; aluControl = ALU_ADD;  end
+            OR: begin regDst = 1'b1; regWrite = 1'b1; aluControl = ALU_OR;   end
+            SRL: begin regDst = 1'b1; regWrite = 1'b1; aluControl = ALU_SRL;  end
+            SLTU: begin regDst = 1'b1; regWrite = 1'b1; aluControl = ALU_SLTU; end
+            SUBU: begin regDst = 1'b1; regWrite = 1'b1; aluControl = ALU_SUBU; end
 
-            { `C_SPEC,  `F_ADDU } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_ADD;  end
-            { `C_SPEC,  `F_OR   } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_OR;   end
-            { `C_SPEC,  `F_SRL  } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SRL;  end
-            { `C_SPEC,  `F_SLTU } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SLTU; end
-            { `C_SPEC,  `F_SUBU } : begin regDst = 1'b1; regWrite = 1'b1; aluControl = `ALU_SUBU; end
-
-            { `C_ADDIU, `F_ANY  } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD;  end
-            { `C_LUI,   `F_ANY  } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_LUI;  end
-            { `C_LW,    `F_ANY  } : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD; memToReg = 1'b1; end
-            { `C_SW,    `F_ANY  } : begin memWrite = 1'b1; aluSrc = 1'b1; aluControl = `ALU_ADD;  end
-
-            { `C_BEQ,   `F_ANY  } : begin branch = 1'b1; condZero = 1'b1; aluControl = `ALU_SUBU; end
-            { `C_BNE,   `F_ANY  } : begin branch = 1'b1; aluControl = `ALU_SUBU; end
+            ADDIU: begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = ALU_ADD;  end
+            LUI: begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = ALU_LUI;  end
+            LW : begin regWrite = 1'b1; aluSrc = 1'b1; aluControl = ALU_ADD; memToReg = 1'b1; end
+            SW : begin memWrite = 1'b1; aluSrc = 1'b1; aluControl = ALU_ADD;  end
+            BEQ : begin branch = 1'b1; condZero = 1'b1; aluControl = ALU_SUBU; end
+            BNE : begin branch = 1'b1; aluControl = ALU_SUBU; end
         endcase
+
+        pcSrc = branch & (aluZero == condZero);
     end
-endmodule
+endmodule : sm_control
 
 
 module sm_alu
 (
     input  [31:0] srcA,
     input  [31:0] srcB,
-    input  [ 2:0] oper,
+    input sm_cpu_config::ALU_Command oper,
     input  [ 4:0] shift,
     output        zero,
     output reg [31:0] result
 );
-    always @ (*) begin
+    import sm_cpu_config::*;
+
+    always_comb begin
         case (oper)
-            default   : result = srcA + srcB;
-            `ALU_ADD  : result = srcA + srcB;
-            `ALU_OR   : result = srcA | srcB;
-            `ALU_LUI  : result = (srcB << 16);
-            `ALU_SRL  : result = srcB >> shift;
-            `ALU_SLTU : result = (srcA < srcB) ? 1 : 0;
-            `ALU_SUBU : result = srcA - srcB;
+            ALU_ADD  : result = srcA + srcB;
+            ALU_OR   : result = srcA | srcB;
+            ALU_LUI  : result = (srcB << 16);
+            ALU_SRL  : result = srcB >> shift;
+            ALU_SLTU : result = (srcA < srcB) ? 1 : 0;
+            ALU_SUBU : result = srcA - srcB;
         endcase
     end
 
     assign zero   = (result == 0);
-endmodule
+endmodule : sm_alu
+
 
 module sm_register_file
 (
