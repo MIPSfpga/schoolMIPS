@@ -130,6 +130,47 @@ module sm_testbench;
 
     endtask
 
+    // DPI
+    import "DPI-C" function int load_word(int address);
+    import "DPI-C" function void store_word(int address, int value);
+
+    task dpi_ram (
+        input [31:0] instr,
+        input [31:0] rf [31:0],
+        input [31:0] to_register
+    );
+
+        reg[5:0] cmdOper;
+        reg[5:0] cmdFunk;
+        reg[4:0] cmdRs;
+        reg[4:0] cmdRt;
+        reg[15:0] cmdImm;
+        reg[31:0] expected_value, got_value;
+
+        begin
+            import sm_cpu_config::*;
+
+            cmdOper = instr[31:26];
+            cmdFunk = instr[5:0];
+            cmdRs   = instr[25:21];
+            cmdRt   = instr[20:16];
+            cmdImm  = instr[15:0];
+
+            casez (Command'({cmdOper,cmdFunk}))
+                LW: begin
+                    expected_value = load_word(rf[cmdRs+cmdImm]);
+                    got_value = to_register;
+                    if (expected_value != got_value) begin
+                        $display("ERROR: The got value 0x%h doesn't match the expected 0x%h!", got_value, expected_value);
+                    end
+                end
+                SW: begin
+                    store_word(rf[cmdRs+cmdImm], rf[cmdRt]);
+                end
+            endcase
+        end
+    endtask : dpi_ram
+
 
     //simulation debug output
     integer cycle; initial cycle = 0;
@@ -142,8 +183,10 @@ module sm_testbench;
                   cycle, regData, (regData << 2), sm_top.sm_cpu.instr, sm_top.sm_cpu.rf.rf[2]);
 
         disasmInstr(sm_top.sm_cpu.instr);
-
         $write("\n");
+
+        // dpi
+        dpi_ram(sm_top.sm_cpu.instr, sm_top.sm_cpu.rf.rf, sm_top.sm_cpu.wd3);
 
         cycle = cycle + 1;
 
