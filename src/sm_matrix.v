@@ -93,7 +93,7 @@ module sm_matrix
         .value      ( bRData3    )
     );
 
-endmodule
+endmodule : sm_matrix
 
 
 module sm_matrix_decoder
@@ -133,8 +133,9 @@ module sm_matrix_mux
     input  [31:0] in3,
     input  [31:0] in4,
     input  [31:0] in5
-);  
-    always_comb
+);
+
+    always_comb begin
         casez (bSel)
             default   : out = in0;
             6'b?????1 : out = in0;
@@ -144,4 +145,6 @@ module sm_matrix_mux
             6'b?10000 : out = in4;
             6'b100000 : out = in5;
         endcase
-endmodule
+    end
+
+endmodule : sm_matrix_mux
