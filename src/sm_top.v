@@ -112,9 +112,9 @@ module sm_clk_divider
     input           rst_n,
     input   [ 3:0 ] devide,
     input           enable,
-    output          clkOut
+    output logic clkOut
 );
-    wire [31:0] cntr, cntrNext;
+    logic[31:0] cntr, cntrNext;
 
     sm_register_we r_cntr(clkIn, rst_n, enable, cntrNext, cntr);
 

@@ -99,7 +99,7 @@ endmodule : sm_matrix
 module sm_matrix_decoder
 (
     input  [31:0] bAddr,
-    output [ 5:0] bSel
+    output logic [ 5:0] bSel
 );
 
     always_comb begin

@@ -1,7 +1,7 @@
 
 vlib work
 
-set p0 -vlog01compat
+set p0 -sv
 set p1 +define+SIMULATION
 set p2 +define+SIMULATION_CYCLES=1200
 

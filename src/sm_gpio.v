@@ -15,9 +15,9 @@ module sm_gpio
 );
     localparam BLANK_WIDTH = 32 - sm_config::GPIO_WIDTH;
 
-    wire   [sm_config::GPIO_WIDTH - 1:0] gpioIn;    // debounced input signals
-    wire                          gpioOutWe; // output Pin value write enable
-    wire   [sm_config::GPIO_WIDTH - 1:0] gpioOut;   // output Pin next value
+    logic   [sm_config::GPIO_WIDTH - 1:0] gpioIn;    // debounced input signals
+    logic                          gpioOutWe; // output Pin value write enable
+    logic   [sm_config::GPIO_WIDTH - 1:0] gpioOut;   // output Pin next value
 
     sm_debouncer   #(.SIZE(sm_config::GPIO_WIDTH)) debounce(clk, gpioInput, gpioIn);
     sm_register_we #(.SIZE(sm_config::GPIO_WIDTH)) r_output(clk, rst_n, gpioOutWe, gpioOut, gpioOutput);

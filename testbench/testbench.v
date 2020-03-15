@@ -1,8 +1,4 @@
-
 `timescale 1 ns / 100 ps
-
-`include "sm_cpu.vh"
-`include "sm_config.vh"
 
 `ifndef SIMULATION_CYCLES
     `define SIMULATION_CYCLES 120
@@ -19,8 +15,8 @@ module sm_testbench;
     wire [31:0] regData;
     wire        cpuClk;
 
-    wire [`SM_GPIO_WIDTH - 1:0] gpioInput; // GPIO output pins
-    wire [`SM_GPIO_WIDTH - 1:0] gpioOutput; // GPIO intput pins
+    wire [sm_config::GPIO_WIDTH - 1:0] gpioInput; // GPIO output pins
+    wire [sm_config::GPIO_WIDTH - 1:0] gpioOutput; // GPIO intput pins
     wire                        pwmOutput;  // PWM output pin
     wire                        alsCS;      // Ligth Sensor chip select
     wire                        alsSCK;     // Light Sensor SPI clock
@@ -97,6 +93,8 @@ module sm_testbench;
         reg signed [15:0] cmdImmS;
 
         begin
+            import sm_cpu_config::*;
+
             cmdOper = instr[31:26];
             cmdFunk = instr[ 5:0 ];
             cmdRs   = instr[25:21];
@@ -108,25 +106,25 @@ module sm_testbench;
 
             $write("   ");
 
-            casez( {cmdOper,cmdFunk} )
+            casez (Command'({cmdOper,cmdFunk}))
                 default               : if (instr == 32'b0) 
                                             $write ("nop");
                                         else
                                             $write ("new/unknown");
 
-                { `C_SPEC,  `F_ADDU } : $write ("addu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_OR   } : $write ("or    $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SRL  } : $write ("srl   $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SLTU } : $write ("sltu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
-                { `C_SPEC,  `F_SUBU } : $write ("subu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                ADDU: $write ("addu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                OR : $write ("or    $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                SRL : $write ("srl   $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                SLTU : $write ("sltu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
+                SUBU : $write ("subu  $%1d, $%1d, $%1d", cmdRd, cmdRs, cmdRt);
 
-                { `C_ADDIU, `F_ANY  } : $write ("addiu $%1d, $%1d, %1d", cmdRt, cmdRs, cmdImm);
-                { `C_LUI,   `F_ANY  } : $write ("lui   $%1d, %1d",       cmdRt, cmdImm);
-                { `C_LW,    `F_ANY  } : $write ("lw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
-                { `C_SW,    `F_ANY  } : $write ("sw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
+                ADDIU : $write ("addiu $%1d, $%1d, %1d", cmdRt, cmdRs, cmdImm);
+                LUI : $write ("lui   $%1d, %1d",       cmdRt, cmdImm);
+                LW : $write ("lw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
+                SW : $write ("sw    $%1d, %1d($%1d)", cmdRt, cmdImm, cmdRs);
 
-                { `C_BEQ,   `F_ANY  } : $write ("beq   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
-                { `C_BNE,   `F_ANY  } : $write ("bne   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
+                BEQ : $write ("beq   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
+                BNE : $write ("bne   $%1d, $%1d, %1d", cmdRs, cmdRt, cmdImmS + 1);
             endcase
         end
 
@@ -156,4 +154,4 @@ module sm_testbench;
         end
     end
 
-endmodule
+endmodule : sm_testbench

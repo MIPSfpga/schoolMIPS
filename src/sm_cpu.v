@@ -16,12 +16,12 @@ module sm_cpu
     input           clk,        // clock
     input           rst_n,      // reset
     input   [ 4:0]  regAddr,    // debug access reg address
-    output  [31:0]  regData,    // debug access reg data
-    output  [31:0]  imAddr,     // instruction memory address
+    output logic [31:0]  regData,    // debug access reg data
+    output logic [31:0]  imAddr,     // instruction memory address
     input   [31:0]  imData,     // instruction memory data
-    output  [31:0]  dmAddr,     // data memory address
-    output          dmWe,       // data memory write enable
-    output  [31:0]  dmWData,    // data memory write data
+    output  logic [31:0]  dmAddr,     // data memory address
+    output  logic dmWe,       // data memory write enable
+    output  logic [31:0]  dmWData,    // data memory write data
     input   [31:0]  dmRData     // data memory read data
 );
     // control wires
@@ -35,14 +35,15 @@ module sm_cpu
     wire        memWrite;
 
     // program counter
-    wire [31:0] pc;
-    wire [31:0] pcBranch;
-    wire [31:0] pcNext  = pc + 1;
-    wire [31:0] pc_new  = ~pcSrc ? pcNext : pcBranch;
+    logic [31:0] pc, pcBranch, pcNext, pc_new;
+    always_comb begin
+        pcNext = pc + 1;
+        pc_new = ~pcSrc ? pcNext : pcBranch;
+    end
     sm_register r_pc(clk ,rst_n, pc_new, pc);
 
     // program memory access
-    wire [31:0] instr;
+    logic [31:0] instr;
     always_comb begin
         imAddr = pc;
         instr = imData;
@@ -56,8 +57,8 @@ module sm_cpu
 
 
     // register file
-    wire [31:0] rd1, rd2, wd3;
-    wire [ 4:0] a3;
+    logic [31:0] rd1, rd2, wd3;
+    logic [4:0] a3;
     always_comb begin
         a3 = regDst ? instr[15:11] : instr[20:16];
     end
@@ -77,14 +78,14 @@ module sm_cpu
     );
 
     // sign extension
-    wire [31:0] signImm;
+    logic [31:0] signImm;
     always_comb begin
         signImm = { {16 { instr[15] }}, instr[15:0] };
         pcBranch = pcNext + signImm;
     end
 
     // alu
-    wire [31:0] aluResult, srcB;
+    logic [31:0] aluResult, srcB;
     always_comb begin
         srcB = aluSrc ? signImm : rd2;
     end
@@ -128,7 +129,7 @@ module sm_control
 (
     input sm_cpu_config::Command cmd,
     input            aluZero,
-    output           pcSrc, 
+    output logic          pcSrc,
     output reg       regDst, 
     output reg       regWrite, 
     output reg       aluSrc,
@@ -178,7 +179,7 @@ module sm_alu
     input  [31:0] srcB,
     input sm_cpu_config::ALU_Command oper,
     input  [ 4:0] shift,
-    output        zero,
+    output logic zero,
     output reg [31:0] result
 );
     import sm_cpu_config::*;
@@ -206,9 +207,9 @@ module sm_register_file
     input  [ 4:0] a1,
     input  [ 4:0] a2,
     input  [ 4:0] a3,
-    output [31:0] rd0,
-    output [31:0] rd1,
-    output [31:0] rd2,
+    output logic [31:0] rd0,
+    output logic [31:0] rd1,
+    output logic [31:0] rd2,
     input  [31:0] wd3,
     input         we3
 );

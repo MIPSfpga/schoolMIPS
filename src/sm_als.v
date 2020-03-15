@@ -2,14 +2,14 @@ module sm_als
 (
     input             clk,
     input             rst_n,
-    output            cs,
-    output            sck,
+    output logic cs,
+    output logic sck,
     input             sdo,
-    output     [31:0] value
+    output logic [31:0] value
 );
-    wire sample_bit, value_done;
-    wire [8:0] cnt, cntNext;
-    wire [15:0] shift, shiftNext, val;
+    logic sample_bit, value_done;
+    logic [8:0] cnt, cntNext;
+    logic [15:0] shift, shiftNext, val;
 
     sm_register #(.SIZE(9)) r_counter(clk, rst_n, cntNext, cnt);
     sm_register_we #(.SIZE(16)) r_shift(clk, rst_n, sample_bit, shiftNext, shift);
