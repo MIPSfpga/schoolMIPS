@@ -42,7 +42,7 @@ set_global_assignment -name DEVICE 5CSEMA5F31C6
 set_global_assignment -name TOP_LEVEL_ENTITY de1_soc
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "THU JUL 11 11:26:45 2013"
-set_global_assignment -name LAST_QUARTUS_VERSION 15.1.0
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Lite Edition"
 set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_location_assignment PIN_AJ4 -to ADC_CONVST
@@ -667,13 +667,19 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_R[6]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_R[7]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_SYNC_N
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_VS
-set_global_assignment -name VERILOG_FILE ../de1_soc.v
-set_global_assignment -name HEX_FILE ../../program/program.hex
-set_global_assignment -name VERILOG_FILE ../../../src/sm_rom.v
-set_global_assignment -name VERILOG_FILE ../../../src/sm_register.v
-set_global_assignment -name VERILOG_FILE ../../../src/sm_hex_display.v
-set_global_assignment -name VERILOG_FILE ../../../src/sm_cpu.v
-set_global_assignment -name VERILOG_FILE ../../../src/sm_clk_divider.v
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_config.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_top.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_rom.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_register.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_ram.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_pwm.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_matrix.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_hex_display.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_gpio.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_cpu.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../src/sm_als.v
+set_global_assignment -name SYSTEMVERILOG_FILE de1_soc.v
 set_global_assignment -name SDC_FILE de1_soc.sdc
+
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

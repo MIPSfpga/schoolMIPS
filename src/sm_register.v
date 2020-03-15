@@ -13,7 +13,8 @@ module sm_register
             q <= { SIZE { 1'b0}};
         else
             q <= d;
-endmodule
+
+endmodule : sm_register
 
 
 module sm_register_we
@@ -32,4 +33,5 @@ module sm_register_we
             q <= { SIZE { 1'b0}};
         else
             if(we) q <= d;
-endmodule
+
+endmodule : sm_register_we
