@@ -42,12 +42,18 @@ module sm_cpu
     sm_register r_pc(clk ,rst_n, pc_new, pc);
 
     // program memory access
-    assign imAddr = pc;
-    wire [31:0] instr = imData;
+    wire [31:0] instr;
+    always_comb begin
+        imAddr = pc;
+        instr = imData;
+    end
 
     // debug register access
     wire [31:0] rd0;
-    assign regData = (regAddr != 0) ? rd0 : pc;
+    always_comb begin
+        regData = (regAddr != 0) ? rd0 : pc;
+    end
+
 
     // register file
     wire [31:0] rd1, rd2, wd3;
@@ -162,6 +168,7 @@ module sm_control
 
         pcSrc = branch & (aluZero == condZero);
     end
+
 endmodule : sm_control
 
 
