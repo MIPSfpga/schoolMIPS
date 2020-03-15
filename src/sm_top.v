@@ -46,6 +46,7 @@ module sm_top
     wire            dmWe;
     wire    [31:0]  dmWData;
     wire    [31:0]  dmRData;
+
     sm_matrix matrix
     (
         .clk        ( clk        ),
@@ -77,7 +78,7 @@ module sm_top
         .dmRData    ( dmRData   )
     );
 
-endmodule
+endmodule : sm_top
 
 
 // metastability input debouncer module
@@ -97,7 +98,7 @@ module sm_debouncer
         q    <= data;
     end
 
-endmodule
+endmodule : sm_debouncer
 
 
 // tunable clock devider
@@ -113,10 +114,13 @@ module sm_clk_divider
     input           enable,
     output          clkOut
 );
-    wire [31:0] cntr;
-    wire [31:0] cntrNext = cntr + 1;
+    wire [31:0] cntr, cntrNext;
+
     sm_register_we r_cntr(clkIn, rst_n, enable, cntrNext, cntr);
 
-    assign clkOut = bypass ? clkIn 
-                           : cntr[shift + devide];
-endmodule
+    always_comb begin
+        cntrNext = cntr + 1;
+        clkOut = bypass ? clkIn : cntr[shift + devide];
+    end
+
+endmodule : sm_clk_divider
