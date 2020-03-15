@@ -14,18 +14,18 @@ module sm_pwm
     output            pwmOutput
 );
     //bus side
-    wire [7:0] compare;
-    wire [7:0] counter;
+    wire [7:0] compare, counter, counterNext, compareNext;
+    wire compareWe;
 
-    assign bRData = { { 24 { 1'b0 }}, compare };
-
-    wire compareWe = bSel & bWrite;
-    wire [7:0] compareNext = bWData [7:0];
     sm_register_we #(.SIZE(8)) r_setCompare(clk, rst_n, compareWe, compareNext, compare);
-
-    //pwm side
-    assign pwmOutput = (counter > compare);
-    wire [7:0] counterNext = counter + 1;
     sm_register #(.SIZE(8)) r_valCounter(clk, rst_n, counterNext, counter);
 
-endmodule
+    always_comb begin
+        bRData = { { 24 { 1'b0 }}, compare };
+        compareWe = bSel & bWrite;
+        compareNext = bWData [7:0];
+        pwmOutput = (counter > compare);
+        counterNext = counter + 1;
+    end
+
+endmodule : sm_pwm
