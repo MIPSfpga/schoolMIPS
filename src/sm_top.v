@@ -1,7 +1,4 @@
-
-`include "sm_config.vh"
-
-//hardware top level module
+// hardware top level module
 module sm_top
 (
     input           clkIn,
@@ -12,14 +9,14 @@ module sm_top
     input   [ 4:0 ] regAddr,
     output  [31:0 ] regData,
 
-    input      [`SM_GPIO_WIDTH - 1:0] gpioInput, // GPIO output pins
-    output     [`SM_GPIO_WIDTH - 1:0] gpioOutput, // GPIO intput pins
+    input      [sm_config::GPIO_WIDTH - 1:0] gpioInput, // GPIO output pins
+    output     [sm_config::GPIO_WIDTH - 1:0] gpioOutput, // GPIO intput pins
     output                            pwmOutput,  // PWM output pin
     output                            alsCS,      // Ligth Sensor chip select
     output                            alsSCK,     // Light Sensor SPI clock
     input                             alsSDO      // Light Sensor SPI data
 );
-    //metastability input filters
+    // metastability input filters
     wire    [ 3:0 ] devide;
     wire            enable;
     wire    [ 4:0 ] addr;
@@ -28,8 +25,8 @@ module sm_top
     sm_debouncer #(.SIZE(1)) f1(clkIn, clkEnable, enable);
     sm_debouncer #(.SIZE(5)) f2(clkIn, regAddr,   addr  );
 
-    //cores
-    //clock devider
+    // cores
+    // clock devider
     sm_clk_divider sm_clk_divider
     (
         .clkIn      ( clkIn     ),
@@ -39,12 +36,12 @@ module sm_top
         .clkOut     ( clk       )
     );
 
-    //instruction memory
+    // instruction memory
     wire    [31:0]  imAddr;
     wire    [31:0]  imData;
     sm_rom reset_rom(imAddr, imData);
 
-    //data bus matrix
+    // data bus matrix
     wire    [31:0]  dmAddr;
     wire            dmWe;
     wire    [31:0]  dmWData;
@@ -65,7 +62,7 @@ module sm_top
         .alsSDO     ( alsSDO     )
     );
 
-    //cpu core
+    // cpu core
     sm_cpu sm_cpu
     (
         .clk        ( clk       ),
@@ -82,7 +79,8 @@ module sm_top
 
 endmodule
 
-//metastability input debouncer module
+
+// metastability input debouncer module
 module sm_debouncer
 #(
     parameter SIZE = 1
@@ -101,7 +99,8 @@ module sm_debouncer
 
 endmodule
 
-//tunable clock devider
+
+// tunable clock devider
 module sm_clk_divider
 #(
     parameter shift  = 16,

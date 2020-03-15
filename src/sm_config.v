@@ -10,6 +10,20 @@
  *                   Vladislav Tarasevish
  */ 
 
+package sm_config;
+    // GPIO port width [1, 32]
+    parameter GPIO_WIDTH = 16;
+
+    parameter GPIO_REG_INPUT = 4'h0;
+    parameter GPIO_REG_OUTPUT = 4'h4;
+
+    parameter RAM_ADDR_MATCH = 2'b00;
+    parameter GPIO_ADDR_MATCH = 12'h7f0;
+    parameter PWM_ADDR_MATCH  = 12'h7f1;
+    parameter ALS_ADDR_MATCH  = 12'h7f2;
+endpackage : sm_config
+
+
 package sm_cpu_config;
     // ALU commands
     typedef enum logic[2:0] {
@@ -44,4 +58,5 @@ package sm_cpu_config;
         SUBU = {6'b000000, 6'b100011}  // R-type, Unsigned Subtract
                                        // Rd = Rs – Rt
     } Command;
+
 endpackage : sm_cpu_config

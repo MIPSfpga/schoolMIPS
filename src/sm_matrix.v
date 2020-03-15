@@ -1,7 +1,3 @@
-
-
-`include "sm_config.vh"
-
 module sm_matrix
 (
     //bus side
@@ -13,8 +9,8 @@ module sm_matrix
     output     [31:0] bRData,   // bus read data
 
     //pin side
-    input      [`SM_GPIO_WIDTH - 1:0] gpioInput, // GPIO output pins
-    output     [`SM_GPIO_WIDTH - 1:0] gpioOutput, // GPIO intput pins
+    input      [sm_config::GPIO_WIDTH - 1:0] gpioInput, // GPIO output pins
+    output     [sm_config::GPIO_WIDTH - 1:0] gpioOutput, // GPIO intput pins
     output                            pwmOutput,  // PWM output pin
     output                            alsCS,      // Ligth Sensor chip select
     output                            alsSCK,     // Light Sensor SPI clock
