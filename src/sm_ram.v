@@ -1,5 +1,3 @@
-
-
 module sm_ram
 #(
     parameter SIZE = 64
@@ -18,4 +16,4 @@ module sm_ram
         if (we)
             ram[a[31:2]] <= wd;
 
-endmodule
+endmodule : sm_ram

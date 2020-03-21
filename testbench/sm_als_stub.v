@@ -1,6 +1,3 @@
-
-
-
 module sm_als_stub
 #(
     parameter value = 8'hAB
@@ -22,4 +19,4 @@ module sm_als_stub
             buffer <= tpacket;
     end
 
-endmodule
+endmodule : sm_als_stub

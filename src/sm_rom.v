@@ -1,4 +1,3 @@
-
 module sm_rom
 #(
     parameter SIZE = 64
@@ -14,4 +13,4 @@ module sm_rom
         $readmemh ("program.hex", rom);
     end
 
-endmodule
+endmodule : sm_rom
