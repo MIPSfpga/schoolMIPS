@@ -2,6 +2,8 @@
 
 A small MIPS CPU core originally based on Sarah L. Harris MIPS CPU ("Digital Design and Computer Arhitecture" by David Money Harris and Sarah L Harris). The first version of schoolMIPS was written for [Young Russian Chip Architects](http://www.silicon-russia.com/2017/06/09/arduino-and-fpga/) summer school.
 
+Next version of schoolMIPS is based on RISC-V architecture: [schoolRISCV](https://github.com/zhelnio/schoolRISCV)
+
 The CPU have several versions (from simple to complex). Each of them is placed in the separate git branch:
 - **00_simple** - the simplest CPU without data memory, programs compiled with GNU gcc;
 - **01_mmio** - the same but with data memory, simple system bus and peripherals (pwm, gpio, als);
